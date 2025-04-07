@@ -1,0 +1,3 @@
+<template>
+    new local
+</template>
