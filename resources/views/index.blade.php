@@ -1,38 +1,42 @@
-@extends('layouts.landing')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-@section('title', 'Corteclick')
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Corteclick: Reserva online fácil y rápida en peluquerías y barberías locales. Encuentra, compara precios y agenda tu cita sin llamadas. ¡Digitalizamos el sector!">
+    <meta name="keywords"
+        content="Corteclick, peluquerías, barberías, reserva online, citas, agenda, belleza, cabello, servicios de peluquería, búsqueda de peluquerías, disponibilidad peluquerías, valoración peluquerías, digitalización peluquerías, reserva de citas online">
+    <meta name="author" content="Corteclick (o el nombre de tu empresa/desarrollador)">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="es">
 
-@section('meta')
-    {{-- Otras etiquetas meta específicas para la landing
-    (consultar views/layouts/landing.blade.php antes de añadir una nueva) --}}
-@endsection
+    <meta property="og:title" content="Corteclick - Reserva online fácil y rápida en peluquerías y barberías">
+    <meta property="og:description"
+        content="Encuentra, compara precios y agenda tu cita en peluquerías y barberías locales sin complicaciones. ¡Digitalizamos el sector de la belleza!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request()->url() }}"> {{-- Genera la URL actual de la página dinámicamente --}}
+    <meta property="og:site_name" content="Corteclick">
+    {{--
+    <meta property="og:image" content="{{ asset('images/logo-compartir.png') }}"> --}} {{-- Reemplazar con la URL del logo para compartir en redes sociales --}}
 
-@section('content')
-    <section id="hero" class="hero-section">
-        <h1>El Titular Principal y Llamativo</h1>
-        <p>Una breve descripción convincente de tu producto o servicio.</p>
-        <button class="call-to-action">¡Empieza Ahora!</button>
-    </section>
+    <title>Corteclick</title>
 
-    <section id="features" class="features-section">
-        <h2>Características Asombrosas</h2>
-        {{-- Lista de características --}}
-    </section>
+    {{-- CSS general --}}
+    @vite('resources/css/normalize.css')
+    @vite('resources/css/app.css')
+</head>
 
-    <section id="contact" class="contact-section">
-        <h2>¡Contáctanos!</h2>
-        {{-- Formulario de contacto --}}
-    </section>
-@endsection
+<body>
+    <div id="app">
+        <app>
+            {{-- Aquí se montará el componente raíz App.vue --}}
+        </app>
+    </div>
 
-@section('footer')
-    {{-- Aquí va el contenido específico del footer de tu landing --}}
-    <p>&copy; {{ date('Y') }} Tu Empresa</p>
-@endsection
+    {{-- JavaScript --}}
+    @vite('resources/js/app.js')
+</body>
 
-@section('scripts')
-    {{-- Aquí puedes añadir scripts específicos para la landing page --}}
-    <script>
-        console.log('Scripts específicos de la landing page');
-    </script>
-@endsection
+</html>
