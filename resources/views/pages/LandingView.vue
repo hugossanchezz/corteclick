@@ -4,7 +4,17 @@ export default {
 };
 </script>
 
-<template>landing</template>
+<template>
+    landing
+
+    iniciar sesion | registrarse
+
+    svgs
+
+    que ofrecemos
+
+    como funcionamos
+</template>
 
 <style lang="scss">
 
