@@ -19,11 +19,18 @@
     <meta property="og:url" content="{{ request()->url() }}"> {{-- Genera la URL actual de la página dinámicamente --}}
     <meta property="og:site_name" content="Corteclick">
     {{--
-    <meta property="og:image" content="{{ asset('images/logo-compartir.png') }}"> --}} {{-- Reemplazar con la URL del logo para compartir en redes sociales --}}
+    <meta property="og:image" content="{{ asset('images/logo-compartir.png') }}"> --}} {{-- Reemplazar con la URL del
+    logo para compartir en redes sociales --}}
 
     <title>Corteclick</title>
 
     {{-- CSS general --}}
+    <style>
+        /* Dancing Script, Montserrat Alternate & Montserrat fonts */
+
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+    </style>
+
     @vite('resources/css/normalize.css')
     @vite('resources/css/app.css')
 </head>
