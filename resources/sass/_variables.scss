@@ -1,7 +1,59 @@
-// Body
-$body-bg: #f8fafc;
+// Variables de la guía de estilos
 
-// Typography
-$font-family-sans-serif: 'Nunito', sans-serif;
-$font-size-base: 0.9rem;
-$line-height-base: 1.6;
+$colores: (
+    "blanco": #fcf7f8,
+    "gris_claro": #e5e5e5,
+    "gris_oscuro": #565656,
+    "azul_oscuro": #222831,
+    "naranja": #fca311,
+    "rojo": #a02f39,
+);
+
+$fuentes: (
+    "logo": (
+        "family": "Dancing Script",
+        "size": 50px,
+        "style": italic,
+    ),
+    "titulo_principal": (
+        "family": "Montserrat",
+        "size": 24px,
+        "style": bold,
+    ),
+    "titulo_secundario": (
+        "family": "Montserrat Alternates",
+        "size": 20px,
+        "weight": 500,
+    ),
+    "parrafo": (
+        "family": "Montserrat Alternates",
+        "size": 14px,
+    ),
+);
+
+// Mixin para aplicar la fuente
+@mixin fuente($nombre-fuente) {
+    $fuente: map-get($fuentes, $nombre-fuente);
+
+    @if $fuente {
+        @if map-has-key($fuente, "family") {
+            font-family: map-get($fuente, "family");
+        }
+        @if map-has-key($fuente, "size") {
+            font-size: map-get($fuente, "size");
+        }
+        @if map-has-key($fuente, "style") {
+            font-style: map-get($fuente, "style");
+        }
+        @if map-has-key($fuente, "weight") {
+            font-weight: map-get($fuente, "weight");
+        }
+    } @else {
+        @warn "La fuente '#{$nombre-fuente}' no está definida en el mapa $fuentes.";
+    }
+}
+
+// Uso del mixin
+// h1 {
+//     @include fuente("titulo_principal");
+// }

@@ -1,1 +1,1 @@
-@import"https://fonts.bunny.net/css?family=Nunito";*{background-color:#f8fafc}
+.flex{display:flex}.flex-center{display:flex;justify-content:center;align-items:center}.flex-column{display:flex;flex-direction:column}.grid{display:grid}
