@@ -14,7 +14,7 @@ export default {
     <button>{{ label }}</button>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 @use "@/sass/variables" as *;
 
 button {
