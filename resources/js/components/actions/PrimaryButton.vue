@@ -1,11 +1,33 @@
+<script>
+export default {
+    name: "PrimaryButton",
+    props: {
+        label: {
+            type: String, // Tipo de dato esperado
+            default: "Primary Button", // Valor por defecto
+        },
+    },
+};
+</script>
+
 <template>
-    <button>Primary Button</button>
+    <button>{{ label }}</button>
 </template>
 
-<script>
-    export default {
-        mounted() {
-            console.log('Primary Button mounted.')
-        }
-    }
-</script>
+<style lang="scss">
+@use "@/sass/variables" as *;
+
+button {
+    background-color: map-get($colores, "naranja");
+    color: map-get($colores, "blanco");
+    @include fuente("titulo_secundario");
+
+    padding: 0.65rem 1.25rem ;
+    margin: 0.5rem;
+
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+</style>
