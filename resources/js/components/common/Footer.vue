@@ -31,8 +31,6 @@ footer {
     color: map-get($colores, "blanco");
     @include fuente("parrafo");
 
-    position: absolute;
-    bottom: 0;
     width: 100%;
 
     padding: 30px 0;
