@@ -1,7 +1,9 @@
 <template>
-    <Header />
-    <router-view></router-view>
-    <Footer />
+    <div class="app__container grid">
+        <Header />
+        <router-view></router-view>
+        <Footer />
+    </div>
 </template>
 
 <script>
@@ -15,3 +17,11 @@ export default {
     },
 };
 </script>
+
+<style scoped lang="scss">
+
+.app__container{
+    min-height: 100vh;
+    grid-template-rows: auto 1fr auto;
+}
+</style>
