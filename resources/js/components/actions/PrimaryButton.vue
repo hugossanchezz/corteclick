@@ -23,11 +23,18 @@ button {
     @include fuente("titulo_secundario");
 
     padding: 0.65rem 1.25rem ;
-    margin: 0.5rem;
+    margin: 0 0.5rem;
 
     border: none;
     border-radius: 5px;
     cursor: pointer;
+
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
 
 }
 </style>
