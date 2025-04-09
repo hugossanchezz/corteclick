@@ -1,7 +1,7 @@
 // Variables de la guía de estilos
 
 $colores: (
-    "blanco": #fcf7f8,
+    "blanco": #f5f5f5,
     "gris_claro": #e5e5e5,
     "gris_oscuro": #565656,
     "azul_oscuro": #222831,
@@ -12,18 +12,23 @@ $colores: (
 $fuentes: (
     "logo": (
         "family": "Dancing Script",
-        "size": 50px,
+        "size": 40px,
+        "style": italic,
+    ),
+    "span_corteclick": (
+        "family": "Dancing Script",
+        "size": 24px,
         "style": italic,
     ),
     "titulo_principal": (
         "family": "Montserrat",
-        "size": 24px,
-        "style": bold,
+        "size": 26px,
+        "weight": 600,
     ),
     "titulo_secundario": (
         "family": "Montserrat Alternates",
-        "size": 20px,
-        "weight": 500,
+        "size": 18px,
+        "weight": 600,
     ),
     "parrafo": (
         "family": "Montserrat Alternates",
