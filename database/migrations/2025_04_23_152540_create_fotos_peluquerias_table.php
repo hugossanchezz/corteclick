@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('peluquerias', function (Blueprint $table) {
+        Schema::create('peluquerias_fotos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->string('direccion', 200);
+            $table->unsignedBigInteger('id_peluqueria');
+            $table->binary('imagen')->nullable();
             $table->timestamps();
+
+            $table->foreign('id_peluqueria')->references('id')->on('peluquerias');
         });
     }
 
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('peluquerias');
+        Schema::dropIfExists('peluquerias_fotos');
     }
 };
