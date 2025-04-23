@@ -1,0 +1,61 @@
+@use "_variables.scss" as *;
+
+// Functional classes
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.grid {
+    display: grid;
+}
+
+// Spacing classes
+.mg-tb-1{
+    margin: 1rem 0;
+}
+
+// Styling classes
+h1 {
+    @include fuente("titulo_principal");
+}
+
+h2 {
+    @include fuente("titulo_secundario");
+}
+
+p,
+li,
+a {
+    @include fuente("parrafo");
+}
+
+.span__corteclick {
+    @include fuente("span_corteclick");
+    color: map-get($colores, "naranja");
+    margin-right: 2.5px;
+}
+
+.glass-effect {
+    background: rgba(177, 177, 177, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+// Mixins
+@mixin responsive-layout($breakpoint) {
+    @media (max-width: $breakpoint) {
+        @content;
+    }
+}
