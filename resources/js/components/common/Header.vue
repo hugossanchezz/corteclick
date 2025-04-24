@@ -1,6 +1,6 @@
 <script>
 import { useRoute } from 'vue-router';
-import { ref,computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import SecondaryButton from "@/js/components/actions/SecondaryButton.vue";
@@ -13,10 +13,27 @@ export default {
         SecondaryButton,
     },
     setup() {
+        // Obtenemos la instancia de la ruta actual para verificar en qué página estamos.
         const route = useRoute();
+        // Creamos una propiedad computada para verificar si la ruta actual es la página de inicio ('/').
         const isLandingPage = computed(() => route.path === '/');
+        // Creamos una referencia reactiva para indicar si el usuario está autenticado. Inicialmente, asumimos que no lo está.
         const isAuthenticated = ref(false);
 
+        // Hook onMounted que se ejecuta una vez que el componente ha sido montado en el DOM.
+        onMounted(() => {
+            // Verificamos si existe un token en el localStorage. La existencia de un token suele indicar que el usuario ha iniciado sesión y/o ha seleccionado "Recordarme".
+            const token = localStorage.getItem("token");
+            // Si se encuentra un token, actualizamos la variable isAuthenticated a true.
+            if (token) {
+                isAuthenticated.value = true;
+            } else {
+                // Si no se encuentra un token, la variable isAuthenticated permanece en false (su valor inicial).
+                isAuthenticated.value = false; // Aunque ya es false por defecto, lo ponemos explícitamente para mayor claridad.
+            }
+        });
+
+        // Retornamos las propiedades y métodos que queremos exponer en la plantilla del componente.
         return {
             isLandingPage,
             isAuthenticated,
