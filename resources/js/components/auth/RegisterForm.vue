@@ -1,47 +1,53 @@
 <script>
+// Importamos las librerías
 import axios from "axios";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch } from "vue";
 
 export default {
     name: "RegisterForm",
+
     components: { PrimaryButton },
+
     setup() {
+        // Obtenemos la instancia del router para poder navegar entre las rutas.
         const router = useRouter();
 
         // Estados del formulario usando ref
+        // ref crea una referencia reactiva a un valor. Aquí definimos referencias para cada campo del formulario.
         const nombre = ref("");
         const apellidos = ref("");
         const correo = ref("");
         const contrasenia = ref("");
         const confirmarContrasenia = ref("");
         const localidad = ref("");
-        const telefono = ref(""); // Nuevo campo para el teléfono
+        const telefono = ref("");
         const aceptarTerminos = ref(false);
 
-        // Estados de error usando ref
-        const errorNombre = ref("");
-        const errorApellidos = ref("");
-        const errorCorreo = ref("");
-        const errorContrasenia = ref("");
-        const errorConfirmarContrasenia = ref("");
-        const errorLocalidad = ref("");
-        const errorTelefono = ref(""); // Nuevo estado de error para el teléfono
-        const errorAceptarTerminos = ref("");
-        const generalErrorMessage = ref(""); // Nuevo ref para el mensaje de error general
-
-        const visibilidadContrasenia = ref(false);
-        const visibilidadConfirmarContrasenia = ref(false);
-        const registroExitoso = ref(false); // Nuevo estado para indicar registro exitoso
+        // Objeto para almacenar los errores de cada campo
+        // Este objeto reactivo contendrá los mensajes de error para cada campo del formulario.
+        const errores = ref({});
+        // Este ref almacena un mensaje de error general para mostrar en caso de fallas en la validación del cliente o del servidor.
+        const generalErrorMessage = ref("");
+        // Este ref podría usarse para indicar si el registro fue exitoso (aunque actualmente no se usa en la plantilla).
+        const registroExitoso = ref(false);
+        // Este ref podría usarse para almacenar mensajes de error relacionados con las credenciales (aunque actualmente no se usa).
         const credencialesInvalidas = ref("");
 
+        // Refs para controlar la visibilidad de las contraseñas.
+        const visibilidadContrasenia = ref(false);
+        const visibilidadConfirmarContrasenia = ref(false);
+
         // Expresiones regulares para validación
+        // Definimos expresiones regulares para validar el formato del correo electrónico y el número de teléfono.
         const correoPattern =
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        const telefonoPattern = /^\+?[0-9]{9,15}$/; // Patrón para un número de teléfono internacional
+        const telefonoPattern = /^\+?[0-9]{9,15}$/;
 
         // Estados derivados (computados) para la contraseña
+        // Los computed properties se utilizan para derivar valores reactivos basados en otros estados reactivos.
+        // Aquí, verificamos si la contraseña cumple con los criterios.
         const tieneMinuscula = computed(() => /[a-z]/.test(contrasenia.value));
         const tieneMayuscula = computed(() => /[A-Z]/.test(contrasenia.value));
         const tieneNumero = computed(() => /\d/.test(contrasenia.value));
@@ -52,6 +58,7 @@ export default {
             () => contrasenia.value.length >= 8
         );
 
+        // Este computed property determina si la contraseña cumple con todos los criterios de validación.
         const contraseniaValida = computed(() => {
             return (
                 tieneMinuscula.value &&
@@ -62,29 +69,24 @@ export default {
             );
         });
 
-        const tieneErrores = computed(() => {
-            return (
-                errorNombre.value ||
-                errorApellidos.value ||
-                errorCorreo.value ||
-                errorContrasenia.value ||
-                errorConfirmarContrasenia.value ||
-                errorLocalidad.value ||
-                errorTelefono.value || // Incluir error de teléfono
-                errorAceptarTerminos.value
-            );
-        });
+        // Este computed property verifica si el objeto de errores tiene alguna propiedad, indicando si hay algún error.
+        const tieneErrores = computed(
+            () => Object.keys(errores.value).length > 0
+        );
 
         // Iconos de visibilidad de contraseña
+        // Computed properties para determinar la ruta del icono a mostrar según la visibilidad de la contraseña.
         const iconoVisibilidadContrasenia = computed(() =>
             visibilidadContrasenia.value
                 ? "/img/auth/visibility_off.svg"
                 : "/img/auth/visibility_on.svg"
         );
+        // Computed property para determinar el tipo de input de la contraseña (text o password) según su visibilidad.
         const tipoInputContrasenia = computed(() =>
             visibilidadContrasenia.value ? "text" : "password"
         );
 
+        // Iconos de visibilidad para la confirmación de contraseña (igual que la contraseña).
         const iconoVisibilidadConfirmarContrasenia = computed(() =>
             visibilidadConfirmarContrasenia.value
                 ? "/img/auth/visibility_off.svg"
@@ -94,120 +96,134 @@ export default {
             visibilidadConfirmarContrasenia.value ? "text" : "password"
         );
 
+        // Función genérica para actualizar los errores
+        // Esta función recibe el nombre del campo y el mensaje de error. Actualiza el objeto de errores.
+        const actualizarError = (campo, mensaje) => {
+            // Asigna el mensaje de error al campo especificado en el objeto de errores.
+            errores.value[campo] = mensaje;
+            // Si el mensaje está vacío (no hay error), elimina la propiedad del objeto de errores.
+            if (!mensaje) {
+                delete errores.value[campo];
+            }
+        };
+
         // Observadores (watch)
+        // Los watchers se utilizan para reaccionar a los cambios en un estado reactivo.
+        // Aquí, para cada campo del formulario, definimos un watcher que valida el valor y actualiza el error correspondiente.
         watch(nombre, (newValue) => {
-            errorNombre.value = !newValue
-                ? "El nombre es requerido"
-                : /[^a-zA-Z0-9]/.test(newValue)
-                ? "No se permiten caracteres especiales"
-                : "";
+            actualizarError(
+                "nombre",
+                !newValue
+                    ? "El nombre es requerido"
+                    : /[^a-zA-Z0-9\s]/.test(newValue)
+                    ? "No se permiten caracteres especiales"
+                    : ""
+            );
         });
 
         watch(correo, (newValue) => {
-            errorCorreo.value = !newValue
-                ? "El correo es requerido"
-                : !correoPattern.test(newValue)
-                ? "Correo no válido"
-                : "";
+            actualizarError(
+                "correo",
+                !newValue
+                    ? "El correo es requerido"
+                    : !correoPattern.test(newValue)
+                    ? "Correo no válido"
+                    : ""
+            );
         });
 
         watch(contrasenia, (newValue) => {
-            errorContrasenia.value = !newValue
-                ? "La contraseña es requerida"
-                : !contraseniaValida.value
-                ? "La contraseña no cumple con los requisitos"
-                : "";
+            actualizarError(
+                "contrasenia",
+                !newValue
+                    ? "La contraseña es requerida"
+                    : !contraseniaValida.value
+                    ? "La contraseña no cumple con los requisitos"
+                    : ""
+            );
         });
 
         watch(confirmarContrasenia, (newValue) => {
-            errorConfirmarContrasenia.value =
-                newValue !== contrasenia.value
-                    ? "Las contraseñas no coinciden"
-                    : "";
+            actualizarError(
+                "confirmarContrasenia",
+                newValue !== contrasenia.value ? "Las contraseñas no coinciden" : ""
+            );
         });
 
         watch(aceptarTerminos, (newValue) => {
-            errorAceptarTerminos.value = !newValue
-                ? "Debes aceptar los términos y condiciones"
-                : "";
+            actualizarError(
+                "aceptarTerminos",
+                !newValue ? "Debes aceptar los términos y condiciones" : ""
+            );
         });
 
         watch(telefono, (newValue) => {
-            errorTelefono.value = !newValue
-                ? "El teléfono es requerido"
-                : !telefonoPattern.test(newValue)
-                ? "Teléfono no válido"
-                : "";
+            actualizarError(
+                "telefono",
+                !newValue
+                    ? "El teléfono es requerido"
+                    : !telefonoPattern.test(newValue)
+                    ? "Teléfono no válido"
+                    : ""
+            );
         });
 
         // Método para manejar el envío del formulario
         const submitForm = async () => {
-            generalErrorMessage.value = ""; // Limpiar el mensaje de error general
+            // Reiniciamos los mensajes de error general al intentar enviar el formulario.
+            generalErrorMessage.value = "";
             credencialesInvalidas.value = "";
+            // Verificamos si hay errores en el formulario utilizando el computed property tieneErrores.
             if (tieneErrores.value) {
                 generalErrorMessage.value =
                     "Por favor, corrige los errores en el formulario.";
-                return; // Detener el envío si hay errores
+                return; // Detenemos el envío si hay errores.
             }
 
             try {
-                await axios.post("/api/register", {
-                    // Ajusta la ruta de la API
+                // Realizamos una petición POST a la API de registro con los datos del formulario.
+                const response = await axios.post("/api/register", {
                     name: nombre.value,
                     apellidos: apellidos.value,
                     email: correo.value,
                     password: contrasenia.value,
                     telefono: telefono.value,
                     localidad: localidad.value,
+                    aceptarTerminos: aceptarTerminos.value,
                 });
-
-                alert("¡Gracias por registrarte! Ahora puedes iniciar sesión.");
-
-                // Redirigir al login
-                router.push("/login");
+                // Si la respuesta tiene un estado 200 (éxito).
+                if (response.status === 200) {
+                    // Mostramos una alerta de éxito al usuario.
+                    alert(
+                        "¡Gracias por registrarte! Ahora puedes iniciar sesión."
+                    );
+                    // Redirigimos al usuario a la página de autenticación.
+                    router.push("/auth");
+                }
             } catch (error) {
+                // En caso de error en la petición.
                 console.error("Error de registro", error.response);
+                // Si el error de respuesta tiene un estado 422 (Unprocessable Entity), indica errores de validación del servidor.
                 if (error.response && error.response.status === 422) {
-                    // Recorre los errores de validación y actualiza los refs de error correspondientes
-                    const errores = error.response.data.errors;
-                    if (errores.name) errorNombre.value = errores.name[0];
-                    if (errores.surname)
-                        errorApellidos.value = errores.surname[0];
-                    if (errores.email) errorCorreo.value = errores.email[0];
-                    if (errores.password)
-                        errorContrasenia.value = errores.password[0];
-                    if (errores.phone) errorTelefono.value = errores.phone[0];
-                    if (errores.location)
-                        errorLocalidad.value = errores.location[0];
-                    if (errores.terms)
-                        errorAceptarTerminos.value = errores.terms[0];
+                    const erroresServidor = error.response.data.errors;
+                    // Limpiamos los errores anteriores del cliente.
+                    errores.value = {};
+                    // Actualizamos el objeto de errores con los errores proporcionados por el servidor.
+                    for (const campo in erroresServidor) {
+                        actualizarError(campo, erroresServidor[campo][0]);
+                    }
+                    // Mostramos un mensaje de error general indicando que hay errores en los campos.
                     generalErrorMessage.value =
-                        "Error en el registro. Por favor, revisa los campos."; // Establecer mensaje de error
+                        "Error en el registro. Por favor, revisa los campos.";
                 } else {
+                    // Si el error es diferente a un error de validación del servidor, mostramos un mensaje de error genérico.
                     generalErrorMessage.value =
                         "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.";
                 }
             }
         };
 
-        // Verificar "Recordarme" al cargar el componente
-        /* onMounted(() => {
-          const storedToken = localStorage.getItem("token");
-          const storedUser = localStorage.getItem("user");
-
-          if (storedToken && storedUser) {
-              try {
-                  alert("Cierra la sesión actual para poder registrarte");
-                  router.push("/");
-              } catch (error) {
-                  console.error("Error al parsear el usuario", error);
-                  localStorage.removeItem("token");
-                  localStorage.removeItem("user");
-              }
-          }
-      });
-      */
-
+        // Retornamos todos los estados y métodos que queremos exponer en la plantilla del componente.
         return {
             nombre,
             apellidos,
@@ -217,21 +233,17 @@ export default {
             localidad,
             telefono,
             aceptarTerminos,
-            errorNombre,
-            errorApellidos,
-            errorCorreo,
-            errorContrasenia,
-            errorConfirmarContrasenia,
-            errorLocalidad,
-            errorTelefono,
-            errorAceptarTerminos,
+
+            errores, // Objeto de errores para la plantilla
+            generalErrorMessage, // Mensaje de error general para la plantilla
+
             visibilidadContrasenia,
             visibilidadConfirmarContrasenia,
             iconoVisibilidadContrasenia,
             tipoInputContrasenia,
             iconoVisibilidadConfirmarContrasenia,
             tipoInputConfirmarContrasenia,
-            submitForm,
+
             tieneMinuscula,
             tieneMayuscula,
             tieneNumero,
@@ -241,7 +253,7 @@ export default {
             router,
             credencialesInvalidas,
             tieneErrores,
-            generalErrorMessage,
+            submitForm,
         };
     },
 };
@@ -267,8 +279,8 @@ export default {
                         required
                     />
                 </div>
-                <div v-if="errorNombre" class="errorMensaje">
-                    {{ errorNombre }}
+                <div v-if="errores.nombre" class="errorMensaje">
+                    {{ errores.nombre }}
                 </div>
             </div>
 
@@ -285,8 +297,8 @@ export default {
                         placeholder="Sin caracteres especiales"
                     />
                 </div>
-                <div v-if="errorApellidos" class="errorMensaje">
-                    {{ errorApellidos }}
+                <div v-if="errores.apellidos" class="errorMensaje">
+                    {{ errores.apellidos }}
                 </div>
             </div>
         </div>
@@ -302,7 +314,9 @@ export default {
                     required
                 />
             </div>
-            <div v-if="errorCorreo" class="errorMensaje">{{ errorCorreo }}</div>
+            <div v-if="errores.correo" class="errorMensaje">
+                {{ errores.correo }}
+            </div>
         </div>
 
         <div class="flex-column form__campo">
@@ -339,6 +353,9 @@ export default {
                     Debe tener al menos 8 caracteres
                 </li>
             </ul>
+            <div v-if="errores.contrasenia" class="errorMensaje">
+                {{ errores.contrasenia }}
+            </div>
         </div>
 
         <div class="flex-column form__campo">
@@ -363,44 +380,43 @@ export default {
                     "
                 />
             </div>
-            <div v-if="errorConfirmarContrasenia" class="errorMensaje">
-                {{ errorConfirmarContrasenia }}
+            <div v-if="errores.confirmarContrasenia" class="errorMensaje">
+                {{ errores.confirmarContrasenia }}
             </div>
         </div>
 
         <div class="form__horizontal flex">
             <div class="flex-column form__campo">
-                <label class="label-form" for="localidad"> Localidad * </label>
+                <label class="label-form" for="localidad"> Localidad </label>
                 <div class="inputForm flex">
-                    <select v-model="localidad" required>
+                    <select v-model="localidad">
                         <option selected disabled value="">
                             Selecciona una localidad
                         </option>
-                        <option value="Ciudad Real">Ciudad Real</option>
-                        <option value="Toledo">Toledo</option>
-                        <option value="Albacete">Albacete</option>
-                        <option value="Cuenca">Cuenca</option>
-                        <option value="Guadalajara">Guadalajara</option>
+                        <option value="1">Ciudad Real</option>
+                        <option value="2">Toledo</option>
+                        <option value="3">Albacete</option>
+                        <option value="4">Cuenca</option>
+                        <option value="5">Guadalajara</option>
                     </select>
                 </div>
-                <div v-if="errorLocalidad" class="errorMensaje">
-                    {{ errorLocalidad }}
+                <div v-if="errores.localidad" class="errorMensaje">
+                    {{ errores.localidad }}
                 </div>
             </div>
 
             <div class="flex-column form__campo">
-                <label class="label-form" for="telefono"> Teléfono * </label>
+                <label class="label-form" for="telefono"> Teléfono </label>
                 <div class="inputForm flex">
                     <img src="/img/auth/phone.svg" alt="Icono de telefono" />
                     <input
                         v-model="telefono"
                         type="tel"
                         placeholder="+34 000 000 000"
-                        required
                     />
                 </div>
-                <div v-if="errorTelefono" class="errorMensaje">
-                    {{ errorTelefono }}
+                <div v-if="errores.telefono" class="errorMensaje">
+                    {{ errores.telefono }}
                 </div>
             </div>
         </div>
@@ -423,8 +439,8 @@ export default {
                     </router-link>
                 </label>
             </div>
-            <div v-if="errorAceptarTerminos" class="errorMensaje">
-                {{ errorAceptarTerminos }}
+            <div v-if="errores.aceptarTerminos" class="errorMensaje">
+                {{ errores.aceptarTerminos }}
             </div>
         </div>
         <div v-if="generalErrorMessage" class="errorMensaje">
@@ -434,7 +450,7 @@ export default {
 
         <p class="p">
             ¿Ya tienes una cuenta?
-            <router-link to="/login" class="span"> Inicia sesión </router-link>
+            <router-link to="/auth" class="span"> Inicia sesión </router-link>
         </p>
     </form>
 </template>

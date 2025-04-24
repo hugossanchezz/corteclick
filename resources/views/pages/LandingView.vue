@@ -27,14 +27,14 @@ export default {
         <section class="main__redirect flex">
             <div class="redirect__login flex-column">
                 <h2>¿Ya tienes una cuenta?</h2>
-                <router-link to="/login">
+                <router-link to="/auth">
                     <PrimaryButton label="Iniciar Sesión" />
                 </router-link>
             </div>
 
             <div class="redirect__register flex-column">
                 <h2>¿Quieres crear una cuenta?</h2>
-                <router-link to="/register">
+                <router-link to="/auth/register">
                     <PrimaryButton label="Registrarme" />
                 </router-link>
             </div>

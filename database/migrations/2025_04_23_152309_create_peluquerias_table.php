@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('peluquerias', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 100);
-            $table->string('descripcion', 200);
+            $table->string('descripcion', 200)->nullable();
+            $table->string('direccion', 200);
             $table->unsignedBigInteger('localidad')->nullable();
             $table->string('email', 150);
             $table->string('telefono', 20)->nullable();

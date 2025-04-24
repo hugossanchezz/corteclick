@@ -296,7 +296,7 @@ export default {
                 reservados.
             </p>
         </div>
-        <div class="btn-accept">
+        <div class="btn-return">
             <router-link to="/auth/register/terms" class="flex-center"
                 >Volver</router-link
             >
@@ -314,6 +314,8 @@ section {
     width: 50%;
     height: 40rem;
     margin: 0 auto;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
     padding: 1rem;
     border-radius: 10px;
     overflow-y: auto;
@@ -350,7 +352,7 @@ section {
     }
 }
 
-.btn-accept {
+.btn-return {
     background-color: map-get($colores, "naranja");
     position: sticky;
     width: 5rem;

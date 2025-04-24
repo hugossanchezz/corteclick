@@ -1,4 +1,5 @@
 <script>
+// Importamos las librerías necesarias para el componente.
 import axios from "axios";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
@@ -6,32 +7,39 @@ import { ref, computed, watch, onMounted } from "vue";
 
 export default {
     name: "LoginForm",
+
     components: { PrimaryButton },
+
     setup() {
+        // Obtenemos la instancia del router para poder navegar entre las rutas.
         const router = useRouter();
+
+        // Estados del formulario usando ref
         const correo = ref("");
         const contrasenia = ref("");
         const recordarme = ref(false);
         const errorCorreo = ref("");
         const visibilidadContrasenia = ref(false);
-        const credencialesInvalidas = ref(""); // Nueva variable para credenciales incorrectas
+        const credencialesInvalidas = ref("");
 
         // Expresión regular para la validación del correo
         const correoPattern =
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         // Estados derivados (computados)
-        const tieneMinuscula = computed(() => /[a-z]/.test(contrasenia.value));
-        const tieneMayuscula = computed(() => /[A-Z]/.test(contrasenia.value));
-        const tieneNumero = computed(() => /\d/.test(contrasenia.value));
-        const tieneCaracterEspecial = computed(() =>
-            /[!@#$%^&*]/.test(contrasenia.value)
+        // Los computed properties se actualizan automáticamente cuando sus dependencias reactivas cambian.
+        const tieneMinuscula = computed(() => /[a-z]/.test(contrasenia.value)); // Comprueba si la contraseña contiene al menos una minúscula.
+        const tieneMayuscula = computed(() => /[A-Z]/.test(contrasenia.value)); // Comprueba si la contraseña contiene al menos una mayúscula.
+        const tieneNumero = computed(() => /\d/.test(contrasenia.value)); // Comprueba si la contraseña contiene al menos un número.
+        const tieneCaracterEspecial = computed(
+            () => /[!@#$%^&*]/.test(contrasenia.value) // Comprueba si la contraseña contiene al menos un carácter especial.
         );
         const tieneLongitudMinima = computed(
-            () => contrasenia.value.length >= 8
+            () => contrasenia.value.length >= 8 // Comprueba si la contraseña tiene al menos 8 caracteres de longitud.
         );
 
         const contraseniaValida = computed(() => {
+            // Determina si la contraseña cumple con todos los requisitos definidos.
             return (
                 tieneMinuscula.value &&
                 tieneMayuscula.value &&
@@ -42,57 +50,67 @@ export default {
         });
 
         const tieneErrores = computed(
-            () => errorCorreo.value || !contraseniaValida.value
+            () => errorCorreo.value || !contraseniaValida.value // Determina si hay algún error en el formulario (error de correo o contraseña no válida).
         );
 
-        const iconoVisibilidad = computed(() =>
-            visibilidadContrasenia.value
-                ? "/img/auth/visibility_off.svg"
-                : "/img/auth/visibility_on.svg"
+        const iconoVisibilidad = computed(
+            () =>
+                visibilidadContrasenia.value
+                    ? "/img/auth/visibility_off.svg" // Si la contraseña es visible, muestra el icono de ocultar.
+                    : "/img/auth/visibility_on.svg" // Si la contraseña no es visible, muestra el icono de mostrar.
         );
 
-        const tipoInput = computed(() =>
-            visibilidadContrasenia.value ? "text" : "password"
+        const tipoInput = computed(
+            () => (visibilidadContrasenia.value ? "text" : "password") // Determina el tipo de input de la contraseña según su visibilidad.
         );
 
         // Observadores (watch)
+        // Los watchers permiten ejecutar una función en respuesta a los cambios de una referencia reactiva.
         watch(correo, (newValue) => {
+            // Observa los cambios en el campo de correo electrónico para validar su formato.
             errorCorreo.value = correoPattern.test(newValue)
-                ? ""
-                : "Correo electrónico inválido";
+                ? "" // Si el formato es válido, el mensaje de error se vacía.
+                : "Correo electrónico inválido"; // Si el formato no es válido, se establece un mensaje de error.
         });
 
         // Método para manejar el envío del formulario
         const submitForm = async () => {
-            credencialesInvalidas.value = ""; // Resetea el mensaje de error de credenciales
+            credencialesInvalidas.value = ""; // Resetea el mensaje de error de credenciales al intentar iniciar sesión.
             try {
+                // Realiza una petición POST a la API de inicio de sesión con las credenciales del usuario.
                 const response = await axios.post("/api/login", {
                     email: correo.value,
                     password: contrasenia.value,
-                    remember: recordarme.value,
+                    remember: recordarme.value, // Envía el estado del checkbox "Recordarme" al backend.
                 });
-                //console.log("Inicio de sesión exitoso");
 
-                // Almacenar el token y la información del usuario
+                // Almacenar el token y la información del usuario en el almacenamiento local del navegador.
                 localStorage.setItem("token", response.data.access_token);
                 localStorage.setItem(
                     "user",
                     JSON.stringify(response.data.user)
                 );
+                // Si el usuario selecciona "Recordarme", guarda una bandera en el almacenamiento local.
                 if (recordarme.value) {
                     localStorage.setItem("rememberMe", "true");
+                } else {
+                    localStorage.removeItem("rememberMe"); // Elimina la bandera si no se selecciona "Recordarme".
                 }
 
-                router.push("/"); // Redirigir a la página principal
+                router.push("/"); // Redirige al usuario a la página principal después del inicio de sesión exitoso.
             } catch (error) {
+                // Captura cualquier error ocurrido durante la petición de inicio de sesión.
                 if (error.response && error.response.status === 401) {
-                    // Error de credenciales incorrectas
+                    // Error de credenciales incorrectas (código de estado 401 no autorizado).
                     credencialesInvalidas.value =
                         "Credenciales incorrectas. Por favor, inténtalo de nuevo.";
                 } else if (error.response && error.response.status === 422) {
+                    // Error de validación del servidor (código de estado 422 entidad no procesable).
+                    // Intenta obtener el mensaje de error específico del campo 'email' desde la respuesta del servidor.
                     errorCorreo.value =
                         error.response.data.errors?.email?.[0] || "";
                 } else {
+                    // Otro tipo de error inesperado.
                     alert(
                         "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde."
                     );
@@ -102,16 +120,20 @@ export default {
 
         // Verificar "Recordarme" al cargar el componente
         onMounted(() => {
-            const rememberMe = localStorage.getItem("rememberMe");
-            const storedToken = localStorage.getItem("token");
-            const storedUser = localStorage.getItem("user");
+            const rememberMe = localStorage.getItem("rememberMe"); // Intenta obtener el valor de "rememberMe" del almacenamiento local.
+            const storedToken = localStorage.getItem("token"); // Intenta obtener el token del almacenamiento local.
+            const storedUser = localStorage.getItem("user"); // Intenta obtener la información del usuario del almacenamiento local.
 
+            // Si "rememberMe" es true y hay un token y un usuario almacenados.
             if (rememberMe === "true" && storedToken && storedUser) {
                 try {
-                    const user = JSON.parse(storedUser);
-                    recordarme.value = true;
-                    router.push("/");
+                    recordarme.value = true; // Establece el checkbox "Recordarme" como marcado.
+                    alert(
+                        "Ya iniciaste sesión anteriormente. Cierra la sesión para iniciar una nueva."
+                    )
+                    router.push("/"); // Redirige al usuario a la página principal sin necesidad de iniciar sesión de nuevo.
                 } catch (error) {
+                    // Si hay un error al parsear el usuario (puede que esté corrupto), limpia el almacenamiento local.
                     console.error("Error al parsear el usuario", error);
                     localStorage.removeItem("rememberMe");
                     localStorage.removeItem("token");
@@ -120,6 +142,7 @@ export default {
             }
         });
 
+        // Retorna los estados y métodos que se utilizarán en la plantilla del componente.
         return {
             correo,
             contrasenia,

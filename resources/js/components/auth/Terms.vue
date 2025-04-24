@@ -259,9 +259,9 @@ export default {
             </p>
         </div>
         <!-- Botón para volver al Registro -->
-        <div class="btn-accept">
+        <div class="btn-return">
             <router-link to="/auth/register" class="flex-center"
-                >Aceptar</router-link
+                >Volver</router-link
             >
         </div>
     </section>
@@ -279,7 +279,7 @@ section {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     width: 50%;
     height: 40rem;
-    margin: 0 auto;
+    margin: 1rem;
     padding: 1rem;
     border-radius: 10px;
     overflow-y: auto;
@@ -321,7 +321,7 @@ section {
     }
 }
 
-.btn-accept {
+.btn-return {
     background-color: map-get($colores, "naranja");
     position: sticky;
     width: 5rem;
