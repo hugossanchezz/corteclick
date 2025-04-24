@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Models\User;
-use \stdClass;
 
 class AuthController extends Controller
 {
@@ -17,16 +15,23 @@ class AuthController extends Controller
             'name' => 'required|string|max:150',
             'email' => 'required|email|max:150|unique:users',
             'password' => 'required|string|min:8',
+            'apellidos' => 'nullable|string|max:100', // Cambiado a nullable
+            'telefono' => 'nullable|string|max:20',    // Cambiado a nullable
+            'localidad' => 'nullable|integer|max:20',  // Cambiado a nullable
+            'aceptarTerminos' => 'required|accepted', // Agregada validación para los términos
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json(['errors' => $validator->errors()], 422); // Devuelve un array 'errors'
         }
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'apellidos' => $request->apellidos,
+            'telefono' => $request->telefono,
+            'localidad' => $request->localidad,
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -35,25 +40,23 @@ class AuthController extends Controller
             'data' => $user,
             'access_token' => $token,
             'token_type' => 'Bearer',
-        ]);
-
+        ], 200); //Devolver 200 en caso de éxito
     }
 
     public function login(Request $request)
     {
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (!auth()->attempt($request->only('email', 'password'))) {
             return response()->json(['message' => 'Credenciales incorrectas.'], 401);
         }
 
-        $user = User::where('email', $request['email'])->firstOrFail();
-
+        $user = User::where('email', $request->email)->firstOrFail();
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Hola ' . $user->name,
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
+            'user' => auth()->user(), // Usa auth()->user() para obtener el usuario autenticado.
         ]);
     }
 
@@ -61,8 +64,8 @@ class AuthController extends Controller
     {
         auth()->user()->tokens()->delete();
 
-        return [
-            'message' => 'Sesión cerrada correctamente.'
-        ];
+        return response()->json([ // Devuelve la respuesta como JSON
+            'message' => 'Sesión cerrada correctamente.',
+        ]);
     }
 }
