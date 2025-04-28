@@ -4,6 +4,7 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import { ref, computed, watch, onMounted } from "vue";
+import { isAuthenticated } from "@/js/auth/eventBus";
 
 export default {
     name: "LoginForm",
@@ -17,7 +18,6 @@ export default {
         // Estados del formulario usando ref
         const correo = ref("");
         const contrasenia = ref("");
-        const recordarme = ref(false);
         const errorCorreo = ref("");
         const visibilidadContrasenia = ref(false);
         const credencialesInvalidas = ref("");
@@ -81,7 +81,6 @@ export default {
                 const response = await axios.post("/api/login", {
                     email: correo.value,
                     password: contrasenia.value,
-                    remember: recordarme.value, // Envía el estado del checkbox "Recordarme" al backend.
                 });
 
                 // Almacenar el token y la información del usuario en el almacenamiento local del navegador.
@@ -90,13 +89,9 @@ export default {
                     "user",
                     JSON.stringify(response.data.user)
                 );
-                // Si el usuario selecciona "Recordarme", guarda una bandera en el almacenamiento local.
-                if (recordarme.value) {
-                    localStorage.setItem("rememberMe", "true");
-                } else {
-                    localStorage.removeItem("rememberMe"); // Elimina la bandera si no se selecciona "Recordarme".
-                }
 
+                // Cambiar varible global de estar logueado a true
+                isAuthenticated.value = true;
                 router.push("/"); // Redirige al usuario a la página principal después del inicio de sesión exitoso.
             } catch (error) {
                 // Captura cualquier error ocurrido durante la petición de inicio de sesión.
@@ -118,19 +113,17 @@ export default {
             }
         };
 
-        // Verificar "Recordarme" al cargar el componente
+        // Verificar si ya iniciaste sesión al cargar el componente
         onMounted(() => {
-            const rememberMe = localStorage.getItem("rememberMe"); // Intenta obtener el valor de "rememberMe" del almacenamiento local.
             const storedToken = localStorage.getItem("token"); // Intenta obtener el token del almacenamiento local.
             const storedUser = localStorage.getItem("user"); // Intenta obtener la información del usuario del almacenamiento local.
 
             // Si "rememberMe" es true y hay un token y un usuario almacenados.
-            if (rememberMe === "true" && storedToken && storedUser) {
+            if (storedToken && storedUser) {
                 try {
-                    recordarme.value = true; // Establece el checkbox "Recordarme" como marcado.
                     alert(
                         "Ya iniciaste sesión anteriormente. Cierra la sesión para iniciar una nueva."
-                    )
+                    );
                     router.push("/"); // Redirige al usuario a la página principal sin necesidad de iniciar sesión de nuevo.
                 } catch (error) {
                     // Si hay un error al parsear el usuario (puede que esté corrupto), limpia el almacenamiento local.
@@ -146,7 +139,6 @@ export default {
         return {
             correo,
             contrasenia,
-            recordarme,
             errorCorreo,
             visibilidadContrasenia,
             tieneMinuscula,
@@ -227,11 +219,6 @@ export default {
 
         <div v-if="credencialesInvalidas" class="errorMensaje mg-tb-1">
             {{ credencialesInvalidas }}
-        </div>
-
-        <div class="flex mg-tb-1">
-            <input v-model="recordarme" type="checkbox" />
-            <label for="recordarme"> Recordarme </label>
         </div>
 
         <PrimaryButton label="Iniciar Sesión" />

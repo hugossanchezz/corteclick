@@ -1,9 +1,10 @@
 <script>
-import { useRoute } from 'vue-router';
-import { ref, computed, onMounted } from 'vue';
+import { useRoute } from "vue-router";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import SecondaryButton from "@/js/components/actions/SecondaryButton.vue";
+import { isAuthenticated } from "@/js/auth/eventBus";
 
 export default {
     name: "Header",
@@ -12,31 +13,17 @@ export default {
         PrimaryButton,
         SecondaryButton,
     },
+
     setup() {
-        // Obtenemos la instancia de la ruta actual para verificar en qué página estamos.
         const route = useRoute();
-        // Creamos una propiedad computada para verificar si la ruta actual es la página de inicio ('/').
-        const isLandingPage = computed(() => route.path === '/');
-        // Creamos una referencia reactiva para indicar si el usuario está autenticado. Inicialmente, asumimos que no lo está.
-        const isAuthenticated = ref(false);
+        const isLandingPage = computed(() => route.path === "/");
 
-        // Hook onMounted que se ejecuta una vez que el componente ha sido montado en el DOM.
-        onMounted(() => {
-            // Verificamos si existe un token en el localStorage. La existencia de un token suele indicar que el usuario ha iniciado sesión y/o ha seleccionado "Recordarme".
-            const token = localStorage.getItem("token");
-            // Si se encuentra un token, actualizamos la variable isAuthenticated a true.
-            if (token) {
-                isAuthenticated.value = true;
-            } else {
-                // Si no se encuentra un token, la variable isAuthenticated permanece en false (su valor inicial).
-                isAuthenticated.value = false; // Aunque ya es false por defecto, lo ponemos explícitamente para mayor claridad.
-            }
-        });
+        // IMPORTANTE: computar isAuthenticated para que se reactive correctamente
+        const estaLogueado = computed(() => isAuthenticated.value);
 
-        // Retornamos las propiedades y métodos que queremos exponer en la plantilla del componente.
         return {
             isLandingPage,
-            isAuthenticated,
+            estaLogueado,
         };
     },
 };
@@ -65,19 +52,19 @@ export default {
                 </div>
             </nav>
             <div class="navigation__auth flex-center">
-                <div v-if="!isAuthenticated" class="auth__item flex-center">
+                <div v-if="!estaLogueado" class="auth__item flex-center">
                     <router-link to="/auth">
                         <SecondaryButton label="Iniciar Sesión" />
                     </router-link>
                 </div>
-                <div v-if="!isAuthenticated" class="auth__item flex-center">
+                <div v-if="!estaLogueado" class="auth__item flex-center">
                     <router-link to="/auth/register">
                         <SecondaryButton label="Registrarme" />
                     </router-link>
                 </div>
-                <div v-if="isAuthenticated" class="auth__item flex-center">
+                <div v-if="estaLogueado" class="auth__item flex-center">
                     <router-link to="/profile">
-                        <svg
+                        <!-- <svg
                             class="profile__icon"
                             xmlns="http://www.w3.org/2000/svg"
                             height="34px"
@@ -88,7 +75,12 @@ export default {
                             <path
                                 d="M234-276q51-39 114-61.5T480-360q69 0 132 22.5T726-276q35-41 54.5-93T800-480q0-133-93.5-226.5T480-800q-133 0-226.5 93.5T160-480q0 59 19.5 111t54.5 93Zm246-164q-59 0-99.5-40.5T340-580q0-59 40.5-99.5T480-720q59 0 99.5 40.5T620-580q0 59-40.5 99.5T480-440Zm0 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q53 0 100-15.5t86-44.5q-39-29-86-44.5T480-280q-53 0-100 15.5T294-220q39 29 86 44.5T480-160Zm0-360q26 0 43-17t17-43q0-26-17-43t-43-17q-26 0-43 17t-17 43q0 26 17 43t43 17Zm0-60Zm0 360Z"
                             />
-                        </svg>
+                        </svg> -->
+                        <img
+                            class="auth__item__avatar"
+                            src="img/header/avatar.png"
+                            alt="Icono de perfil del usuario"
+                        />
                     </router-link>
                 </div>
             </div>
@@ -154,6 +146,7 @@ header {
 
                 &:hover {
                     border-bottom: 1px solid map-get($colores, "naranja");
+
                 }
             }
         }
@@ -163,11 +156,16 @@ header {
             justify-content: end;
 
             .auth__item {
-                .profile__icon {
-                    transition: fill 0.3s ease-in-out;
-
+                .auth__item__avatar {
+                    // transition: fill 0.3s ease-in-out;
+                    background-color: map-get($colores, 'blanco');
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 50%;
                     &:hover {
                         fill: map-get($colores, "naranja");
+                        transform: scale(1.02);
                     }
                 }
             }
@@ -200,7 +198,7 @@ header {
 }
 
 .landing-bg {
-    background-image: url("/img/landing/carrusel/barber_pole.webp");
+    background-image: url("/img/header/carrusel/barber_razor.webp");
     background-size: cover;
     background-position: center;
 }
