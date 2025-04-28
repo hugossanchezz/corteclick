@@ -110,7 +110,7 @@ main {
 
     section {
         width: 100%;
-        padding: 4rem 30%;
+        padding: 4rem 20%;
         margin-bottom: 2rem;
     }
 
