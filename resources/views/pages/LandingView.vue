@@ -109,7 +109,6 @@ main {
     align-items: center;
 
     section {
-        width: 100%;
         padding: 4rem 30%;
         margin-bottom: 2rem;
     }
