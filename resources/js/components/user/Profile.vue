@@ -1,16 +1,22 @@
 <script>
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { isAuthenticated } from "@/js/auth/eventBus";
+import DangerButton from "@/js/components/actions/DangerButton.vue";
 
 export default {
-    name: "ProfileView",
-    components: {},
+    name: "Profile",
+    components: { DangerButton },
     setup() {
         const user = ref(null);
         const router = useRouter();
 
+        /**
+         * Cierra la sesión del usuario y redirige a la página de inicio.
+         * Limpia los tokens de autenticación y csrf en el almacenamiento local.
+         * Si se produce un error, muestra un mensaje de depuración en la consola.
+         */
         const handleLogout = async () => {
             try {
                 const csrfToken = document
@@ -64,16 +70,19 @@ export default {
             }
         });
 
-        return { user, handleLogout, router };
+        return {
+            user,
+            handleLogout,
+            router,
+        };
     },
 };
 </script>
 
 <template>
-    <div class="profile-container">
-        <h1>Perfil de Usuario</h1>
+    <div>
         <div v-if="user">
-            <p><strong>Nombre:</strong> {{ user.name }}</p>
+            <h1>Bienvenido {{ user.name }}</h1>
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>Apellidos:</strong> {{ user.apellidos }}</p>
             <p><strong>Teléfono:</strong> {{ user.telefono }}</p>
@@ -82,6 +91,7 @@ export default {
         <div v-else>
             <p>No hay información de usuario disponible.</p>
         </div>
-        <button @click="handleLogout">Cerrar sesión</button>
+        <!-- <button @click="handleLogout">Cerrar sesión</button> -->
+        <DangerButton @click="handleLogout" label="Cerrar sesión" />
     </div>
 </template>

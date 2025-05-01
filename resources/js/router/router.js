@@ -14,8 +14,9 @@ import Privacy from "@/js/components/auth/Privacy.vue";
 import Cookies from "@/js/components/auth/Cookies.vue";
 
 // User
-import ProfileView from '@/views/user/ProfileView.vue';
-import SettingsView from '@/views/user/SettingsView.vue';
+import UserView from '@/views/user/UserView.vue';
+import Profile from '@/js/components/user/Profile.vue';
+import Settings from '@/js/components/user/Settings.vue';
 
 // Admin
 import DashboardView from '@/views/admin/DashboardView.vue';
@@ -66,9 +67,13 @@ const routes = [
     },
 
     // User
-    { path: '/profile', name: 'Profile', component: ProfileView },
-    { path: '/settings', name: 'Settings', component: SettingsView },
-
+    {
+        path: '/user', name: 'User', component: UserView,
+        children: [
+            { path: '', name: 'Profile', component: Profile },
+            { path: 'settings', name: 'Settings', component: Settings },
+        ],
+    },
     // Admin
     { path: '/dashboard', name: 'Dashboard', component: DashboardView },
 
