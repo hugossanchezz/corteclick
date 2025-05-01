@@ -28,6 +28,7 @@
 // Styling classes
 h1 {
     @include fuente("titulo_principal");
+    margin: 0
 }
 
 h2 {
