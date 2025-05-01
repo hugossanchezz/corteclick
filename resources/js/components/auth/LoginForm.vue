@@ -221,7 +221,9 @@ export default {
             {{ credencialesInvalidas }}
         </div>
 
-        <PrimaryButton label="Iniciar Sesión" />
+        <div class="flex-center mg-tb-1">
+            <PrimaryButton label="Iniciar Sesión" />
+        </div>
 
         <p class="p">
             ¿No tienes una cuenta?
