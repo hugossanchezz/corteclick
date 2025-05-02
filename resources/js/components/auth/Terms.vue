@@ -5,10 +5,10 @@ import { useRoute } from 'vue-router';
 export default {
     name: "Terms",
     setup() {
-        const route = useRoute();
+        const router = useRoute();
         const currentYear = ref(new Date().getFullYear());
         // Usa computed para que isRouteTerms se actualice automáticamente
-        const isRouteTerms = computed(() => route.path === '/auth/register/terms');
+        const isRouteTerms = computed(() => router.path === '/auth/register/terms');
 
         return {
             currentYear,

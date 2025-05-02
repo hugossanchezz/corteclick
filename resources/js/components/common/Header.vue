@@ -1,6 +1,6 @@
 <script>
 import { useRoute } from "vue-router";
-import { ref, computed, onMounted, onUnmounted } from "vue";
+import { computed } from "vue";
 
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import SecondaryButton from "@/js/components/actions/SecondaryButton.vue";
@@ -63,7 +63,7 @@ export default {
                     </router-link>
                 </div>
                 <div v-if="estaLogueado" class="auth__item flex-center">
-                    <router-link to="/profile">
+                    <router-link to="/user">
                         <!-- <svg
                             class="profile__icon"
                             xmlns="http://www.w3.org/2000/svg"
@@ -146,7 +146,6 @@ header {
 
                 &:hover {
                     border-bottom: 1px solid map-get($colores, "naranja");
-
                 }
             }
         }
@@ -158,7 +157,7 @@ header {
             .auth__item {
                 .auth__item__avatar {
                     // transition: fill 0.3s ease-in-out;
-                    background-color: map-get($colores, 'blanco');
+                    background-color: map-get($colores, "blanco");
                     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
                     width: 34px;
                     height: 34px;

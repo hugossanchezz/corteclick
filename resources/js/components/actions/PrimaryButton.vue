@@ -23,6 +23,7 @@ button {
     @include fuente("titulo_secundario");
 
     padding: 0.65rem 1.25rem ;
+    width: fit-content;
 
     border: none;
     border-radius: 5px;
