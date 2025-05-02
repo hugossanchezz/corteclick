@@ -109,18 +109,17 @@ main {
     align-items: center;
 
     section {
-        padding: 4rem 30%;
-        margin-bottom: 2rem;
+        padding: 4rem;
     }
 
     .main__redirect {
+        margin-bottom: 0;
         div {
-            width: 50%;
+            width: 25rem;
             padding: 1rem 2rem;
             text-align: center;
 
             h2 {
-                @include fuente("titulo_secundario");
                 margin-bottom: 1rem;
             }
         }
@@ -138,7 +137,6 @@ main {
         background-color: map-get($colores, "gris_claro");
         color: map-get($colores, "azul_oscuro");
 
-        text-align: center;
         align-items: center;
 
         .description__title {
@@ -151,6 +149,9 @@ main {
                 margin: 0 1rem;
             }
         }
+        p {
+            width: 55%;
+        }
     }
 
     .main__how {
@@ -158,7 +159,7 @@ main {
 
         .how__timeline {
             align-items: center;
-            white-space: nowrap;
+            justify-content: center;
             .timeline__item {
                 padding: 1rem 2rem;
                 gap: 1rem;
