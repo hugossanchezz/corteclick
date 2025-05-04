@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PeluqueriaController;
 
 Route::get('/', function () {
     return view('index');

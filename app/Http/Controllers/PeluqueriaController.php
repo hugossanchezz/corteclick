@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Peluqueria;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class PeluqueriaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $peluqueria = Peluqueria::all();
-
-        return $peluqueria;
-    }
+    public function index(): JsonResponse
+{
+    $peluquerias = Peluqueria::all();
+    return response()->json($peluquerias);
+}
 
     /**
      * Show the form for creating a new resource.

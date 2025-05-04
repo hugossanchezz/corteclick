@@ -20,7 +20,7 @@ class PeluqueriasSeeder extends Seeder
                 'nombre' => 'Peluquería Rosa',
                 'descripcion' => 'Peluquería unisex con amplia experiencia.',
                 'direccion' => 'Calle Morales 34',
-                'localidad' => 1, // Asumiendo que 1 es una localidad válida
+                'localidad' => 1,
                 'email' => 'rosa@example.com',
                 'telefono' => '+34 912345678',
                 'tipo' => 'UNISEX',
@@ -32,11 +32,11 @@ class PeluqueriasSeeder extends Seeder
                 'nombre' => 'Barber Shop El Barbero',
                 'descripcion' => 'Barbería especializada en cortes masculinos.',
                 'direccion' => 'Avenida Principal 12',
-                'localidad' => 2, // Asumiendo que 2 es una localidad válida
+                'localidad' => 2,
                 'email' => 'barber@example.com',
                 'telefono' => '+34 911223344',
                 'tipo' => 'BARBERIA',
-                'contrasenia' => Hash::make('secreto456'), // Encripta la contraseña
+                'contrasenia' => Hash::make('secreto456'),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
