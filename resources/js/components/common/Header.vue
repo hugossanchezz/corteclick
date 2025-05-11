@@ -90,7 +90,7 @@ export default {
                 <div class="modal__text">
                     ¡Consigue tu nuevo look con solo un click!
                 </div>
-                <router-link to="/appointment">
+                <router-link to="/locals">
                     <PrimaryButton label="Pedir Cita" />
                 </router-link>
             </div>
