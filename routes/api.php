@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PeluqueriaController;
+use App\Http\Controllers\LocalidadController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -35,3 +36,7 @@ Route::get('/locals', [PeluqueriaController::class , 'index']);
 
 Route::get('/locals/{id}', [PeluqueriaController::class , 'show']);
 
+// ------ Localities ------------------------------------------------------
+Route::get('/localities/{valor}', [LocalidadController::class, 'getCodigoPostalNombreById']);
+
+Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);
