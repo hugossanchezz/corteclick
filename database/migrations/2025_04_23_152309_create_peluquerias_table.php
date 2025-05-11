@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('telefono', 20)->nullable();
             $table->enum('tipo', ['BARBERIA', 'PELUQUERIA', 'UNISEX'])->nullable();
             $table->string('contrasenia',255);// Encriptada en sha1
-
+            $table->decimal('valoracion', 3, 2)->nullable()->comment('Media de las valoraciones del establecimiento');
+            
             $table->foreign('localidad')->references('id')->on('localidades');
             $table->timestamps();
         });
