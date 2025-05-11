@@ -1,6 +1,5 @@
 <script>
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
-import SecondaryButton from "@/js/components/actions/SecondaryButton.vue";
 import DangerButton from "@/js/components/actions/DangerButton.vue";
 
 export default {
@@ -8,7 +7,6 @@ export default {
 
     components: {
         PrimaryButton,
-        SecondaryButton,
         DangerButton,
     },
     methods: {
@@ -137,6 +135,7 @@ main {
         background-color: map-get($colores, "gris_claro");
         color: map-get($colores, "azul_oscuro");
 
+        width: 100%;
         align-items: center;
 
         .description__title {
