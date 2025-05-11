@@ -15,11 +15,13 @@ class LocalidadesSeeder extends Seeder
     public function run()
     {
         DB::table('localidades')->insert([
-            ['id' => 1, 'nombre' => 'Ciudad Real', 'codigo_postal' => '13001'],
-            ['id' => 2, 'nombre' => 'Toledo', 'codigo_postal' => '45001'],
-            ['id' => 3, 'nombre' => 'Albacete', 'codigo_postal' => '02001'],
-            ['id' => 4, 'nombre' => 'Cuenca', 'codigo_postal' => '16001'],
-            ['id' => 5, 'nombre' => 'Guadalajara', 'codigo_postal' => '19001'],
+            ['id' => 1, 'nombre' => 'CIUDAD REAL', 'codigo_postal' => '13001'],
+            ['id' => 2, 'nombre' => 'TOLEDO', 'codigo_postal' => '45001'],
+            ['id' => 3, 'nombre' => 'ALBACETE', 'codigo_postal' => '02001'],
+            ['id' => 4, 'nombre' => 'CUENCA', 'codigo_postal' => '16001'],
+            ['id' => 5, 'nombre' => 'GUADALAJARA', 'codigo_postal' => '19001'],
+            ['id' => 6, 'nombre' => 'SEGOVIA', 'codigo_postal' => '40001'],
+            ['id' => 7, 'nombre' => 'ALMERIA', 'codigo_postal' => '04001'],
         ]);
     }
 }
