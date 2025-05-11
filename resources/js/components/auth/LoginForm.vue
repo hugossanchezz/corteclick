@@ -168,12 +168,7 @@ export default {
         </div>
         <div class="inputForm flex">
             <img src="/img/auth/at_sign.svg" alt="Icono de arroba" />
-            <input
-                v-model="correo"
-                type="text"
-                placeholder="Correo electrónico"
-                required
-            />
+            <input v-model="correo" type="text" placeholder="Correo electrónico" required />
         </div>
         <div v-if="errorCorreo" class="errorMensaje">{{ errorCorreo }}</div>
 
@@ -181,22 +176,10 @@ export default {
             <label class="label-form" for="contrasenia"> Contraseña </label>
         </div>
         <div class="inputForm flex">
-            <img
-                src="/img/auth/lock.svg"
-                alt="Icono de candado de contraseña"
-            />
-            <input
-                v-model="contrasenia"
-                :type="tipoInput"
-                placeholder="Contraseña"
-                required
-            />
-            <img
-                class="input-visibilidad"
-                :src="iconoVisibilidad"
-                alt="Mostrar y ocultar contraseña"
-                @click="visibilidadContrasenia = !visibilidadContrasenia"
-            />
+            <img src="/img/auth/lock.svg" alt="Icono de candado de contraseña" />
+            <input v-model="contrasenia" :type="tipoInput" placeholder="Contraseña" required />
+            <img class="input-visibilidad" :src="iconoVisibilidad" alt="Mostrar y ocultar contraseña"
+                @click="visibilidadContrasenia = !visibilidadContrasenia" />
         </div>
 
         <ul v-if="contrasenia.length" class="errorMensaje">
@@ -221,14 +204,14 @@ export default {
             {{ credencialesInvalidas }}
         </div>
 
-        <div class="flex-center mg-tb-1">
+        <div class="form__bottom flex-column mg-tb-1">
             <PrimaryButton label="Iniciar Sesión" />
+            <p class="p">
+                ¿No tienes una cuenta?
+                <router-link to="/auth/register" class="span"> Regístrate </router-link>
+            </p>
         </div>
 
-        <p class="p">
-            ¿No tienes una cuenta?
-            <router-link to="/register" class="span"> Regístrate </router-link>
-        </p>
     </form>
 </template>
 
@@ -299,6 +282,7 @@ label {
     a {
         color: map-get($colores, "naranja");
         text-decoration: none;
+
         &:hover {
             text-decoration: underline;
         }
@@ -316,6 +300,11 @@ label {
     ul {
         margin-bottom: 20px;
     }
+}
+
+.form__bottom {
+    align-items: center;
+    gap: 1rem;
 }
 
 .errorMensaje {
@@ -348,6 +337,7 @@ label {
         width: 100%;
         padding: 0;
     }
+
     .input {
         margin-left: 0;
     }

@@ -21,14 +21,14 @@
 }
 
 // Spacing classes
-.mg-tb-1{
+.mg-tb-1 {
     margin: 1rem 0;
 }
 
 // Styling classes
 h1 {
     @include fuente("titulo_principal");
-    margin: 0
+    margin: 0;
 }
 
 h2 {

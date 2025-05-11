@@ -3,7 +3,7 @@
 import axios from "axios";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 
 export default {
     name: "RegisterForm",
@@ -22,6 +22,7 @@ export default {
         const contrasenia = ref("");
         const confirmarContrasenia = ref("");
         const localidad = ref("");
+        const localidades = ref([]);
         const telefono = ref("");
         const aceptarTerminos = ref(false);
 
@@ -107,6 +108,24 @@ export default {
             }
         };
 
+        onMounted(() => {
+            cargarLocalidades();
+        });
+
+        const cargarLocalidades = async () => {
+            try {
+                const response = await fetch('/api/localities'); // Asegúrate de que esta ruta exista
+                if (!response.ok) {
+                    throw new Error(`Error al cargar localidades: ${response.status}`);
+                }
+                const data = await response.json();
+
+                localidades.value = data;
+            } catch (error) {
+                console.error("Error al obtener las localidades:", error);
+            }
+        };
+
         // Observadores (watch)
         // Los watchers se utilizan para reaccionar a los cambios en un estado reactivo.
         // Aquí, para cada campo del formulario, definimos un watcher que valida el valor y actualiza el error correspondiente.
@@ -116,8 +135,8 @@ export default {
                 !newValue
                     ? "El nombre es requerido"
                     : /[^a-zA-Z0-9\s]/.test(newValue)
-                    ? "No se permiten caracteres especiales"
-                    : ""
+                        ? "No se permiten caracteres especiales"
+                        : ""
             );
         });
 
@@ -127,8 +146,8 @@ export default {
                 !newValue
                     ? "El correo es requerido"
                     : !correoPattern.test(newValue)
-                    ? "Correo no válido"
-                    : ""
+                        ? "Correo no válido"
+                        : ""
             );
         });
 
@@ -138,8 +157,8 @@ export default {
                 !newValue
                     ? "La contraseña es requerida"
                     : !contraseniaValida.value
-                    ? "La contraseña no cumple con los requisitos"
-                    : ""
+                        ? "La contraseña no cumple con los requisitos"
+                        : ""
             );
         });
 
@@ -163,8 +182,8 @@ export default {
                 !newValue
                     ? "El teléfono es requerido"
                     : !telefonoPattern.test(newValue)
-                    ? "Teléfono no válido"
-                    : ""
+                        ? "Teléfono no válido"
+                        : ""
             );
         });
 
@@ -231,6 +250,7 @@ export default {
             contrasenia,
             confirmarContrasenia,
             localidad,
+            localidades,
             telefono,
             aceptarTerminos,
 
@@ -268,16 +288,8 @@ export default {
             <div class="flex-column form__campo">
                 <label for="nombre"> Nombre * </label>
                 <div class="inputForm flex">
-                    <img
-                        src="/img/auth/person.svg"
-                        alt="Icono para input de nombre"
-                    />
-                    <input
-                        v-model="nombre"
-                        type="text"
-                        placeholder="Sin caracteres especiales"
-                        required
-                    />
+                    <img src="/img/auth/person.svg" alt="Icono para input de nombre" />
+                    <input v-model="nombre" type="text" placeholder="Sin caracteres especiales" required />
                 </div>
                 <div v-if="errores.nombre" class="errorMensaje">
                     {{ errores.nombre }}
@@ -287,15 +299,8 @@ export default {
             <div class="flex-column form__campo">
                 <label for="apellidos"> Apellidos </label>
                 <div class="inputForm flex">
-                    <img
-                        src="/img/auth/person.svg"
-                        alt="Icono para input de apellidos"
-                    />
-                    <input
-                        v-model="apellidos"
-                        type="text"
-                        placeholder="Sin caracteres especiales"
-                    />
+                    <img src="/img/auth/person.svg" alt="Icono para input de apellidos" />
+                    <input v-model="apellidos" type="text" placeholder="Sin caracteres especiales" />
                 </div>
                 <div v-if="errores.apellidos" class="errorMensaje">
                     {{ errores.apellidos }}
@@ -307,12 +312,7 @@ export default {
             <label class="label-form" for="correo"> Correo * </label>
             <div class="inputForm flex">
                 <img src="/img/auth/at_sign.svg" alt="Icono de correo" />
-                <input
-                    v-model="correo"
-                    type="email"
-                    placeholder="ejemplo@email.com"
-                    required
-                />
+                <input v-model="correo" type="email" placeholder="ejemplo@email.com" required />
             </div>
             <div v-if="errores.correo" class="errorMensaje">
                 {{ errores.correo }}
@@ -323,18 +323,9 @@ export default {
             <label class="label-form" for="contrasenia"> Contraseña * </label>
             <div class="inputForm flex">
                 <img src="/img/auth/lock.svg" alt="Icono de contraseña" />
-                <input
-                    v-model="contrasenia"
-                    :type="tipoInputContrasenia"
-                    placeholder="Contraseña"
-                    required
-                />
-                <img
-                    class="input-visibilidad"
-                    :src="iconoVisibilidadContrasenia"
-                    alt="Mostrar y ocultar contraseña"
-                    @click="visibilidadContrasenia = !visibilidadContrasenia"
-                />
+                <input v-model="contrasenia" :type="tipoInputContrasenia" placeholder="Contraseña" required />
+                <img class="input-visibilidad" :src="iconoVisibilidadContrasenia" alt="Mostrar y ocultar contraseña"
+                    @click="visibilidadContrasenia = !visibilidadContrasenia" />
             </div>
             <ul v-if="contrasenia.length" class="errorMensaje">
                 <li :class="{ correcto: tieneMinuscula }">
@@ -364,21 +355,13 @@ export default {
             </label>
             <div class="inputForm flex">
                 <img src="/img/auth/lock.svg" alt="Icono de contraseña" />
-                <input
-                    v-model="confirmarContrasenia"
-                    :type="tipoInputConfirmarContrasenia"
-                    placeholder="Confirma tu contraseña"
-                    required
-                />
-                <img
-                    class="input-visibilidad"
-                    :src="iconoVisibilidadConfirmarContrasenia"
-                    alt="Mostrar y ocultar contraseña"
-                    @click="
+                <input v-model="confirmarContrasenia" :type="tipoInputConfirmarContrasenia"
+                    placeholder="Confirma tu contraseña" required />
+                <img class="input-visibilidad" :src="iconoVisibilidadConfirmarContrasenia"
+                    alt="Mostrar y ocultar contraseña" @click="
                         visibilidadConfirmarContrasenia =
-                            !visibilidadConfirmarContrasenia
-                    "
-                />
+                        !visibilidadConfirmarContrasenia
+                        " />
             </div>
             <div v-if="errores.confirmarContrasenia" class="errorMensaje">
                 {{ errores.confirmarContrasenia }}
@@ -393,11 +376,9 @@ export default {
                         <option selected disabled value="">
                             Selecciona una localidad
                         </option>
-                        <option value="1">Ciudad Real</option>
-                        <option value="2">Toledo</option>
-                        <option value="3">Albacete</option>
-                        <option value="4">Cuenca</option>
-                        <option value="5">Guadalajara</option>
+                        <option v-for="localidad in localidades" :key="localidad.id" :value="localidad.id">
+                            {{ localidad.nombre }}
+                        </option>
                     </select>
                 </div>
                 <div v-if="errores.localidad" class="errorMensaje">
@@ -409,11 +390,7 @@ export default {
                 <label class="label-form" for="telefono"> Teléfono </label>
                 <div class="inputForm flex">
                     <img src="/img/auth/phone.svg" alt="Icono de telefono" />
-                    <input
-                        v-model="telefono"
-                        type="tel"
-                        placeholder="+34 000 000 000"
-                    />
+                    <input v-model="telefono" type="tel" placeholder="+34 000 000 000" />
                 </div>
                 <div v-if="errores.telefono" class="errorMensaje">
                     {{ errores.telefono }}
@@ -424,11 +401,7 @@ export default {
             <div class="terminos flex">
                 <div class="terminos__switch">
                     <label class="switch">
-                        <input
-                            v-model="aceptarTerminos"
-                            type="checkbox"
-                            required
-                        />
+                        <input v-model="aceptarTerminos" type="checkbox" required />
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -446,12 +419,14 @@ export default {
         <div v-if="generalErrorMessage" class="errorMensaje">
             {{ generalErrorMessage }}
         </div>
-        <PrimaryButton label="Registrarse" />
+        <div class="form__bottom flex-column mg-tb-1">
+            <PrimaryButton label="Registrarse" />
+            <p class="p">
+                ¿Ya tienes una cuenta?
+                <router-link to="/auth" class="span"> Inicia sesión </router-link>
+            </p>
+        </div>
 
-        <p class="p">
-            ¿Ya tienes una cuenta?
-            <router-link to="/auth" class="span"> Inicia sesión </router-link>
-        </p>
     </form>
 </template>
 
@@ -474,11 +449,11 @@ form {
         gap: 10px;
     }
 
-    .form__horizontal > div:nth-child(1) {
+    .form__horizontal>div:nth-child(1) {
         width: 40%;
     }
 
-    .form__horizontal > div:nth-child(2) {
+    .form__horizontal>div:nth-child(2) {
         width: 60%;
     }
 
@@ -519,9 +494,17 @@ form {
             }
         }
     }
+
+    .form__bottom{
+        align-items: center;
+        gap: 1rem;
+    }
+
     label {
         margin-left: 5px;
     }
+
+    
 }
 
 // Estilos para .span
@@ -562,6 +545,7 @@ form {
         width: 100%;
         padding: 0;
     }
+
     .input {
         margin-left: 0;
     }

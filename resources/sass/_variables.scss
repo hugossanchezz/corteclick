@@ -35,24 +35,29 @@ $fuentes: (
         "family": "Montserrat Alternates",
         "size": 14px,
     ),
+    "parrafo_max": (
+        "family": "Montserrat Alternates",
+        "size": 16px,
+        "weight": 500,
+    ),
 );
 
 // Mixin para aplicar la fuente
 @mixin fuente($nombre-fuente) {
-    $fuente: map-get($fuentes, $nombre-fuente);
+    $fuente: map-get($fuentes, $nombre-fuente) ;
 
     @if $fuente {
         @if map-has-key($fuente, "family") {
-            font-family: map-get($fuente, "family");
+            font-family: map-get($fuente, "family") !important;
         }
         @if map-has-key($fuente, "size") {
-            font-size: map-get($fuente, "size");
+            font-size: map-get($fuente, "size") !important;
         }
         @if map-has-key($fuente, "style") {
-            font-style: map-get($fuente, "style");
+            font-style: map-get($fuente, "style") !important;
         }
         @if map-has-key($fuente, "weight") {
-            font-weight: map-get($fuente, "weight");
+            font-weight: map-get($fuente, "weight") !important;
         }
     } @else {
         @warn "La fuente '#{$nombre-fuente}' no está definida en el mapa $fuentes.";
