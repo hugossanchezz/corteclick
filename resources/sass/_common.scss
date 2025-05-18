@@ -25,6 +25,10 @@
     margin: 1rem 0;
 }
 
+.mg-tb-4 {
+    margin: 4rem 0;
+}
+
 // Styling classes
 h1 {
     @include fuente("titulo_principal");
@@ -52,6 +56,26 @@ a {
     border: 1px solid rgba(255, 255, 255, 0.3);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.loading {
+    font-weight: bold;
+    color: transparent;
+    /* El texto inicial es transparente */
+    background: linear-gradient(90deg, map-get($colores, 'gris_claro') 0%, map-get($colores, 'azul_oscuro') 50%, map-get($colores, 'gris_claro') 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-size: 200% 100%;
+    animation: reveal-color 3s linear forwards;
+}
+
+@keyframes reveal-color {
+  0% {
+    background-position: 200% 0; /* El fondo está completamente a la derecha */
+  }
+  100% {
+    background-position: 0 0; /* El fondo se mueve completamente a la izquierda */
+  }
 }
 
 // Mixins
