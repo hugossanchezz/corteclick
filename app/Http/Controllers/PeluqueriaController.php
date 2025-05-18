@@ -12,10 +12,17 @@ class PeluqueriaController extends Controller
      * Display a listing of the resource.
      */
     public function index(): JsonResponse
-{
-    $peluquerias = Peluqueria::all();
-    return response()->json($peluquerias);
-}
+    {
+        $peluquerias = Peluqueria::all();
+        return response()->json($peluquerias);
+    }
+
+    public function search(Request $request): JsonResponse
+    {
+        $query = $request->input('query');
+        $peluquerias = Peluqueria::where('nombre', 'like', '%' . $query . '%')->get();
+        return response()->json($peluquerias);
+    }
 
     /**
      * Show the form for creating a new resource.

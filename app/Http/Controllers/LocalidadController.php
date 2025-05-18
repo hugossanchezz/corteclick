@@ -11,34 +11,32 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class LocalidadController extends Controller
 {
     /**
-     * Obtiene el ID de una localidad por su código postal o nombre.
+     * Devuelve los IDs de las localidades que coincidan con un código postal.
+     * Si el valor no es un código postal, busca por nombre y devuelve el ID único.
      *
-     * @param string $valor El código postal o el nombre de la localidad.
-     * @return int El ID de la localidad, o 0 si no se encuentra.
+     * @param string $valor
+     * @return array|int Lista de IDs si es código postal, o único ID si es nombre.
      */
-    public function getCodigoPostalNombreById(string $valor): int
+    public function getIdsByCodigoPostalONombre(string $valor): JsonResponse
     {
         try {
-            // Determina si el valor es un número entero.
             if (ctype_digit($valor)) {
-                // Si es un número, busca por código postal.
-                $localidad = Localidad::where('codigo_postal', $valor)->firstOrFail();
+                // Búsqueda por código postal que empiece por el valor (LIKE 'valor%')
+                $ids = Localidad::where('codigo_postal', 'LIKE', $valor . '%')
+                    ->pluck('id')
+                    ->toArray();
             } else {
-                // Si no es un número, asume que es un nombre y busca por nombre (en mayúsculas).
-                $nombre = strtoupper($valor);
-                $localidad = Localidad::where('nombre', $nombre)->firstOrFail();
+                // Búsqueda parcial por nombre (LIKE %valor%)
+                $nombre = strtoupper($valor); // Pasar a mayúsculas
+                $ids = Localidad::where('nombre', 'LIKE', '%' . $nombre . '%')
+                    ->pluck('id')
+                    ->toArray();
             }
 
-            // Devuelve el ID de la localidad.
-            return $localidad->id;
-        } catch (ModelNotFoundException $e) {
-            // Captura la excepción si no se encuentra la localidad.
-            Log::error("Localidad no encontrada con valor '{$valor}': " . $e->getMessage());
-            return 0; // Devuelve 0 para indicar que no se encontró la localidad
+            return response()->json($ids);
         } catch (Throwable $e) {
-            // Captura cualquier otro error.
-            Log::error("Error al obtener la localidad con valor '{$valor}': " . $e->getMessage());
-            return 0; // Devuelve 0 para indicar un error
+            Log::error("Error al obtener ID(s) con valor '{$valor}': " . $e->getMessage());
+            return response()->json([], 500);
         }
     }
 
@@ -55,5 +53,21 @@ class LocalidadController extends Controller
         $localidades = Localidad::select('id', 'nombre')->get();
 
         return $localidades;
+    }
+
+    /**
+     * Obtiene el nombre de una localidad por su ID.
+     *
+     * @param int $id
+     * @return string|null El nombre de la localidad, o nulo si no se encuentra.
+     */
+    public function getNombreById($id)
+    {
+        try {
+            $localidad = Localidad::findOrFail($id);
+            return $localidad->nombre;
+        } catch (ModelNotFoundException $e) {
+            return null;
+        }
     }
 }
