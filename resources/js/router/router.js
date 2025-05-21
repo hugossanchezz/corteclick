@@ -17,9 +17,12 @@ import Cookies from "@/js/components/auth/Cookies.vue";
 import UserView from '@/views/user/UserView.vue';
 import Profile from '@/js/components/user/Profile.vue';
 import Settings from '@/js/components/user/Settings.vue';
+import Appointments from '@/js/components/user/Appointments.vue';
+import Locals from '@/js/components/user/Locals.vue';
 
 // Admin
 import DashboardView from '@/views/admin/DashboardView.vue';
+import LocalRequestsView from '@/views/admin/LocalRequestsView.vue';
 
 // 404 Not Found
 import NotFoundPage from '@/views/pages/NotFoundView.vue';
@@ -72,10 +75,12 @@ const routes = [
         children: [
             { path: '', name: 'Profile', component: Profile },
             { path: 'settings', name: 'Settings', component: Settings },
+            { path: 'appointments', name: 'Appointments', component: Appointments },
+            { path: 'my-locals', name: 'MyLocals', component: Locals },
+            { path: '/admin/dashboard', name: 'Dashboard', component: DashboardView },
+            { path: '/admin/requests', name: 'Requests', component: LocalRequestsView },
         ],
     },
-    // Admin
-    { path: '/dashboard', name: 'Dashboard', component: DashboardView },
 
     // 404 Not Found
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFoundPage }

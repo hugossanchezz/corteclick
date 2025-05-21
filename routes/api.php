@@ -37,6 +37,11 @@ Route::get('/locals', [PeluqueriaController::class , 'index']);
 Route::get('/locals/{id}', [PeluqueriaController::class , 'show']);
 
 // ------ Localities ------------------------------------------------------
-Route::get('/localities/{valor}', [LocalidadController::class, 'getCodigoPostalNombreById']);
+Route::get('/localities/{valor}', [LocalidadController::class, 'getIdsByCodigoPostalONombre']);
 
 Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);
+
+Route::get('/localities/{id}/name', [LocalidadController::class, 'getNombreById']);
+
+// ------ Locals ----------------------------------------------------------
+Route::post('/new-local', [PeluqueriaController::class , 'createLocalRequest']);
