@@ -1,6 +1,6 @@
 <script>
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import RequireAuth from "@/js/components/auth/RequireAuth.vue";
 
 export default {
@@ -9,6 +9,7 @@ export default {
     setup() {
         const user = ref(null);
         const router = useRouter();
+        const route = useRoute(); // Get the current route
 
         onMounted(() => {
             const storedUser = localStorage.getItem("user");
@@ -26,8 +27,15 @@ export default {
             }
         });
 
+        // Function to check if a route is active
+        const isActiveRoute = (routeName) => {
+            return route.path.endsWith(routeName);
+        };
+
         return {
+            user,
             router,
+            isActiveRoute,
         };
     },
 };
@@ -36,10 +44,37 @@ export default {
 <template>
     <RequireAuth>
         <div class="profile flex">
-            <section class="profile__aside flex-column">
-                <router-link to="/user"> Perfil </router-link>
-                <router-link to="/user/settings"> Configuración </router-link>
-            </section>
+            <aside class="flex-column">
+
+                <router-link :to="'/user'" :class="{ 'route--active': isActiveRoute('/user') }">
+                    Perfil
+                </router-link>
+                <router-link :to="'/user/appointments'"
+                    :class="{ 'route--active': isActiveRoute('/user/appointments') }">
+                    Mis citas
+                </router-link>
+
+                <!-- Para usuarios con rol de empresario o admin -->
+                <router-link v-if="user.rol_id == 2 || user.rol_id == 1" :to="'/user/my-locals'"
+                    :class="{ 'route--active': isActiveRoute('/user/my-locals') }">
+                    Mis locales
+                </router-link>
+
+                <!-- Para usuarios con rol de admin -->
+                <router-link v-if="user.rol_id == 1" :to="'/admin/requests'"
+                    :class="{ 'route--active': isActiveRoute('/admin/requests') }">
+                    Solicitudes de locales
+                </router-link>
+                <router-link v-if="user.rol_id == 1" :to="'/admin/dashboard'"
+                    :class="{ 'route--active': isActiveRoute('/admin/dashboard') }">
+                    Panel de control
+                </router-link>
+
+                <router-link :to="'/user/settings'" class="flex aside__config"
+                    :class="{ 'route--active': isActiveRoute('/user/settings') }">
+                    Configuración <img src="/img/utils/settings.svg" alt="">
+                </router-link>
+            </aside>
             <section class="profile__main">
                 <router-view />
             </section>
@@ -53,7 +88,7 @@ export default {
 .profile {
     height: 100%;
 
-    .profile__aside {
+    aside {
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
         height: 100%;
         width: fit-content;
@@ -63,19 +98,45 @@ export default {
 
         a {
             color: map-get($colores, "naranja");
+            font-weight: bold;
             padding: 5px 10px;
             border-radius: 5px;
             text-decoration: none;
+            border: 2px solid transparent;
+
+            align-items: center;
+            gap: 10px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             &:hover {
-                background-color: map-get($colores, "gris_claro");
+                border: 2px solid map-get($colores, "gris_claro");
+            }
+        }
+
+        .route--active {
+            border: 2px solid map-get($colores, "gris_claro");
+        }
+
+        .aside__config {
+            color: map-get($colores, 'azul_oscuro');
+            align-items: center;
+            display: flex;
+
+            img {
+                transition: transform 0.85s ease-in-out;
+            }
+
+            &:hover img {
+                transform: rotate(180deg);
             }
         }
     }
 
     .profile__main {
         width: 100%;
-
         padding: 3rem 2rem;
     }
 }

@@ -1,116 +1,96 @@
 <script>
 import SecondaryButton from "@/js/components/actions/SecondaryButton.vue";
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 
 export default {
     name: "LocalsView",
     components: { SecondaryButton },
     setup() {
         const peluquerias = ref([]);
+        const peluqueriasFiltradas = ref([]);
+        const errorBusqueda = ref(null);
         const loading = ref(true);
+
         const tipoLocalFilter = ref("");
         const ordenValoracion = ref("");
         const codigoPostalBusqueda = ref("");
-        const peluqueriasFiltradas = ref([]);
-        const errorBusqueda = ref(null);
 
-        const cargarPeluquerias = () => {
+        const paginaActual = ref(1);
+        const itemsPorPagina = 12;
+
+        const cargarPeluquerias = async () => {
             loading.value = true;
-            fetch("/api/locals")
-                .then((response) => response.json())
-                .then((data) => {
-                    peluquerias.value = data;
-                    loading.value = false;
-                    aplicarFiltros();
-                })
-                .catch((error) => {
-                    console.error("Error al obtener las peluquerías:", error);
-                    loading.value = false;
-                    errorBusqueda.value = "Error al cargar las peluquerías. Por favor, intenta de nuevo.";
-                });
+            try {
+                const res = await fetch(`/api/locals`);
+                if (!res.ok) throw new Error("Error al cargar peluquerías");
+                const data = await res.json();
+
+                for (const p of data) {
+                    const resLoc = await fetch(`/api/localities/${p.localidad}/name`);
+                    if (resLoc.ok) {
+                        p.nombreLocalidad = await resLoc.text();
+                    } else {
+                        p.nombreLocalidad = "Desconocido"; // Fallback en caso de error
+                    }
+                }
+
+                peluquerias.value = data;
+                aplicarFiltros();
+            } catch (error) {
+                console.error("Error al cargar las peluquerías o localidades:", error);
+                errorBusqueda.value = "Error al cargar los datos.";
+            } finally {
+                loading.value = false;
+            }
         };
 
-        onMounted(() => {
-            cargarPeluquerias();
-        });
-
-        const aplicarFiltros = () => {
-            let resultado = peluquerias.value;
+        const aplicarFiltros = async () => {
+            let resultado = [...peluquerias.value];
             errorBusqueda.value = null;
 
-            // Filtrar por tipo de local
             if (tipoLocalFilter.value) {
-                resultado = resultado.filter(
-                    (p) => p.tipo === tipoLocalFilter.value
-                );
+                resultado = resultado.filter(p => p.tipo === tipoLocalFilter.value);
             }
 
-            // Filtrar por código postal / nombre de localidad
-            if (codigoPostalBusqueda.value) {
-                const buscarLocalidad = (local) => {
-                    return fetch(`/api/localities/${codigoPostalBusqueda.value}`)
-                        .then(response => {
-                            if (!response.ok) {
-                                if (response.status === 404) {
-                                    throw new Error('Localidad no encontrada');
-                                }
-                                throw new Error(`Error al buscar localidad: ${response.status} ${response.statusText}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            return data === local.localidad;
-                        })
-                        .catch(error => {
-                            console.error("Error al obtener la localidad:", error);
-                            if (error.message === 'Localidad no encontrada') {
-                                errorBusqueda.value = "No se encontró ninguna localidad con ese código postal o nombre.";
-                            } else {
-                                errorBusqueda.value = "Error al buscar la localidad. Por favor, inténtalo de nuevo.";
-                            }
-                            return false;
-                        });
-                };
+            if (codigoPostalBusqueda.value.trim()) {
+                try {
+                    const valorBusqueda = codigoPostalBusqueda.value.trim();
+                    const res = await fetch(`/api/localities/${encodeURIComponent(valorBusqueda)}`);
+                    if (!res.ok) throw new Error("Localidad no encontrada");
 
-                const peluqueriasFiltradasTemp = [];
-                const promesas = resultado.map(peluqueria => {
-                    return buscarLocalidad(peluqueria).then(coincide => {
-                        if (coincide) {
-                            peluqueriasFiltradasTemp.push(peluqueria);
-                        }
-                    });
-                });
+                    const idsLocalidad = await res.json();
 
-                Promise.all(promesas).then(() => {
-                    resultado = peluqueriasFiltradasTemp;
-
-                    // Ordenar por valoración
-                    if (ordenValoracion.value) {
-                        if (ordenValoracion.value === "mayor-menor") {
-                            resultado = [...resultado].sort((a, b) => b.valoracion - a.valoracion);
-                        } else if (ordenValoracion.value === "menor-mayor") {
-                            resultado = [...resultado].sort((a, b) => a.valoracion - b.valoracion);
+                    if (idsLocalidad.length === 0) {
+                        errorBusqueda.value = "No se encontraron resultados.";
+                        resultado = []; // Mostrar mensaje sin resultados
+                    } else {
+                        resultado = resultado.filter(p => idsLocalidad.includes(p.localidad));
+                        if (resultado.length === 0) {
+                            errorBusqueda.value = "No se encontraron peluquerías en las localidades especificadas.";
                         }
                     }
-                    peluqueriasFiltradas.value = resultado;
-                });
-                return;
-            }
-
-            // Ordenar por valoración
-            if (ordenValoracion.value) {
-                if (ordenValoracion.value === "mayor-menor") {
-                    resultado = [...resultado].sort((a, b) => b.valoracion - a.valoracion);
-                } else if (ordenValoracion.value === "menor-mayor") {
-                    resultado = [...resultado].sort((a, b) => a.valoracion - b.valoracion);
+                } catch (error) {
+                    errorBusqueda.value = "Error al buscar la localidad.";
+                    console.error("Error en búsqueda por localidad:", error);
+                    resultado = []; // Mostrar mensaje sin resultados
                 }
             }
-            peluqueriasFiltradas.value = resultado;
+
+            ordenarYGuardar(resultado);
         };
 
-        watch([tipoLocalFilter, ordenValoracion, codigoPostalBusqueda], () => {
-            aplicarFiltros();
-        });
+        const ordenarYGuardar = (lista) => {
+            let listaOrdenada = [...lista];
+
+            if (ordenValoracion.value === "mayor-menor") {
+                listaOrdenada.sort((a, b) => b.valoracion - a.valoracion);
+            } else if (ordenValoracion.value === "menor-mayor") {
+                listaOrdenada.sort((a, b) => a.valoracion - b.valoracion);
+            }
+
+            peluqueriasFiltradas.value = listaOrdenada;
+            paginaActual.value = 1;
+        };
 
         const resetFilters = () => {
             tipoLocalFilter.value = "";
@@ -119,17 +99,41 @@ export default {
             aplicarFiltros();
         };
 
+        const paginaSiguiente = () => {
+            if (paginaActual.value < totalPages.value) paginaActual.value++;
+        };
+
+        const paginaAnterior = () => {
+            if (paginaActual.value > 1) paginaActual.value--;
+        };
+
+        const totalPages = computed(() =>
+            Math.ceil(peluqueriasFiltradas.value.length / itemsPorPagina)
+        );
+
+        const peluqueriasPaginadas = computed(() => {
+            const start = (paginaActual.value - 1) * itemsPorPagina;
+            return peluqueriasFiltradas.value.slice(start, start + itemsPorPagina);
+        });
+
+        watch([tipoLocalFilter, ordenValoracion, codigoPostalBusqueda], aplicarFiltros, { deep: true });
+        onMounted(cargarPeluquerias);
+
         return {
-            peluquerias,
+            peluqueriasPaginadas,
+            peluqueriasFiltradas,
             loading,
+            errorBusqueda,
             tipoLocalFilter,
             ordenValoracion,
             codigoPostalBusqueda,
             resetFilters,
-            peluqueriasFiltradas,
-            errorBusqueda
+            paginaActual,
+            totalPages,
+            paginaSiguiente,
+            paginaAnterior
         };
-    },
+    }
 };
 </script>
 
@@ -174,24 +178,22 @@ export default {
         <main class="flex-column">
             <div class="peluquerias__buscador">
                 <input type="text" placeholder="Introduce el código postal o nombre de la localidad"
-                    v-model="codigoPostalBusqueda" />
+                    v-model="codigoPostalBusqueda" @input="aplicarFiltros" />
                 <img src="/img/utils/search.svg" alt="Buscador de locales por código postal" />
             </div>
-            <div v-if="loading">Cargando peluquerías...</div>
+            <div v-if="loading">
+                <p class="mg-tb-4 loading">Cargando peluquerías...</p>
+            </div>
             <div v-else-if="errorBusqueda">
-                <p class="error-message">{{ errorBusqueda }}</p>
+                <p class="mg-tb-4 error-message">{{ errorBusqueda }}</p>
             </div>
-            <div v-else-if="peluqueriasFiltradas.length === 0">
-                No hay peluquerías disponibles.
-            </div>
-
             <div v-else class="peluquerias__grid grid">
-                <div v-for="peluqueria in peluqueriasFiltradas" :key="peluqueria.id"
+                <div v-for="peluqueria in peluqueriasPaginadas" :key="peluqueria.id"
                     class="peluqueria__card flex-column">
                     <img src="/img/utils/corteclick.png" alt="Imagen principal de la peluquería" />
                     <h2 class="card__info flex">
                         {{ peluqueria.nombre }}
-                        <span>4,4 ★</span>
+                        <div>{{ peluqueria.valoracion }} <span>★</span></div>
                     </h2>
                     <p class="card__description">
                         {{ peluqueria.descripcion }}
@@ -199,13 +201,18 @@ export default {
                     <div class="card__info flex">
                         <p class="flex">
                             <img class="card__location" src="/img/locals/location.svg" alt="Icono de la ubicación" />
-                            {{ peluqueria.direccion }}
+                            {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
                         </p>
-
                         <img class="card__bookmark" @click="peluqueria.favorito = !peluqueria.favorito"
                             src="/img/locals/bookmark.svg" alt="Guardar peluquería como favorita" />
                     </div>
                 </div>
+            </div>
+            <div class="pagination__controls flex-center" v-if="totalPages > 1">
+                <button @click="paginaAnterior" :disabled="paginaActual === 1">
+                    << </button>
+                        <p>Página {{ paginaActual }} de {{ totalPages }}</p>
+                        <button @click="paginaSiguiente" :disabled="paginaActual === totalPages"> >> </button>
             </div>
         </main>
     </div>
@@ -275,7 +282,8 @@ export default {
                 padding: 5px 2rem;
 
                 &:focus {
-                    outline: 1px solid map-get($colores, "naranja");
+                    border: 2px solid map-get($colores, "gris_oscuro");
+                    outline: none;
                 }
             }
 
@@ -291,7 +299,7 @@ export default {
             width: 100%;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
-            margin-top: 20px;
+            margin: 20px 0;
 
             .peluqueria__card {
                 background-color: white;
@@ -350,17 +358,35 @@ export default {
                         height: 30px;
                         cursor: pointer;
                     }
+
+                    span {
+                        color: map-get($colores, "naranja");
+                    }
                 }
 
             }
 
+        }
+
+        .pagination__controls {
+            @include fuente("parrafo");
+            padding: 1rem;
+            gap: 1rem;
+
+            button {
+                border: 2px solid map-get($colores, "gris_claro");
+                background-color: transparent;
+                border-radius: 5px;
+                padding: 2.5px 10px;
+                cursor: pointer;
+            }
         }
     }
 
 }
 
 .error-message {
-    color: red;
+    color: map-get($colores, "naranja");
     margin-top: 10px;
 }
 

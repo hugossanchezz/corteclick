@@ -9,7 +9,8 @@ export default {
     name: "Profile",
     components: { DangerButton },
     setup() {
-        const user = ref(null);
+        const user = ref(null); // Información del usuario logueado
+        const nombreLocalidad = ref("Cargando..."); // Nombre de la localidad del usuario
         const router = useRouter();
 
         /**
@@ -22,7 +23,7 @@ export default {
                 const csrfToken = document
                     .querySelector('meta[name="csrf-token"]')
                     .getAttribute("content");
-                const token = localStorage.getItem("token"); // Recuperamos el token de autenticación
+                const token = localStorage.getItem("token");
 
                 const response = await axios.post(
                     "/api/logout",
@@ -30,40 +31,41 @@ export default {
                     {
                         headers: {
                             "X-CSRF-TOKEN": csrfToken,
-                            Authorization: `Bearer ${token}`, // Añadimos también el token de autenticación
+                            Authorization: `Bearer ${token}`,
                         },
                     }
                 );
 
-                console.log("Sesión cerrada:", response.data);
-
-                // Cambiar varible global de estar logueado a false
                 isAuthenticated.value = false;
-
-                // Eliminar tokens
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
                 router.push("/");
             } catch (error) {
                 console.error("Error al cerrar sesión:", error);
                 if (error.response && error.response.status === 401) {
-                    console.error(
-                        "Error de autenticación: El token CSRF es inválido o no se ha proporcionado."
-                    );
+                    console.error("Token CSRF inválido o ausente.");
                 }
             }
         };
 
-        onMounted(() => {
+        /**
+         * Al montar el componente, intenta recuperar el usuario del localStorage.
+         * Si existe, carga también el nombre de su localidad a través de la API.
+         */
+        onMounted(async () => {
             const storedUser = localStorage.getItem("user");
             if (storedUser) {
                 try {
                     user.value = JSON.parse(storedUser);
+
+                    const res = await fetch(`/api/localities/${user.value.localidad}/name`);
+                    if (res.ok) {
+                        nombreLocalidad.value = await res.text();
+                    } else {
+                        nombreLocalidad.value = "Desconocido";
+                    }
                 } catch (error) {
-                    console.error(
-                        "Error al parsear el objeto de usuario:",
-                        error
-                    );
+                    console.error("Error al cargar usuario o localidad:", error);
                     localStorage.removeItem("user");
                     router.push("/");
                 }
@@ -72,6 +74,7 @@ export default {
 
         return {
             user,
+            nombreLocalidad,
             handleLogout,
             router,
         };
@@ -86,12 +89,12 @@ export default {
             <p><strong>Email:</strong> {{ user.email }}</p>
             <p><strong>Apellidos:</strong> {{ user.apellidos }}</p>
             <p><strong>Teléfono:</strong> {{ user.telefono }}</p>
-            <p><strong>Localidad:</strong> {{ user.localidad }}</p>
+            <p><strong>Localidad:</strong> {{ nombreLocalidad }}</p>
+            <p><strong>Rol:</strong> {{ user.rol_id }}</p>
         </div>
         <div v-else>
             <p>No hay información de usuario disponible.</p>
         </div>
-        <!-- <button @click="handleLogout">Cerrar sesión</button> -->
         <DangerButton @click="handleLogout" label="Cerrar sesión" />
     </div>
 </template>
