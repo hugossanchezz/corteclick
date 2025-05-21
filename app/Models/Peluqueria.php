@@ -31,6 +31,8 @@ class Peluqueria extends Model
         'telefono',
         'tipo',
         'contrasenia',
+        'valoracion',
+        'user_id',
     ];
 
     /**

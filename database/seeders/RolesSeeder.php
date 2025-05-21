@@ -12,19 +12,15 @@ class RolesSeeder extends Seeder
     {
         DB::table('roles')->insert([
             [
-                'nombre' => 'administrador',
+                'id' => 1,
+                'nombre' => 'Administrador',
                 'descripcion' => 'Rol con todos los privilegios.',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
-            [
-                'nombre' => 'empresario',
-                'descripcion' => 'Usuario propietario de una peluquería.',
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now(),
-            ],
-            [
-                'nombre' => 'usuario',
+            [   
+                'id' => 2,
+                'nombre' => 'Usuario',
                 'descripcion' => 'Rol de usuario básico.',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),

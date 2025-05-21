@@ -13,7 +13,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(PeluqueriasSeeder::class);
         $this->call(LocalidadesSeeder::class);
+        $this->call(RolesSeeder::class);
+        $this->call(UsersSeeder::class);
+        $this->call(PeluqueriasSeeder::class);
     }
 }

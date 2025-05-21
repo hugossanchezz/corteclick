@@ -16,6 +16,7 @@ class UsersSeeder extends Seeder
     {
         DB::table('users')->insert([
             [
+                'id' => 1,
                 'name' => 'Admin',
                 'apellidos' => 'Administrador',
                 'telefono' => '600000001',
@@ -30,26 +31,13 @@ class UsersSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Empresario',
-                'apellidos' => 'García',
-                'telefono' => '600000002',
-                'localidad' => rand(1, 7),
-                'foto' => null,
-                'rol_id' => 2,
-                'email' => 'empresario@example.com',
-                'email_verified_at' => now(),
-                'password' => Hash::make('Empresario123@'),
-                'remember_token' => Str::random(10),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
+                'id' => 2,
                 'name' => 'Usuario',
                 'apellidos' => 'López',
                 'telefono' => '600000003',
                 'localidad' => rand(1, 7),
                 'foto' => null,
-                'rol_id' => 3,
+                'rol_id' => 2,
                 'email' => 'usuario@example.com',
                 'email_verified_at' => now(),
                 'password' => Hash::make('Usuario123@'),

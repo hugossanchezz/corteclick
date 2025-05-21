@@ -23,8 +23,10 @@ return new class extends Migration
             $table->string('telefono', 20);
             $table->enum('tipo', ['hombres', 'mujeres', 'unisex']);
             $table->string('contrasenia');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
-
+            
+            $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('localidad')->references('id')->on('localidades');
         });
     }
