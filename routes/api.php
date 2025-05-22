@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PeluqueriaController;
+use App\Http\Controllers\PeluqueriaSolicitudController;
 use App\Http\Controllers\LocalidadController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -44,4 +45,4 @@ Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']
 Route::get('/localities/{id}/name', [LocalidadController::class, 'getNombreById']);
 
 // ------ Locals ----------------------------------------------------------
-Route::post('/new-local', [PeluqueriaController::class , 'createLocalRequest']);
+Route::post('/new-local', [PeluqueriaSolicitudController::class , 'createLocalRequest']);

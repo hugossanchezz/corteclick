@@ -14,7 +14,7 @@ export default {
 <template>
     <section>
 
-        <FormLocal @guardar="guardarNegocio" />
+        <FormLocal />
     </section>
 </template>
 

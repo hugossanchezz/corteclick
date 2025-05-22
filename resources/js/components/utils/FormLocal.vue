@@ -1,159 +1,456 @@
-<script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import DangerButton from "@/js/components/actions/DangerButton.vue";
-import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
+<script>
+import axios from "axios";
 import { useRouter } from "vue-router";
+import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
+import { ref, computed, watch, onMounted } from "vue";
 
-// Props
-const props = defineProps({
-    datos: {
-        type: Object,
-        default: () => ({}),
-    },
-    soloLectura: {
-        type: Boolean,
-        default: false,
-    },
-    ocultarContrasenia: {
-        type: Boolean,
-        default: false,
-    },
-});
+export default {
+  name: "FormLocal",
 
+  components: { PrimaryButton },
 
-// Emits
-const emit = defineEmits(["guardar"]);
+  setup() {
+    const router = useRouter();
 
-// Estado del formulario
-const form = ref({
-    nombre: "",
-    descripcion: "",
-    direccion: "",
-    localidad: null,
-    email: "",
-    telefono: "",
-    tipo: "",
-    contrasenia: "",
-});
+    // Form fields
+    const nombre = ref("");
+    const descripcion = ref("");
+    const direccion = ref("");
+    const localidad = ref("");
+    const localidades = ref([]);
+    const email = ref("");
+    const telefono = ref("");
+    const tipo = ref("");
+    const contrasenia = ref("");
+    const confirmarContrasenia = ref("");
+    const user_id = ref(""); // Placeholder; fetched from localStorage
 
-// Errores
-const errores = ref({});
+    // Error handling
+    const errores = ref({});
+    const generalErrorMessage = ref("");
+    const registroExitoso = ref(false);
+    const credencialesInvalidas = ref("");
 
-// Visibilidad contraseña
-const visibilidadContrasenia = ref(false);
-const tipoInputContrasenia = computed(() =>
-    visibilidadContrasenia.value ? "text" : "password"
-);
-const iconoVisibilidadContrasenia = computed(() =>
-    visibilidadContrasenia.value ? "/img/auth/visibility_off.svg" : "/img/auth/visibility_on.svg"
-);
+    // Submission state
+    const isSubmitting = ref(false);
 
-// Validaciones para la contraseña
-const tieneMinuscula = computed(() => /[a-z]/.test(form.value.contrasenia));
-const tieneMayuscula = computed(() => /[A-Z]/.test(form.value.contrasenia));
-const tieneNumero = computed(() => /\d/.test(form.value.contrasenia));
-const tieneEspecial = computed(() => /[!@#$%^&*]/.test(form.value.contrasenia));
-const tieneLongitud = computed(() => form.value.contrasenia.length >= 8);
+    // Password visibility
+    const visibilidadContrasenia = ref(false);
+    const visibilidadConfirmarContrasenia = ref(false);
 
-const contraseniaValida = computed(() =>
-    tieneMinuscula.value &&
-    tieneMayuscula.value &&
-    tieneNumero.value &&
-    tieneEspecial.value &&
-    tieneLongitud.value
-);
+    // Validation patterns
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const telefonoPattern = /^\+?[0-9]{9,15}$/;
 
-// Watch para cargar datos
-watch(
-    () => props.datos,
-    (nuevos) => {
-        form.value = { ...form.value, ...nuevos };
-    },
-    { immediate: true }
-);
+    // Password validation computed properties
+    const tieneMinuscula = computed(() => /[a-z]/.test(contrasenia.value));
+    const tieneMayuscula = computed(() => /[A-Z]/.test(contrasenia.value));
+    const tieneNumero = computed(() => /\d/.test(contrasenia.value));
+    const tieneCaracterEspecial = computed(() => /[!@#$%^&*]/.test(contrasenia.value));
+    const tieneLongitudMinima = computed(() => contrasenia.value.length >= 8);
+    const contraseniaValida = computed(() => {
+      return (
+        tieneMinuscula.value &&
+        tieneMayuscula.value &&
+        tieneNumero.value &&
+        tieneCaracterEspecial.value &&
+        tieneLongitudMinima.value
+      );
+    });
 
-// Enviar
-const handleSubmit = () => {
-    if (!soloLectura && !ocultarContrasenia && !contraseniaValida.value) {
-        errores.value.contrasenia = "La contraseña no cumple con los requisitos.";
+    // Error checking
+    const tieneErrores = computed(() => Object.keys(errores.value).length > 0);
+
+    // Password visibility icons and input types
+    const iconoVisibilidadContrasenia = computed(() =>
+      visibilidadContrasenia.value
+        ? "/img/auth/visibility_off.svg"
+        : "/img/auth/visibility_on.svg"
+    );
+    const tipoInputContrasenia = computed(() =>
+      visibilidadContrasenia.value ? "text" : "password"
+    );
+    const iconoVisibilidadConfirmarContrasenia = computed(() =>
+      visibilidadConfirmarContrasenia.value
+        ? "/img/auth/visibility_off.svg"
+        : "/img/auth/visibility_on.svg"
+    );
+    const tipoInputConfirmarContrasenia = computed(() =>
+      visibilidadConfirmarContrasenia.value ? "text" : "password"
+    );
+
+    // Update error function
+    const actualizarError = (campo, mensaje) => {
+      errores.value[campo] = mensaje;
+      if (!mensaje) {
+        delete errores.value[campo];
+      }
+    };
+
+    // Fetch localities and user_id
+    onMounted(async () => {
+      cargarLocalidades();
+
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          user_id.value = user.id;
+        } catch (error) {
+          console.error("Error al cargar usuario", error);
+          localStorage.removeItem("user");
+          router.push("/");
+        }
+      }
+    });
+
+    const cargarLocalidades = async () => {
+      try {
+        const response = await fetch('/api/localities');
+        if (!response.ok) {
+          throw new Error(`Error al cargar localidades: ${response.status}`);
+        }
+        const data = await response.json();
+        localidades.value = data;
+      } catch (error) {
+        console.error("Error al obtener las localidades:", error);
+      }
+    };
+
+    // Watchers for validation
+    watch(nombre, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "nombre",
+        !newValue
+          ? "El nombre del negocio es requerido"
+          : /[^a-zA-Z0-9\s]/.test(newValue)
+            ? "No se permiten caracteres especiales"
+            : ""
+      );
+    });
+
+    watch(descripcion, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "descripcion",
+        newValue && newValue.length > 255
+          ? "La descripción no puede exceder 255 caracteres"
+          : ""
+      );
+    });
+
+    watch(direccion, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "direccion",
+        !newValue
+          ? "La dirección es requerida"
+          : ""
+      );
+    });
+
+    watch(localidad, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "localidad",
+        !newValue
+          ? "La localidad es requerida"
+          : ""
+      );
+    });
+
+    watch(email, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "email",
+        !newValue
+          ? "El correo es requerido"
+          : !emailPattern.test(newValue)
+            ? "Correo no válido"
+            : ""
+      );
+    });
+
+    watch(telefono, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "telefono",
+        !newValue
+          ? "El teléfono es requerido"
+          : !telefonoPattern.test(newValue)
+            ? "Teléfono no válido"
+            : ""
+      );
+    });
+
+    watch(tipo, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "tipo",
+        !newValue
+          ? "El tipo de servicio es requerido"
+          : ""
+      );
+    });
+
+    watch(contrasenia, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "contrasenia",
+        !newValue
+          ? "La contraseña es requerida"
+          : !contraseniaValida.value
+            ? "La contraseña no cumple con los requisitos"
+            : ""
+      );
+    });
+
+    watch(confirmarContrasenia, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "confirmarContrasenia",
+        newValue !== contrasenia.value ? "Las contraseñas no coinciden" : ""
+      );
+    });
+
+    watch(user_id, (newValue) => {
+      if (isSubmitting.value) return;
+      actualizarError(
+        "user_id",
+        !newValue ? "Debe estar autenticado para registrar un negocio" : ""
+      );
+    });
+
+    // Form submission
+    const submitForm = async () => {
+      generalErrorMessage.value = "";
+      credencialesInvalidas.value = "";
+      if (!user_id.value) {
+        generalErrorMessage.value = "Debe estar autenticado para registrar un negocio.";
         return;
-    }
-    errores.value = {};
-    emit("guardar", { ...form.value });
+      }
+      if (tieneErrores.value) {
+        generalErrorMessage.value = "Por favor, corrige los errores en el formulario.";
+        return;
+      }
+
+      try {
+        const response = await axios.post("/api/new-local", {
+          nombre: nombre.value,
+          descripcion: descripcion.value || 'Peluquería sin descripción.',
+          direccion: direccion.value,
+          localidad: localidad.value,
+          email: email.value,
+          telefono: telefono.value,
+          tipo: tipo.value,
+          contrasenia: contrasenia.value,
+          user_id: user_id.value
+        });
+        if (response.status === 200) {
+          alert("La solicitud de registro ha sido enviada exitosamente.");
+          isSubmitting.value = true;
+          // Reset form fields
+          nombre.value = "";
+          descripcion.value = "";
+          direccion.value = "";
+          localidad.value = "";
+          email.value = "";
+          telefono.value = "";
+          tipo.value = "";
+          contrasenia.value = "";
+          confirmarContrasenia.value = "";
+          errores.value = {};
+          generalErrorMessage.value = "";
+          isSubmitting.value = false;
+        }
+      } catch (error) {
+        console.error("Error de registro", error.response);
+        if (error.response && error.response.status === 422) {
+          const erroresServidor = error.response.data.errors;
+          errores.value = {};
+          for (const campo in erroresServidor) {
+            actualizarError(campo, erroresServidor[campo][0]);
+          }
+          generalErrorMessage.value = "Error en el registro. Por favor, revisa los campos.";
+        } else {
+          generalErrorMessage.value = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.";
+        }
+      }
+    };
+
+    return {
+      nombre,
+      descripcion,
+      direccion,
+      localidad,
+      localidades,
+      email,
+      telefono,
+      tipo,
+      contrasenia,
+      confirmarContrasenia,
+      user_id,
+      errores,
+      generalErrorMessage,
+      visibilidadContrasenia,
+      visibilidadConfirmarContrasenia,
+      iconoVisibilidadContrasenia,
+      tipoInputContrasenia,
+      iconoVisibilidadConfirmarContrasenia,
+      tipoInputConfirmarContrasenia,
+      tieneMinuscula,
+      tieneMayuscula,
+      tieneNumero,
+      tieneCaracterEspecial,
+      tieneLongitudMinima,
+      registroExitoso,
+      credencialesInvalidas,
+      tieneErrores,
+      isSubmitting,
+      submitForm
+    };
+  }
 };
 </script>
 
 <template>
-    <form @submit.prevent="handleSubmit" class="">
-        <div class="flex-column form__campo">
-            <label>Nombre:</label>
-            <div class="inputForm flex">
-                <input v-model="form.nombre" :readonly="soloLectura" required />
-            </div>
+  <form class="flex-column" @submit.prevent="submitForm">
+    <h1 class="flex-center">Registra tu negocio</h1>
+    <hr />
+
+    <div class="flex-column form__campo">
+      <label for="nombre">Nombre del negocio *</label>
+      <div class="inputForm flex">
+        <img src="/img/auth/person_orange.svg" alt="Icono para input de nombre" />
+        <input v-model="nombre" type="text" placeholder="Sin caracteres especiales" required />
+      </div>
+      <div v-if="errores.nombre" class="errorMensaje">
+        {{ errores.nombre }}
+      </div>
+    </div>
+
+    <div class="flex-column form__campo">
+      <label for="descripcion">Descripción</label>
+      <div class="inputForm flex">
+        <img src="/img/utils/edit.svg" alt="Icono para descripción" />
+        <input v-model="descripcion" type="text" placeholder="Describe tu negocio" />
+      </div>
+      <div v-if="errores.descripcion" class="errorMensaje">
+        {{ errores.descripcion }}
+      </div>
+    </div>
+
+    <div class="flex-column form__campo">
+      <label for="direccion">Dirección *</label>
+      <div class="inputForm flex">
+        <img src="/img/locals/location.svg" alt="Icono para dirección" />
+        <input v-model="direccion" type="text" placeholder="Calle, número, etc." required />
+      </div>
+      <div v-if="errores.direccion" class="errorMensaje">
+        {{ errores.direccion }}
+      </div>
+    </div>
+
+    <div class="form__horizontal flex">
+      <div class="flex-column form__campo">
+        <label for="localidad">Localidad *</label>
+        <div class="inputForm flex">
+          <select v-model="localidad" required>
+            <option selected disabled value="">Selecciona una localidad</option>
+            <option v-for="localidad in localidades" :key="localidad.id" :value="localidad.id">
+              {{ localidad.nombre }}
+            </option>
+          </select>
         </div>
-
-        <div class="flex-column form__campo">
-            <label>Descripción:</label>
-            <div class="inputForm flex">
-                <input v-model="form.descripcion" :readonly="soloLectura" />
-            </div>
+        <div v-if="errores.localidad" class="errorMensaje">
+          {{ errores.localidad }}
         </div>
+      </div>
 
-        <div class="flex-column form__campo">
-            <label>Dirección:</label>
-            <div class="inputForm flex">
-                <input v-model="form.direccion" :readonly="soloLectura" required />
-            </div>
+      <div class="flex-column form__campo">
+        <label for="telefono">Teléfono *</label>
+        <div class="inputForm flex">
+          <img src="/img/auth/phone_orange.svg" alt="Icono de teléfono" />
+          <input v-model="telefono" type="tel" placeholder="+34 000 000 000" required />
         </div>
-
-        <div class="flex-column form__campo">
-            <label>Email:</label>
-            <div class="inputForm flex">
-                <input v-model="form.email" type="email" :readonly="soloLectura" required />
-            </div>
+        <div v-if="errores.telefono" class="errorMensaje">
+          {{ errores.telefono }}
         </div>
+      </div>
+    </div>
 
-        <div class="flex-column form__campo">
-            <label>Teléfono:</label>
-            <div class="inputForm flex">
-                <input v-model="form.telefono" :readonly="soloLectura" />
-            </div>
-        </div>
+    <div class="flex-column form__campo">
+      <label for="email">Correo *</label>
+      <div class="inputForm flex">
+        <img src="/img/auth/at_sign_orange.svg" alt="Icono de correo" />
+        <input v-model="email" type="email" placeholder="ejemplo@email.com" required />
+      </div>
+      <div v-if="errores.email" class="errorMensaje">
+        {{ errores.email }}
+      </div>
+    </div>
 
-        <div class="flex-column form__campo">
-            <label>Tipo:</label>
-            <div class="inputForm flex">
-                <select v-model="form.tipo" :disabled="soloLectura">
-                    <option value="">Seleccione</option>
-                    <option value="BARBERIA">Barbería</option>
-                    <option value="PELUQUERIA">Peluquería</option>
-                    <option value="UNISEX">Unisex</option>
-                </select>
-            </div>
-        </div>
+    <div class="flex-column form__campo">
+      <label for="tipo">Tipo de servicio *</label>
+      <div class="inputForm flex">
+        <select v-model="tipo" required>
+          <option selected disabled value="">Selecciona un tipo</option>
+          <option value="UNISEX">Unisex</option>
+          <option value="BARBERIA">Barbería para hombres</option>
+          <option value="PELUQUERIA">Peluquería para mujeres</option>
+        </select>
+      </div>
+      <div v-if="errores.tipo" class="errorMensaje">
+        {{ errores.tipo }}
+      </div>
+    </div>
 
-        <div v-if="!soloLectura && !ocultarContrasenia" class="flex-column form__campo">
-            <label>Contraseña:</label>
-            <div class="inputForm flex">
-                <input :type="tipoInputContrasenia" v-model="form.contrasenia" />
-                <img :src="iconoVisibilidadContrasenia" class="input-visibilidad" alt="Ver y ocultar contraseña"
-                    @click="visibilidadContrasenia = !visibilidadContrasenia" />
-            </div>
-            <p v-if="errores.contrasenia" class="errorMensaje">{{ errores.contrasenia }}</p>
+    <div class="flex-column form__campo">
+      <label for="contrasenia">Contraseña *</label>
+      <div class="inputForm flex">
+        <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
+        <input v-model="contrasenia" :type="tipoInputContrasenia" placeholder="Contraseña" required />
+        <img class="input-visibilidad" :src="iconoVisibilidadContrasenia" alt="Mostrar y ocultar contraseña"
+          @click="visibilidadContrasenia = !visibilidadContrasenia" />
+      </div>
+      <ul v-if="contrasenia.length" class="errorMensaje">
+        <li :class="{ correcto: tieneMinuscula }">Debe tener al menos una letra minúscula</li>
+        <li :class="{ correcto: tieneMayuscula }">Debe tener al menos una letra mayúscula</li>
+        <li :class="{ correcto: tieneNumero }">Debe tener al menos un número</li>
+        <li :class="{ correcto: tieneCaracterEspecial }">Debe tener al menos un carácter especial (!@#$%^&*)</li>
+        <li :class="{ correcto: tieneLongitudMinima }">Debe tener al menos 8 caracteres</li>
+      </ul>
+      <div v-if="errores.contrasenia" class="errorMensaje">
+        {{ errores.contrasenia }}
+      </div>
+    </div>
 
-            <!-- Validaciones visuales -->
-            <ul v-if="form.contrasenia" style="font-size: 0.9em;">
-                <li :style="{ color: tieneMinuscula ? 'green' : 'red' }">Una minúscula</li>
-                <li :style="{ color: tieneMayuscula ? 'green' : 'red' }">Una mayúscula</li>
-                <li :style="{ color: tieneNumero ? 'green' : 'red' }">Un número</li>
-                <li :style="{ color: tieneEspecial ? 'green' : 'red' }">Un carácter especial (!@#$...)</li>
-                <li :style="{ color: tieneLongitud ? 'green' : 'red' }">Mínimo 8 caracteres</li>
-            </ul>
+    <div class="flex-column form__campo">
+      <label for="confirmarContrasenia">Confirma tu contraseña *</label>
+      <div class="inputForm flex">
+        <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
+        <input v-model="confirmarContrasenia" :type="tipoInputConfirmarContrasenia" placeholder="Confirma tu contraseña"
+          required />
+        <img class="input-visibilidad" :src="iconoVisibilidadConfirmarContrasenia" alt="Mostrar y ocultar contraseña"
+          @click="visibilidadConfirmarContrasenia = !visibilidadConfirmarContrasenia" />
+      </div>
+      <div v-if="errores.confirmarContrasenia" class="errorMensaje">
+        {{ errores.confirmarContrasenia }}
+      </div>
+    </div>
 
-        </div>
+    <div v-if="errores.user_id" class="errorMensaje">
+      {{ errores.user_id }}
+    </div>
+    <div v-if="generalErrorMessage" class="errorMensaje">
+      {{ generalErrorMessage }}
+    </div>
 
-        <PrimaryButton type="submit" v-if="!soloLectura" label="Mandar solicitud" />
-    </form>
+    <div class="form__bottom flex-column mg-tb-1">
+      <PrimaryButton label="Enviar mi solicitud" />
+    </div>
+  </form>
 </template>
 
 <style scoped lang="scss">
@@ -161,95 +458,109 @@ const handleSubmit = () => {
 @use "@/sass/common" as *;
 
 * {
-    @include fuente("parrafo");
+  @include fuente("parrafo");
 }
 
 form {
-    padding: 20px 30px;
+  width: 100%;
+  padding: 20px 30px;
+  gap: 10px;
+  border-radius: 20px;
 
+  .form__horizontal {
     gap: 10px;
-    border-radius: 20px;
+  }
 
-    .form__horizontal {
-        gap: 10px;
-    }
+  .form__horizontal > div:nth-child(1) {
+    width: 40%;
+  }
 
-    .form__horizontal>div:nth-child(1) {
-        width: 40%;
-    }
+  .form__horizontal > div:nth-child(2) {
+    width: 60%;
+  }
 
-    .form__horizontal>div:nth-child(2) {
-        width: 60%;
-    }
+  .form__campo {
+    gap: 2px;
 
-    .form__campo {
-        gap: 2px;
+    .inputForm {
+      border: 1.5px solid map-get($colores, "gris_claro");
+      height: 46px;
+      padding: 10px;
+      border-radius: 10px;
+      align-items: center;
+      transition: 0.2s ease-in-out;
 
-        .inputForm {
-            border: 1.5px solid map-get($colores, "gris_claro");
-            height: 46px;
-            padding: 10px;
-            border-radius: 10px;
+      &:focus-within {
+        border: 1.5px solid map-get($colores, "naranja");
+      }
 
-            align-items: center;
-            transition: 0.2s ease-in-out;
-
-            &:focus-within {
-                border: 1.5px solid map-get($colores, "naranja");
-            }
-
-            input {
-                width: 100%;
-                margin-left: 10px;
-                border: none;
-
-                align-items: center;
-
-                &:focus {
-                    outline: none;
-                }
-            }
-
-            select {
-                width: 100%;
-                height: 100%;
-                background-color: transparent;
-                border: 0;
-                cursor: pointer;
-            }
-        }
-    }
-
-    .form__bottom {
+      input {
+        width: 100%;
+        margin-left: 10px;
+        border: none;
         align-items: center;
-        gap: 1rem;
+
+        &:focus {
+          outline: none;
+        }
+      }
+
+      select {
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        border: 0;
+        cursor: pointer;
+      }
     }
+  }
 
-    label {
-        margin-left: 5px;
-    }
+  .form__bottom {
+    align-items: center;
+    gap: 1rem;
+  }
 
-
+  label {
+    margin-left: 5px;
+  }
 }
 
-// Estilos para .span
 .span {
-    color: map-get($colores, "naranja");
-    font-weight: 500;
-
-    cursor: pointer;
+  color: map-get($colores, "naranja");
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .errorMensaje {
-    color: map-get($colores, "rojo");
+  color: map-get($colores, "rojo");
 }
 
 .correcto {
-    color: map-get($colores, "verde");
+  color: map-get($colores, "verde");
 }
 
-// Icono de mostrar/ocultar la contraseña
 .input-visibilidad {
-    cursor: pointer;
+  cursor: pointer;
+}
+
+@include responsive-layout(1440px) {
+  .contenedor-inicio-sesion {
+    width: 80%;
+  }
+
+  .form-container {
+    margin-bottom: 1rem;
+  }
+}
+
+@include responsive-layout(1024px) {
+  form {
+    width: 100%;
+    padding: 0;
+  }
+
+  .input {
+    margin-left: 0;
+  }
 }
 </style>

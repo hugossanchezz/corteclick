@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('peluquerias_solicitudes', function (Blueprint $table) {
             $table->id();
             $table->enum('estado', ['PENDIENTE', 'APROBADA', 'RECHAZADA']);
-            $table->date('fecha');
+            $table->dateTime('fecha');
             $table->string('nombre', 100);
             $table->string('descripcion', 200);
             $table->string('direccion', 150);
             $table->unsignedBigInteger('localidad')->nullable();
             $table->string('email', 150);
             $table->string('telefono', 20);
-            $table->enum('tipo', ['hombres', 'mujeres', 'unisex']);
+            $table->enum('tipo', ['BARBERIA', 'PELUQUERIA', 'UNISEX']);
             $table->string('contrasenia');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
