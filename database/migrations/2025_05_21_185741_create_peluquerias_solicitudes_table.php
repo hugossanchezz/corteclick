@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('descripcion', 200);
             $table->string('direccion', 150);
             $table->unsignedBigInteger('localidad')->nullable();
-            $table->string('email', 150);
+            $table->string('email', 150)->unique();
             $table->string('telefono', 20);
             $table->enum('tipo', ['BARBERIA', 'PELUQUERIA', 'UNISEX']);
             $table->string('contrasenia');

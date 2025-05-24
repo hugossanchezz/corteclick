@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('descripcion', 200)->nullable();
             $table->string('direccion', 200);
             $table->unsignedBigInteger('localidad')->nullable();
-            $table->string('email', 150);
+            $table->string('email', 150)->unique();
             $table->string('telefono', 20)->nullable();
             $table->enum('tipo', ['BARBERIA', 'PELUQUERIA', 'UNISEX'])->nullable();
             $table->string('contrasenia',255);// Encriptada en sha1
