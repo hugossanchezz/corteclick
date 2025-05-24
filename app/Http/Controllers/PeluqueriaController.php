@@ -39,7 +39,6 @@ class PeluqueriaController extends Controller
                 'email' => 'required|email|unique:peluquerias,email',
                 'telefono' => 'required|string|max:20',
                 'tipo' => 'required|string|in:PELUQUERIA,BARBERIA,UNISEX',
-                'contrasenia' => 'required|string',
                 'user_id' => 'required|integer|exists:users,id',
             ]);
 
@@ -52,7 +51,6 @@ class PeluqueriaController extends Controller
                 'email' => $validated['email'],
                 'telefono' => $validated['telefono'],
                 'tipo' => $validated['tipo'],
-                'contrasenia' => $validated['contrasenia'], // Podrías encriptar la contraseña aquí si es necesario
                 'user_id' => $validated['user_id'],
                 'valoracion' => null, 
             ]);

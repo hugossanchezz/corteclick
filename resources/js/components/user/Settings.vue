@@ -95,6 +95,20 @@ export default {
         <div v-else>
             <p>No hay información de usuario disponible.</p>
         </div>
+
+        <hr>
         <DangerButton @click="handleLogout" label="Cerrar sesión" />
     </div>
 </template>
+
+<style scoped lang="scss">
+@use "@/sass/variables" as *;
+
+hr {
+    background-color: map-get($colores, 'gris_claro');
+    width: 50%;
+    height: 2px;
+    border: none;
+    margin: 2rem 0;
+}
+</style>

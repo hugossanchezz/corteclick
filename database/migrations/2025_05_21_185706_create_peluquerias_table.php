@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('email', 150)->unique();
             $table->string('telefono', 20)->nullable();
             $table->enum('tipo', ['BARBERIA', 'PELUQUERIA', 'UNISEX'])->nullable();
-            $table->string('contrasenia',255);// Encriptada en sha1
             $table->decimal('valoracion', 3, 2)->nullable()->comment('Media de las valoraciones del establecimiento');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();

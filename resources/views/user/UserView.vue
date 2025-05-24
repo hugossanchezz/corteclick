@@ -12,7 +12,7 @@ export default {
         const route = useRoute(); // Get the current route
 
         onMounted(() => {
-            const storedUser = localStorage.getItem("user");
+            const storedUser = sessionStorage.getItem("user");
             if (storedUser) {
                 try {
                     user.value = JSON.parse(storedUser);
@@ -21,7 +21,7 @@ export default {
                         "Error al parsear el objeto de usuario:",
                         error
                     );
-                    localStorage.removeItem("user");
+                    sessionStorage.removeItem("user");
                     router.push("/");
                 }
             }
@@ -46,8 +46,9 @@ export default {
         <div class="profile flex">
             <aside class="flex-column">
 
-                <router-link :to="'/user'" :class="{ 'route--active': isActiveRoute('/user') }">
-                    Perfil
+                <router-link :to="'/user'" class="flex aside__config"
+                    :class="{ 'route--active': isActiveRoute('/user/settings') }">
+                    Configuración <img src="/img/utils/settings.svg" alt="">
                 </router-link>
                 <router-link :to="'/user/appointments'"
                     :class="{ 'route--active': isActiveRoute('/user/appointments') }">
@@ -69,11 +70,7 @@ export default {
                     :class="{ 'route--active': isActiveRoute('/admin/dashboard') }">
                     Panel de control
                 </router-link>
-
-                <router-link :to="'/user/settings'" class="flex aside__config"
-                    :class="{ 'route--active': isActiveRoute('/user/settings') }">
-                    Configuración <img src="/img/utils/settings.svg" alt="">
-                </router-link>
+                
             </aside>
             <section class="profile__main">
                 <router-view />

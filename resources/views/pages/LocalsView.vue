@@ -193,7 +193,7 @@ export default {
                     <img src="/img/utils/corteclick.png" alt="Imagen principal de la peluquería" />
                     <h2 class="card__info flex">
                         {{ peluqueria.nombre }}
-                        <div>{{ peluqueria.valoracion }} <span>★</span></div>
+                        <div>{{ peluqueria.valoracion || 'Sin valoración' }} <span>★</span></div>
                     </h2>
                     <p class="card__description">
                         {{ peluqueria.descripcion }}

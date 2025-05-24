@@ -18,7 +18,6 @@ class PeluqueriaSolicitudController extends Controller
             'email' => 'required|email|max:150',
             'telefono' => 'nullable|string|max:20',
             'tipo' => 'required|in:BARBERIA,PELUQUERIA,UNISEX',
-            'contrasenia' => 'required|string|min:8',
             'user_id' => 'required|exists:users,id',
         ]);
 
@@ -32,7 +31,6 @@ class PeluqueriaSolicitudController extends Controller
             'email' => $validated['email'],
             'telefono' => $validated['telefono'] ?? '',
             'tipo' => $validated['tipo'],
-            'contrasenia' => Hash::make($validated['contrasenia']),
             'user_id' => $validated['user_id'],
         ]);
 

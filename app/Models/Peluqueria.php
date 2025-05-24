@@ -30,18 +30,8 @@ class Peluqueria extends Model
         'email',
         'telefono',
         'tipo',
-        'contrasenia',
         'valoracion',
         'user_id',
-    ];
-
-    /**
-     * Los atributos que deben ocultarse para la serialización.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'contrasenia',
     ];
 
     /**

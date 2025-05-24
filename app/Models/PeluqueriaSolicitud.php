@@ -21,7 +21,6 @@ class PeluqueriaSolicitud extends Model
         'email',
         'telefono',
         'tipo',
-        'contrasenia',
         'user_id',
     ];
 

@@ -23,19 +23,25 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // ------ Auth ------------------------------------------------------------
-Route::post('/register', [AuthController::class , 'register']);
+Route::post('/register', [AuthController::class, 'register']);
 
-Route::post('/login', [AuthController::class , 'login']);
+Route::post('/login', [AuthController::class, 'login']);
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::post('/logout', [AuthController::class , 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 });
 
-// ------ Appointments ----------------------------------------------------
-Route::get('/locals', [PeluqueriaController::class , 'index']);
+// ------ Locals ----------------------------------------------------------
+Route::post('/new-request', [PeluqueriaSolicitudController::class, 'createLocalRequest']);
 
-Route::get('/locals/{id}', [PeluqueriaController::class , 'show']);
+Route::post('/new-local', [PeluqueriaController::class, 'createNewLocal']);
+
+Route::delete('/delete-local/{email}', [PeluqueriaController::class, 'deleteLocalByEmail']);
+
+Route::get('/locals', [PeluqueriaController::class, 'getPeluquerias']);
+
+Route::get('/locals/{id}', [PeluqueriaController::class, 'getPeluqueriaById']);
 
 // ------ Localities ------------------------------------------------------
 Route::get('/localities/{valor}', [LocalidadController::class, 'getIdsByCodigoPostalONombre']);
@@ -44,5 +50,9 @@ Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']
 
 Route::get('/localities/{id}/name', [LocalidadController::class, 'getNombreById']);
 
-// ------ Locals ----------------------------------------------------------
-Route::post('/new-local', [PeluqueriaSolicitudController::class , 'createLocalRequest']);
+// ------ Appointments ----------------------------------------------------
+
+// ------ Admin ----------------------------------------------------------
+Route::get('/admin/requests', [PeluqueriaSolicitudController::class, 'getLocalsRequest']);
+Route::post('/admin/requests/{id}/cambiarEstado', [PeluqueriaSolicitudController::class, 'cambiarEstado']);
+

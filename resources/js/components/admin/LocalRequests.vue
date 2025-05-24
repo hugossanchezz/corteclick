@@ -108,7 +108,6 @@ export default {
                             email: solicitud.email,
                             telefono: solicitud.telefono,
                             tipo: solicitud.tipo,
-                            contrasenia: solicitud.contrasenia,
                             user_id: solicitud.user_id,
                         });
                     } catch (newLocalError) {

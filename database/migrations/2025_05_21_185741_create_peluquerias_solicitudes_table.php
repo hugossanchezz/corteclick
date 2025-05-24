@@ -22,7 +22,6 @@ return new class extends Migration
             $table->string('email', 150)->unique();
             $table->string('telefono', 20);
             $table->enum('tipo', ['BARBERIA', 'PELUQUERIA', 'UNISEX']);
-            $table->string('contrasenia');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->timestamps();
             

@@ -58,7 +58,6 @@ export default {
 
 <style scoped lang="scss">
 @use "@/sass/variables" as *;
-@use "@/sass/common" as *;
 
 .modal-overlay {
   position: fixed;
@@ -74,7 +73,7 @@ export default {
 }
 
 .modal-content {
-  background-color: white;
+  background-color: map-get($colores, 'blanco');
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -86,7 +85,7 @@ export default {
 .modal-message {
   @include fuente("parrafo");
   margin-bottom: 20px;
-  color: #666;
+  color: map-get($colores, 'gris_oscuro');
 }
 
 .modal-buttons {
@@ -103,7 +102,7 @@ export default {
 
 .btn-confirm {
   background-color: #4CAF50;
-  color: white;
+  color: map-get($colores, 'blanco');
 }
 
 .btn-confirm:hover {
@@ -112,7 +111,7 @@ export default {
 
 .btn-cancel {
   background-color: #f44336;
-  color: white;
+  color: map-get($colores, 'blanco');
 }
 
 .btn-cancel:hover {

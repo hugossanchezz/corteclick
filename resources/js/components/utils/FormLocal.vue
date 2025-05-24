@@ -22,8 +22,6 @@ export default {
     const email = ref("");
     const telefono = ref("");
     const tipo = ref("");
-    const contrasenia = ref("");
-    const confirmarContrasenia = ref("");
     const user_id = ref("");
 
     // Error handling
@@ -38,49 +36,12 @@ export default {
     const modalMessage = ref("");
     const modalAction = ref(null);
 
-    // Password visibility
-    const visibilidadContrasenia = ref(false);
-    const visibilidadConfirmarContrasenia = ref(false);
-
     // Validation patterns
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const telefonoPattern = /^\+?[0-9]{9}$/;
 
-    // Password validation computed properties
-    const tieneMinuscula = computed(() => /[a-z]/.test(contrasenia.value));
-    const tieneMayuscula = computed(() => /[A-Z]/.test(contrasenia.value));
-    const tieneNumero = computed(() => /\d/.test(contrasenia.value));
-    const tieneCaracterEspecial = computed(() => /[!@#$%^&*]/.test(contrasenia.value));
-    const tieneLongitudMinima = computed(() => contrasenia.value.length >= 8);
-    const contraseniaValida = computed(() => {
-      return (
-        tieneMinuscula.value &&
-        tieneMayuscula.value &&
-        tieneNumero.value &&
-        tieneCaracterEspecial.value &&
-        tieneLongitudMinima.value
-      );
-    });
 
     const tieneErrores = computed(() => Object.keys(errores.value).length > 0);
-
-    // Password visibility icons and input types
-    const iconoVisibilidadContrasenia = computed(() =>
-      visibilidadContrasenia.value
-        ? "/img/auth/visibility_off.svg"
-        : "/img/auth/visibility_on.svg"
-    );
-    const tipoInputContrasenia = computed(() =>
-      visibilidadContrasenia.value ? "text" : "password"
-    );
-    const iconoVisibilidadConfirmarContrasenia = computed(() =>
-      visibilidadConfirmarContrasenia.value
-        ? "/img/auth/visibility_off.svg"
-        : "/img/auth/visibility_on.svg"
-    );
-    const tipoInputConfirmarContrasenia = computed(() =>
-      visibilidadConfirmarContrasenia.value ? "text" : "password"
-    );
 
     // Update error function
     const actualizarError = (campo, mensaje) => {
@@ -162,16 +123,6 @@ export default {
         actualizarError("tipo", "El tipo de servicio es requerido");
       }
 
-      if (!contrasenia.value) {
-        actualizarError("contrasenia", "La contraseña es requerida");
-      } else if (!contraseniaValida.value) {
-        actualizarError("contrasenia", "La contraseña no cumple con los requisitos");
-      }
-
-      if (confirmarContrasenia.value !== contrasenia.value) {
-        actualizarError("confirmarContrasenia", "Las contraseñas no coinciden");
-      }
-
       if (!user_id.value) {
         actualizarError("user_id", "Debe estar autenticado para registrar un negocio");
       }
@@ -204,7 +155,6 @@ export default {
           email: email.value,
           telefono: telefono.value,
           tipo: tipo.value,
-          contrasenia: contrasenia.value,
           user_id: user_id.value
         });
         if (response.status === 200) {
@@ -217,8 +167,6 @@ export default {
           email.value = "";
           telefono.value = "";
           tipo.value = "";
-          contrasenia.value = "";
-          confirmarContrasenia.value = "";
           errores.value = {};
           generalErrorMessage.value = "";
         }
@@ -255,22 +203,9 @@ export default {
       email,
       telefono,
       tipo,
-      contrasenia,
-      confirmarContrasenia,
       user_id,
       errores,
       generalErrorMessage,
-      visibilidadContrasenia,
-      visibilidadConfirmarContrasenia,
-      iconoVisibilidadContrasenia,
-      tipoInputContrasenia,
-      iconoVisibilidadConfirmarContrasenia,
-      tipoInputConfirmarContrasenia,
-      tieneMinuscula,
-      tieneMayuscula,
-      tieneNumero,
-      tieneCaracterEspecial,
-      tieneLongitudMinima,
       registroExitoso,
       credencialesInvalidas,
       tieneErrores,
@@ -378,42 +313,6 @@ export default {
       </div>
       <div v-if="errores.tipo" class="errorMensaje">
         {{ errores.tipo }}
-      </div>
-    </div>
-
-    <div class="form__horizontal flex">
-      <div class="flex-column form__campo">
-        <label for="contrasenia">Contraseña *</label>
-        <div class="inputForm flex">
-          <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
-          <input v-model="contrasenia" :type="tipoInputContrasenia" placeholder="Contraseña" required />
-          <img class="input-visibilidad" :src="iconoVisibilidadContrasenia" alt="Mostrar y ocultar contraseña"
-            @click="visibilidadContrasenia = !visibilidadContrasenia" />
-        </div>
-        <ul v-if="contrasenia.length" class="errorMensaje">
-          <li :class="{ correcto: tieneMinuscula }">Debe tener al menos una letra minúscula</li>
-          <li :class="{ correcto: tieneMayuscula }">Debe tener al menos una letra mayúscula</li>
-          <li :class="{ correcto: tieneNumero }">Debe tener al menos un número</li>
-          <li :class="{ correcto: tieneCaracterEspecial }">Debe tener al menos un carácter especial (!@#$%^&*)</li>
-          <li :class="{ correcto: tieneLongitudMinima }">Debe tener al menos 8 caracteres</li>
-        </ul>
-        <div v-if="errores.contrasenia" class="errorMensaje">
-          {{ errores.contrasenia }}
-        </div>
-      </div>
-
-      <div class="flex-column form__campo">
-        <label for="confirmarContrasenia">Confirma tu contraseña *</label>
-        <div class="inputForm flex">
-          <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
-          <input v-model="confirmarContrasenia" :type="tipoInputConfirmarContrasenia"
-            placeholder="Confirma tu contraseña" required />
-          <img class="input-visibilidad" :src="iconoVisibilidadConfirmarContrasenia" alt="Mostrar y ocultar contraseña"
-            @click="visibilidadConfirmarContrasenia = !visibilidadConfirmarContrasenia" />
-        </div>
-        <div v-if="errores.confirmarContrasenia" class="errorMensaje">
-          {{ errores.confirmarContrasenia }}
-        </div>
       </div>
     </div>
 
