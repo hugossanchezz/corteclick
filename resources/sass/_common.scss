@@ -39,10 +39,18 @@ h2 {
     @include fuente("titulo_secundario");
 }
 
+h3 {
+    @include fuente("parrafo_max");
+}
+
 p,
 li,
 a {
     @include fuente("parrafo");
+}
+
+ul {
+    list-style: none;
 }
 
 .span__corteclick {

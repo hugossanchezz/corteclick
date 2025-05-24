@@ -23,15 +23,13 @@ export default {
     const tipo = ref("");
     const contrasenia = ref("");
     const confirmarContrasenia = ref("");
-    const user_id = ref(""); // Placeholder; fetched from localStorage
+    const user_id = ref("");
 
     // Error handling
     const errores = ref({});
     const generalErrorMessage = ref("");
     const registroExitoso = ref(false);
     const credencialesInvalidas = ref("");
-
-    // Submission state
     const isSubmitting = ref(false);
 
     // Password visibility
@@ -40,7 +38,7 @@ export default {
 
     // Validation patterns
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const telefonoPattern = /^\+?[0-9]{9,15}$/;
+    const telefonoPattern = /^\+?[0-9]{9}$/;
 
     // Password validation computed properties
     const tieneMinuscula = computed(() => /[a-z]/.test(contrasenia.value));
@@ -58,7 +56,6 @@ export default {
       );
     });
 
-    // Error checking
     const tieneErrores = computed(() => Object.keys(errores.value).length > 0);
 
     // Password visibility icons and input types
@@ -81,8 +78,9 @@ export default {
 
     // Update error function
     const actualizarError = (campo, mensaje) => {
-      errores.value[campo] = mensaje;
-      if (!mensaje) {
+      if (mensaje) {
+        errores.value[campo] = mensaje;
+      } else {
         delete errores.value[campo];
       }
     };
@@ -117,121 +115,74 @@ export default {
       }
     };
 
-    // Watchers for validation
-    watch(nombre, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "nombre",
-        !newValue
-          ? "El nombre del negocio es requerido"
-          : /[^a-zA-Z0-9\s]/.test(newValue)
-            ? "No se permiten caracteres especiales"
-            : ""
-      );
-    });
+    // Manual validation function
+    const validarFormulario = () => {
+      errores.value = {};
 
-    watch(descripcion, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "descripcion",
-        newValue && newValue.length > 255
-          ? "La descripción no puede exceder 255 caracteres"
-          : ""
-      );
-    });
+      if (!nombre.value) {
+        actualizarError("nombre", "El nombre del negocio es requerido");
+      } else if (/[^a-zA-Z0-9\s]/.test(nombre.value)) {
+        actualizarError("nombre", "No se permiten caracteres especiales");
+      }
 
-    watch(direccion, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "direccion",
-        !newValue
-          ? "La dirección es requerida"
-          : ""
-      );
-    });
+      if (descripcion.value && descripcion.value.length > 200) {
+        actualizarError("descripcion", "La descripción no puede exceder 200 caracteres");
+      }
 
-    watch(localidad, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "localidad",
-        !newValue
-          ? "La localidad es requerida"
-          : ""
-      );
-    });
+      if (!direccion.value) {
+        actualizarError("direccion", "La dirección es requerida");
+      }
 
-    watch(email, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "email",
-        !newValue
-          ? "El correo es requerido"
-          : !emailPattern.test(newValue)
-            ? "Correo no válido"
-            : ""
-      );
-    });
+      if (!localidad.value) {
+        actualizarError("localidad", "La localidad es requerida");
+      }
 
-    watch(telefono, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "telefono",
-        !newValue
-          ? "El teléfono es requerido"
-          : !telefonoPattern.test(newValue)
-            ? "Teléfono no válido"
-            : ""
-      );
-    });
+      if (!email.value) {
+        actualizarError("email", "El correo es requerido");
+      } else if (!emailPattern.test(email.value)) {
+        actualizarError("email", "Correo no válido");
+      }
 
-    watch(tipo, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "tipo",
-        !newValue
-          ? "El tipo de servicio es requerido"
-          : ""
-      );
-    });
+      if (!telefono.value) {
+        actualizarError("telefono", "El teléfono es requerido");
+      } else if (!telefonoPattern.test(telefono.value)) {
+        actualizarError("telefono", "Teléfono no válido");
+      }
 
-    watch(contrasenia, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "contrasenia",
-        !newValue
-          ? "La contraseña es requerida"
-          : !contraseniaValida.value
-            ? "La contraseña no cumple con los requisitos"
-            : ""
-      );
-    });
+      if (!tipo.value) {
+        actualizarError("tipo", "El tipo de servicio es requerido");
+      }
 
-    watch(confirmarContrasenia, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "confirmarContrasenia",
-        newValue !== contrasenia.value ? "Las contraseñas no coinciden" : ""
-      );
-    });
+      if (!contrasenia.value) {
+        actualizarError("contrasenia", "La contraseña es requerida");
+      } else if (!contraseniaValida.value) {
+        actualizarError("contrasenia", "La contraseña no cumple con los requisitos");
+      }
 
-    watch(user_id, (newValue) => {
-      if (isSubmitting.value) return;
-      actualizarError(
-        "user_id",
-        !newValue ? "Debe estar autenticado para registrar un negocio" : ""
-      );
-    });
+      if (confirmarContrasenia.value !== contrasenia.value) {
+        actualizarError("confirmarContrasenia", "Las contraseñas no coinciden");
+      }
+
+      if (!user_id.value) {
+        actualizarError("user_id", "Debe estar autenticado para registrar un negocio");
+      }
+
+      return Object.keys(errores.value).length === 0;
+    };
+
+    // Remove watchers and rely on manual validation
+    // If you still want real-time feedback, you can keep the watchers, but ensure they don't interfere during submission
 
     // Form submission
     const submitForm = async () => {
       generalErrorMessage.value = "";
       credencialesInvalidas.value = "";
-      if (!user_id.value) {
-        generalErrorMessage.value = "Debe estar autenticado para registrar un negocio.";
-        return;
-      }
-      if (tieneErrores.value) {
+      isSubmitting.value = true;
+
+      // Validate manually
+      if (!validarFormulario()) {
         generalErrorMessage.value = "Por favor, corrige los errores en el formulario.";
+        isSubmitting.value = false;
         return;
       }
 
@@ -249,8 +200,8 @@ export default {
         });
         if (response.status === 200) {
           alert("La solicitud de registro ha sido enviada exitosamente.");
-          isSubmitting.value = true;
-          // Reset form fields
+          
+          // Reset form fields without triggering validation
           nombre.value = "";
           descripcion.value = "";
           direccion.value = "";
@@ -262,7 +213,6 @@ export default {
           confirmarContrasenia.value = "";
           errores.value = {};
           generalErrorMessage.value = "";
-          isSubmitting.value = false;
         }
       } catch (error) {
         console.error("Error de registro", error.response);
@@ -276,6 +226,8 @@ export default {
         } else {
           generalErrorMessage.value = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.";
         }
+      } finally {
+        isSubmitting.value = false;
       }
     };
 
@@ -316,7 +268,9 @@ export default {
 
 <template>
   <form class="flex-column" @submit.prevent="submitForm">
-    <h1 class="flex-center">Registra tu negocio</h1>
+    <h1 class="flex-center">¿Quieres que tu negocio llegue a más gente?</h1>
+    <h3 class="flex-center">Entra en <span class="span__corteclick">Corteclick</span> como empresario con esta solicitud. </h3>
+
     <hr />
 
     <div class="flex-column form__campo">
@@ -332,9 +286,9 @@ export default {
 
     <div class="flex-column form__campo">
       <label for="descripcion">Descripción</label>
-      <div class="inputForm flex">
+      <div class="inputForm inputForm-textarea flex">
         <img src="/img/utils/edit.svg" alt="Icono para descripción" />
-        <input v-model="descripcion" type="text" placeholder="Describe tu negocio" />
+        <textarea v-model="descripcion" placeholder="Describe tu negocio. Max. 200 caracteres" />
       </div>
       <div v-if="errores.descripcion" class="errorMensaje">
         {{ errores.descripcion }}
@@ -359,7 +313,7 @@ export default {
           <select v-model="localidad" required>
             <option selected disabled value="">Selecciona una localidad</option>
             <option v-for="localidad in localidades" :key="localidad.id" :value="localidad.id">
-              {{ localidad.nombre }}
+              {{ localidad.nombre }} - {{ localidad.codigo_postal }}
             </option>
           </select>
         </div>
@@ -372,7 +326,7 @@ export default {
         <label for="telefono">Teléfono *</label>
         <div class="inputForm flex">
           <img src="/img/auth/phone_orange.svg" alt="Icono de teléfono" />
-          <input v-model="telefono" type="tel" placeholder="+34 000 000 000" required />
+          <input v-model="telefono" type="tel" placeholder="000 000 000" required />
         </div>
         <div v-if="errores.telefono" class="errorMensaje">
           {{ errores.telefono }}
@@ -406,39 +360,43 @@ export default {
       </div>
     </div>
 
-    <div class="flex-column form__campo">
-      <label for="contrasenia">Contraseña *</label>
-      <div class="inputForm flex">
-        <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
-        <input v-model="contrasenia" :type="tipoInputContrasenia" placeholder="Contraseña" required />
-        <img class="input-visibilidad" :src="iconoVisibilidadContrasenia" alt="Mostrar y ocultar contraseña"
-          @click="visibilidadContrasenia = !visibilidadContrasenia" />
+    <div class="form__horizontal flex">
+
+      <div class="flex-column form__campo">
+        <label for="contrasenia">Contraseña *</label>
+        <div class="inputForm flex">
+          <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
+          <input v-model="contrasenia" :type="tipoInputContrasenia" placeholder="Contraseña" required />
+          <img class="input-visibilidad" :src="iconoVisibilidadContrasenia" alt="Mostrar y ocultar contraseña"
+            @click="visibilidadContrasenia = !visibilidadContrasenia" />
+        </div>
+        <ul v-if="contrasenia.length" class="errorMensaje">
+          <li :class="{ correcto: tieneMinuscula }">Debe tener al menos una letra minúscula</li>
+          <li :class="{ correcto: tieneMayuscula }">Debe tener al menos una letra mayúscula</li>
+          <li :class="{ correcto: tieneNumero }">Debe tener al menos un número</li>
+          <li :class="{ correcto: tieneCaracterEspecial }">Debe tener al menos un carácter especial (!@#$%^&*)</li>
+          <li :class="{ correcto: tieneLongitudMinima }">Debe tener al menos 8 caracteres</li>
+        </ul>
+        <div v-if="errores.contrasenia" class="errorMensaje">
+          {{ errores.contrasenia }}
+        </div>
       </div>
-      <ul v-if="contrasenia.length" class="errorMensaje">
-        <li :class="{ correcto: tieneMinuscula }">Debe tener al menos una letra minúscula</li>
-        <li :class="{ correcto: tieneMayuscula }">Debe tener al menos una letra mayúscula</li>
-        <li :class="{ correcto: tieneNumero }">Debe tener al menos un número</li>
-        <li :class="{ correcto: tieneCaracterEspecial }">Debe tener al menos un carácter especial (!@#$%^&*)</li>
-        <li :class="{ correcto: tieneLongitudMinima }">Debe tener al menos 8 caracteres</li>
-      </ul>
-      <div v-if="errores.contrasenia" class="errorMensaje">
-        {{ errores.contrasenia }}
+
+      <div class="flex-column form__campo">
+        <label for="confirmarContrasenia">Confirma tu contraseña *</label>
+        <div class="inputForm flex">
+          <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
+          <input v-model="confirmarContrasenia" :type="tipoInputConfirmarContrasenia"
+            placeholder="Confirma tu contraseña" required />
+          <img class="input-visibilidad" :src="iconoVisibilidadConfirmarContrasenia" alt="Mostrar y ocultar contraseña"
+            @click="visibilidadConfirmarContrasenia = !visibilidadConfirmarContrasenia" />
+        </div>
+        <div v-if="errores.confirmarContrasenia" class="errorMensaje">
+          {{ errores.confirmarContrasenia }}
+        </div>
       </div>
     </div>
 
-    <div class="flex-column form__campo">
-      <label for="confirmarContrasenia">Confirma tu contraseña *</label>
-      <div class="inputForm flex">
-        <img src="/img/auth/lock_orange.svg" alt="Icono de contraseña" />
-        <input v-model="confirmarContrasenia" :type="tipoInputConfirmarContrasenia" placeholder="Confirma tu contraseña"
-          required />
-        <img class="input-visibilidad" :src="iconoVisibilidadConfirmarContrasenia" alt="Mostrar y ocultar contraseña"
-          @click="visibilidadConfirmarContrasenia = !visibilidadConfirmarContrasenia" />
-      </div>
-      <div v-if="errores.confirmarContrasenia" class="errorMensaje">
-        {{ errores.confirmarContrasenia }}
-      </div>
-    </div>
 
     <div v-if="errores.user_id" class="errorMensaje">
       {{ errores.user_id }}
@@ -467,24 +425,44 @@ form {
   gap: 10px;
   border-radius: 20px;
 
+  h3 {
+    color: map-get($colores, 'gris_oscuro');
+    align-items: end !important;
+
+    span {
+      margin-left: 5px;
+      margin-right: 7.5px !important;
+    }
+  }
+
+  hr {
+    background-color: map-get($colores, 'gris_claro');
+    height: 2px;
+    border: none;
+  }
+
   .form__horizontal {
     gap: 10px;
-  }
 
-  .form__horizontal > div:nth-child(1) {
-    width: 40%;
-  }
-
-  .form__horizontal > div:nth-child(2) {
-    width: 60%;
+    >div {
+      width: 50%;
+    }
   }
 
   .form__campo {
     gap: 2px;
 
     .inputForm {
-      border: 1.5px solid map-get($colores, "gris_claro");
+      width: 100%;
       height: 46px;
+    }
+
+    .inputForm-textarea {
+      height: 100px;
+    }
+
+    .inputForm {
+      border: 1.5px solid map-get($colores, "gris_claro");
       padding: 10px;
       border-radius: 10px;
       align-items: center;
@@ -511,7 +489,25 @@ form {
         background-color: transparent;
         border: 0;
         cursor: pointer;
+
+        &:focus {
+          outline: none;
+        }
       }
+
+      textarea {
+        width: 100%;
+        height: 100%;
+        background-color: transparent;
+        border: 0;
+        resize: none;
+        margin-left: 10px;
+
+        &:focus {
+          outline: none;
+        }
+      }
+
     }
   }
 
@@ -533,6 +529,7 @@ form {
 
 .errorMensaje {
   color: map-get($colores, "rojo");
+  width: 100%;
 }
 
 .correcto {

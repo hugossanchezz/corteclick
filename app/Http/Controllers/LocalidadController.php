@@ -50,7 +50,7 @@ class LocalidadController extends Controller
     public function getLocalidadesIdNombre()
     {
         // Utiliza el método select() para especificar qué columnas quieres recuperar.
-        $localidades = Localidad::select('id', 'nombre')->get();
+        $localidades = Localidad::select('id', 'nombre', 'codigo_postal')->get();
 
         return $localidades;
     }
