@@ -25,6 +25,7 @@
     logo para compartir en redes sociales --}}
 
     <title>Corteclick</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/utils/corteclick.ico" />
 
     {{-- CSS general --}}
     <style>
