@@ -38,4 +38,34 @@ class PeluqueriaSolicitudController extends Controller
 
         return response()->json(['message' => 'Solicitud enviada correctamente.']);
     }
+
+    public function getLocalsRequest(Request $request)
+    {
+        try {
+            $estado = $request->query('estado', 'PENDIENTE');
+            $solicitudes = PeluqueriaSolicitud::where('estado', $estado)->get();
+            return response()->json($solicitudes, 200);
+        } catch (\Exception $e) {
+            \Log::error("Error fetching local requests: " . $e->getMessage());
+            return response()->json(['error' => 'Error al cargar las solicitudes'], 500);
+        }
+    }
+
+    public function cambiarEstado(Request $request, $id)
+    {
+        $solicitud = PeluqueriaSolicitud::findOrFail($id);
+        $nuevoEstado = $request->input('estado');
+
+        // Validar que el nuevo estado sea válido
+        $estadosValidos = ['PENDIENTE', 'APROBADA', 'RECHAZADA'];
+        if (!in_array($nuevoEstado, $estadosValidos)) {
+            return response()->json(['error' => 'Estado no válido'], 400);
+        }
+
+        // Actualizar el estado
+        $solicitud->estado = $nuevoEstado;
+        $solicitud->save();
+
+        return response()->json(['message' => "Solicitud cambiada a {$nuevoEstado} exitosamente"], 200);
+    }
 }

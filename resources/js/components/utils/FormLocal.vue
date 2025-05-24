@@ -3,11 +3,12 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import { ref, computed, watch, onMounted } from "vue";
+import ModalConfirm from "@/js/components/utils/ModalConfirm.vue"; // Importar ModalConfirm
 
 export default {
   name: "FormLocal",
 
-  components: { PrimaryButton },
+  components: { PrimaryButton, ModalConfirm },
 
   setup() {
     const router = useRouter();
@@ -31,6 +32,11 @@ export default {
     const registroExitoso = ref(false);
     const credencialesInvalidas = ref("");
     const isSubmitting = ref(false);
+
+    // Modal state
+    const showModal = ref(false);
+    const modalMessage = ref("");
+    const modalAction = ref(null);
 
     // Password visibility
     const visibilidadContrasenia = ref(false);
@@ -89,14 +95,14 @@ export default {
     onMounted(async () => {
       cargarLocalidades();
 
-      const storedUser = localStorage.getItem("user");
+      const storedUser = sessionStorage.getItem("user");
       if (storedUser) {
         try {
           const user = JSON.parse(storedUser);
           user_id.value = user.id;
         } catch (error) {
           console.error("Error al cargar usuario", error);
-          localStorage.removeItem("user");
+          sessionStorage.removeItem("user");
           router.push("/");
         }
       }
@@ -143,6 +149,9 @@ export default {
         actualizarError("email", "Correo no válido");
       }
 
+      // Quitar espacios en blanco
+      telefono.value = telefono.value.replace(/\s+/g, "").trim();
+
       if (!telefono.value) {
         actualizarError("telefono", "El teléfono es requerido");
       } else if (!telefonoPattern.test(telefono.value)) {
@@ -170,24 +179,24 @@ export default {
       return Object.keys(errores.value).length === 0;
     };
 
-    // Remove watchers and rely on manual validation
-    // If you still want real-time feedback, you can keep the watchers, but ensure they don't interfere during submission
-
-    // Form submission
-    const submitForm = async () => {
+    // Form submission with modal confirmation
+    const submitForm = () => {
       generalErrorMessage.value = "";
       credencialesInvalidas.value = "";
-      isSubmitting.value = true;
-
-      // Validate manually
-      if (!validarFormulario()) {
+      if (validarFormulario()) {
+        modalMessage.value = "¿Estás seguro de enviar esta solicitud de registro?";
+        modalAction.value = "submit";
+        showModal.value = true;
+      } else {
         generalErrorMessage.value = "Por favor, corrige los errores en el formulario.";
-        isSubmitting.value = false;
-        return;
       }
+    };
 
+    // Handle modal confirmation
+    const confirmarEnvio = async () => {
+      isSubmitting.value = true;
       try {
-        const response = await axios.post("/api/new-local", {
+        const response = await axios.post("/api/new-request", {
           nombre: nombre.value,
           descripcion: descripcion.value || 'Peluquería sin descripción.',
           direccion: direccion.value,
@@ -199,9 +208,8 @@ export default {
           user_id: user_id.value
         });
         if (response.status === 200) {
-          alert("La solicitud de registro ha sido enviada exitosamente.");
-          
-          // Reset form fields without triggering validation
+
+          // Reiniciar el formulario
           nombre.value = "";
           descripcion.value = "";
           direccion.value = "";
@@ -228,7 +236,14 @@ export default {
         }
       } finally {
         isSubmitting.value = false;
+        showModal.value = false; // Cerrar el modal después de completar la acción
       }
+    };
+
+    // Cancel modal
+    const cancelarEnvio = () => {
+      showModal.value = false;
+      modalAction.value = null;
     };
 
     return {
@@ -260,7 +275,12 @@ export default {
       credencialesInvalidas,
       tieneErrores,
       isSubmitting,
-      submitForm
+      submitForm,
+      showModal,
+      modalMessage,
+      modalAction,
+      confirmarEnvio,
+      cancelarEnvio
     };
   }
 };
@@ -269,7 +289,8 @@ export default {
 <template>
   <form class="flex-column" @submit.prevent="submitForm">
     <h1 class="flex-center">¿Quieres que tu negocio llegue a más gente?</h1>
-    <h3 class="flex-center">Entra en <span class="span__corteclick">Corteclick</span> como empresario con esta solicitud. </h3>
+    <h3 class="flex-center">Entra en <span class="span__corteclick">Corteclick</span> como empresario con esta
+      solicitud. </h3>
 
     <hr />
 
@@ -361,7 +382,6 @@ export default {
     </div>
 
     <div class="form__horizontal flex">
-
       <div class="flex-column form__campo">
         <label for="contrasenia">Contraseña *</label>
         <div class="inputForm flex">
@@ -397,7 +417,6 @@ export default {
       </div>
     </div>
 
-
     <div v-if="errores.user_id" class="errorMensaje">
       {{ errores.user_id }}
     </div>
@@ -408,6 +427,10 @@ export default {
     <div class="form__bottom flex-column mg-tb-1">
       <PrimaryButton label="Enviar mi solicitud" />
     </div>
+
+    <!-- Modal de confirmación -->
+    <ModalConfirm v-model:show="showModal" :message="modalMessage" :show-cancel="true"
+      @confirm="confirmarEnvio" @cancel="cancelarEnvio" />
   </form>
 </template>
 
@@ -507,7 +530,6 @@ form {
           outline: none;
         }
       }
-
     }
   }
 

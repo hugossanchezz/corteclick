@@ -11,7 +11,7 @@ class PeluqueriaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function getPeluquerias(): JsonResponse
     {
         $peluquerias = Peluqueria::all();
         return response()->json($peluquerias);
@@ -27,48 +27,70 @@ class PeluqueriaController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function createNewLocal(Request $request)
     {
-        //
+        try {
+            // Validar los datos recibidos
+            $validated = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'descripcion' => 'required|string',
+                'direccion' => 'required|string|max:255',
+                'localidad' => 'required|integer|exists:localidades,id',
+                'email' => 'required|email|unique:peluquerias,email',
+                'telefono' => 'required|string|max:20',
+                'tipo' => 'required|string|in:PELUQUERIA,BARBERIA,UNISEX',
+                'contrasenia' => 'required|string',
+                'user_id' => 'required|integer|exists:users,id',
+            ]);
+
+            // Crear un nuevo registro en la tabla peluquerias
+            $peluqueria = Peluqueria::create([
+                'nombre' => $validated['nombre'],
+                'descripcion' => $validated['descripcion'],
+                'direccion' => $validated['direccion'],
+                'localidad' => $validated['localidad'],
+                'email' => $validated['email'],
+                'telefono' => $validated['telefono'],
+                'tipo' => $validated['tipo'],
+                'contrasenia' => $validated['contrasenia'], // Podrías encriptar la contraseña aquí si es necesario
+                'user_id' => $validated['user_id'],
+                'valoracion' => null, 
+            ]);
+
+            return response()->json([
+                'message' => 'Peluquería creada exitosamente',
+                'peluqueria' => $peluqueria,
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al crear la peluquería: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function deleteLocalByEmail($email)
     {
-        //
-    }
+        try {
+            // Buscar la peluquería por email
+            $peluqueria = Peluqueria::where('email', $email)->first();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Peluqueria $peluqueria)
-    {
-        //
-    }
+            // Verificar si la peluquería existe
+            if (!$peluqueria) {
+                return response()->json([
+                    'error' => 'Peluquería no encontrada con el email proporcionado.',
+                ], 404);
+            }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Peluqueria $peluqueria)
-    {
-        //
-    }
+            // Eliminar la peluquería
+            $peluqueria->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Peluqueria $peluqueria)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Peluqueria $peluqueria)
-    {
-        //
+            return response()->json([
+                'message' => 'Peluquería eliminada exitosamente.',
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al eliminar la peluquería: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }

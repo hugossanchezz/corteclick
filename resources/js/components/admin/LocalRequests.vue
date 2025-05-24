@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted, watch, computed } from "vue"; // Añadimos computed para manejar la caché
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
@@ -13,45 +13,41 @@ export default {
         const estadoSeleccionado = ref("PENDIENTE");
         const estados = ref(["PENDIENTE", "APROBADA", "RECHAZADA"]);
 
-        // Estado para el modal
         const showModal = ref(false);
         const modalMessage = ref("");
-        const modalAction = ref(null); // Guardará la acción a realizar (aprobar, denegar, etc.)
-        const modalSolicitudId = ref(null); // Guardará el ID de la solicitud
+        const modalAction = ref(null);
+        const modalSolicitudId = ref(null);
 
-        // Caché para los nombres de las localidades
         const localidadNames = ref({});
 
         const cargarSolicitudes = async (estado) => {
             try {
                 const response = await axios.get(`/api/admin/requests?estado=${estado}`, {
-                    headers: { Authorization: `Bearer ${sessionStorage.getItem('token')}` }
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
                 solicitudes.value = response.data;
-
-                // Cargar nombres de localidades para las solicitudes obtenidas
                 await cargarNombresLocalidades();
             } catch (error) {
                 console.error("Error fetching local requests:", error);
                 solicitudes.value = [];
-                // Mostrar mensaje de error con el modal
                 modalMessage.value = "Error al cargar las solicitudes. Por favor, intenta de nuevo más tarde.";
-                modalAction.value = null; // No hay acción, solo mensaje
+                modalAction.value = null;
                 showModal.value = true;
             }
         };
 
-        // Función para cargar los nombres de las localidades
         const cargarNombresLocalidades = async () => {
             const uniqueLocalityIds = [...new Set(solicitudes.value.map(s => s.localidad))];
             for (const id of uniqueLocalityIds) {
                 if (!localidadNames.value[id]) {
                     try {
-                        const response = await axios.get(`/api/localities/${id}/name`);
+                        const response = await axios.get(`/api/localities/${id}/name`, {
+                            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                        });
                         localidadNames.value[id] = response.data;
                     } catch (error) {
                         console.error(`Error fetching locality name for ID ${id}:`, error);
-                        localidadNames.value[id] = "Desconocido"; // Valor por defecto en caso de error
+                        localidadNames.value[id] = "Desconocido";
                     }
                 }
             }
@@ -81,18 +77,77 @@ export default {
                 devolverAPendiente: 'PENDIENTE',
             };
             const mensajesExito = {
-                aprobar: "Solicitud APROBADA exitosamente.",
+                aprobar: "Solicitud APROBADA exitosamente y peluquería creada.",
                 denegar: "Solicitud DENEGADA exitosamente.",
-                devolverAPendiente: "Solicitud devuelta a PENDIENTE exitosamente.",
+                devolverAPendiente: "Solicitud devuelta a PENDIENTE exitosamente y peluquería eliminada si existía.",
             };
 
             try {
-                await axios.post(`/api/admin/requests/${solicitudId}/cambiarEstado`, { estado: estadoMap[action] });
+                const solicitud = solicitudes.value.find(s => s.id === solicitudId);
+                if (!solicitud) {
+                    throw new Error("Solicitud no encontrada");
+                }
+
+                if (action === 'aprobar') {
+                    // let normalizedTipo = solicitud.tipo;
+                    // if (normalizedTipo) {
+                    //     normalizedTipo = normalizedTipo.toLowerCase();
+                    //     if (!['peluqueria', 'barberia', 'estetica'].includes(normalizedTipo)) {
+                    //         throw new Error("El tipo de solicitud no es válido. Debe ser 'peluqueria', 'barberia' o 'estetica'.");
+                    //     }
+                    // } else {
+                    //     throw new Error("El campo 'tipo' está vacío o no definido.");
+                    // }
+
+                    try {
+                        const response = await axios.post('/api/new-local', {
+                            nombre: solicitud.nombre,
+                            descripcion: solicitud.descripcion,
+                            direccion: solicitud.direccion,
+                            localidad: solicitud.localidad,
+                            email: solicitud.email,
+                            telefono: solicitud.telefono,
+                            tipo: solicitud.tipo,
+                            contrasenia: solicitud.contrasenia,
+                            user_id: solicitud.user_id,
+                        });
+                    } catch (newLocalError) {
+                        console.error("Error al crear el nuevo local:", newLocalError.response ? newLocalError.response.data : newLocalError.message);
+                        throw newLocalError;
+                    }
+                }
+
+                // Si la acción es devolver a pendiente y el estado actual es APROBADA, eliminar la peluquería por email
+                if (action === 'devolverAPendiente' && solicitud.estado === 'APROBADA') {
+                    try {
+                        const response = await axios.delete(`/api/delete-local/${encodeURIComponent(solicitud.email)}`);
+                    } catch (deleteError) {
+                        // Si la peluquería no existe (404), continuamos con el cambio de estado
+                        if (deleteError.response && deleteError.response.status !== 404) {
+                            console.error("Error al eliminar la peluquería:", deleteError.response ? deleteError.response.data : deleteError.message);
+                            throw deleteError;
+                        } else {
+                            console.warn("No se encontró una peluquería para eliminar con el email:", solicitud.email);
+                        }
+                    }
+                }
+
+                // Cambiar el estado de la solicitud
+                await axios.post(`/api/admin/requests/${solicitudId}/cambiarEstado`, { estado: estadoMap[action] }, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                });
+
+                // Filtrar la solicitud de la lista
                 solicitudes.value = solicitudes.value.filter(s => s.id !== solicitudId);
-                abrirModal(mensajesExito[action], null, null); // Mostrar mensaje de éxito
+                abrirModal(mensajesExito[action], null, null);
             } catch (error) {
-                console.error(`Error al ${action}:`, error);
-                abrirModal(`Error al ${action === 'aprobar' ? 'aprobar' : action === 'denegar' ? 'denegar' : 'devolver a pendiente'} la solicitud. Por favor, intenta de nuevo.`, null, null);
+                console.error(`Error al ${action}:`, error.response ? error.response.data : error.message);
+                abrirModal(
+                    `Error al ${action === 'aprobar' ? 'aprobar' : action === 'denegar' ? 'denegar' : 'devolver a pendiente'} la solicitud. ` +
+                    (error.message || (error.response && error.response.data && error.response.data.error ? error.response.data.error : 'Por favor, intenta de nuevo.')),
+                    null,
+                    null
+                );
             }
         };
 
@@ -119,7 +174,7 @@ export default {
             denegarSolicitud,
             devolverAPendiente,
             ejecutarAccion,
-            localidadNames, // Devolver la caché de nombres de localidades
+            localidadNames,
         };
     },
 };
@@ -259,7 +314,7 @@ tr:hover {
 
 .approve-btn {
     background-color: #4CAF50;
-    color: white;
+    color: map-get($colores, 'blanco');
 }
 
 .approve-btn:hover {
@@ -268,7 +323,7 @@ tr:hover {
 
 .deny-btn {
     background-color: #f44336;
-    color: white;
+    color: map-get($colores, 'blanco');
 }
 
 .deny-btn:hover {
@@ -276,8 +331,8 @@ tr:hover {
 }
 
 .revert-btn {
-    background-color: #ff9800;
-    color: white;
+    background-color: map-get($colores, 'naranja');
+    color: map-get($colores, 'blanco');
 }
 
 .revert-btn:hover {
@@ -287,7 +342,7 @@ tr:hover {
 .no-data-message {
     text-align: center;
     margin-top: 20px;
-    color: #666;
+    color: map-get($colores, 'gris_oscuro');
     font-style: italic;
 }
 </style>
