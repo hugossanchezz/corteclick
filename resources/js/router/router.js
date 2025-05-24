@@ -21,8 +21,8 @@ import Appointments from '@/js/components/user/Appointments.vue';
 import Locals from '@/js/components/user/Locals.vue';
 
 // Admin
-import DashboardView from '@/views/admin/DashboardView.vue';
-import LocalRequestsView from '@/views/admin/LocalRequestsView.vue';
+import Dashboard from '@/js/components/admin/Dashboard.vue';
+import LocalRequests from '@/js/components/admin/LocalRequests.vue';
 
 // 404 Not Found
 import NotFoundPage from '@/views/pages/NotFoundView.vue';
@@ -77,8 +77,8 @@ const routes = [
             { path: 'settings', name: 'Settings', component: Settings },
             { path: 'appointments', name: 'Appointments', component: Appointments },
             { path: 'my-locals', name: 'MyLocals', component: Locals },
-            { path: '/admin/dashboard', name: 'Dashboard', component: DashboardView },
-            { path: '/admin/requests', name: 'Requests', component: LocalRequestsView },
+            { path: '/admin/dashboard', name: 'Dashboard', component: Dashboard },
+            { path: '/admin/requests', name: 'Requests', component: LocalRequests},
         ],
     },
 
