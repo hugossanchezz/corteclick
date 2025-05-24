@@ -15,7 +15,7 @@ export default {
         };
 
         onMounted(() => {
-            const storedUser = localStorage.getItem("user");
+            const storedUser = sessionStorage.getItem("user");
             if (storedUser) {
                 try {
                     JSON.parse(storedUser);
@@ -25,7 +25,7 @@ export default {
                         "Error al parsear el objeto de usuario:",
                         error
                     );
-                    localStorage.removeItem("user");
+                    sessionStorage.removeItem("user");
                     isLoggedIn.value = false;
                     router.push("/");
                 }

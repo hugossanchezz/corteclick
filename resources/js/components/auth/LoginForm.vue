@@ -84,8 +84,8 @@ export default {
                 });
 
                 // Almacenar el token y la información del usuario en el almacenamiento local del navegador.
-                localStorage.setItem("token", response.data.access_token);
-                localStorage.setItem(
+                sessionStorage.setItem("token", response.data.access_token);
+                sessionStorage.setItem(
                     "user",
                     JSON.stringify(response.data.user)
                 );
@@ -115,8 +115,8 @@ export default {
 
         // Verificar si ya iniciaste sesión al cargar el componente
         onMounted(() => {
-            const storedToken = localStorage.getItem("token"); // Intenta obtener el token del almacenamiento local.
-            const storedUser = localStorage.getItem("user"); // Intenta obtener la información del usuario del almacenamiento local.
+            const storedToken = sessionStorage.getItem("token"); // Intenta obtener el token del almacenamiento local.
+            const storedUser = sessionStorage.getItem("user"); // Intenta obtener la información del usuario del almacenamiento local.
 
             // Si "rememberMe" es true y hay un token y un usuario almacenados.
             if (storedToken && storedUser) {
@@ -128,9 +128,9 @@ export default {
                 } catch (error) {
                     // Si hay un error al parsear el usuario (puede que esté corrupto), limpia el almacenamiento local.
                     console.error("Error al parsear el usuario", error);
-                    localStorage.removeItem("rememberMe");
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("user");
+                    sessionStorage.removeItem("rememberMe");
+                    sessionStorage.removeItem("token");
+                    sessionStorage.removeItem("user");
                 }
             }
         });
