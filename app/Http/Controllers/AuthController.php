@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -15,10 +16,10 @@ class AuthController extends Controller
             'name' => 'required|string|max:150',
             'email' => 'required|email|max:150|unique:users',
             'password' => 'required|string|min:8',
-            'apellidos' => 'nullable|string|max:100', // Cambiado a nullable
-            'telefono' => 'nullable|string|max:20',    // Cambiado a nullable
-            'localidad' => 'nullable|integer|max:20',  // Cambiado a nullable
-            'aceptarTerminos' => 'required|accepted', // Agregada validación para los términos
+            'apellidos' => 'nullable|string|max:100',
+            'telefono' => 'nullable|digits:9',
+            'localidad' => 'nullable|integer|max:20',
+            'aceptarTerminos' => 'required|accepted',
         ]);
 
         if ($validator->fails()) {
@@ -72,5 +73,57 @@ class AuthController extends Controller
         return response()->json([ // Devuelve la respuesta como JSON
             'message' => 'Sesión cerrada correctamente.',
         ]);
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        // Verifica que el usuario autenticado coincide con el ID proporcionado
+        if (Auth::id() != $id) {
+            return response()->json([
+                'message' => 'No tienes permiso para actualizar este usuario.',
+            ], 403);
+        }
+
+        // Valida los datos de entrada
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:100',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $id,
+            'apellidos' => 'required|string|max:200',
+            'telefono' => 'required|digits:9',
+            'localidad' => 'required|exists:localidades,id',
+            'foto' => 'nullable|string', // foto es nullable
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Datos inválidos.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            // Busca el usuario por ID
+            $user = User::findOrFail($id);
+
+            // Actualiza los datos del usuario
+            $user->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'apellidos' => $request->apellidos,
+                'telefono' => $request->telefono,
+                'localidad' => $request->localidad,
+                'foto' => $request->foto,
+            ]);
+
+            return response()->json([
+                'message' => 'Usuario actualizado correctamente.',
+                'user' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el usuario.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

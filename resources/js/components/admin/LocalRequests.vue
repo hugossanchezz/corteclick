@@ -225,8 +225,8 @@ export default {
                     <td>{{ solicitud.user_id }}</td>
                     <td>
                         <div v-if="solicitud.estado === 'PENDIENTE'" class="action-buttons flex-center">
-                            <button class="approve-btn" @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
-                            <button class="deny-btn" @click="denegarSolicitud(solicitud.id)">Denegar</button>
+                            <button class="btn-confirm" @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
+                            <button class="btn-cancel" @click="denegarSolicitud(solicitud.id)">Denegar</button>
                         </div>
                         <div v-else-if="solicitud.estado === 'APROBADA' || solicitud.estado === 'RECHAZADA'"
                             class="action-buttons flex-center">
@@ -301,41 +301,13 @@ tr:hover {
     gap: 10px;
 }
 
-.approve-btn,
-.deny-btn,
-.revert-btn {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.approve-btn {
-    background-color: #4CAF50;
-    color: map-get($colores, 'blanco');
-}
-
-.approve-btn:hover {
-    background-color: #45a049;
-}
-
-.deny-btn {
-    background-color: #f44336;
-    color: map-get($colores, 'blanco');
-}
-
-.deny-btn:hover {
-    background-color: #da190b;
-}
-
 .revert-btn {
     background-color: map-get($colores, 'naranja');
     color: map-get($colores, 'blanco');
 }
 
 .revert-btn:hover {
-    background-color: #f57c00;
+    background-color: map-get($colores, 'naranja_oscuro');
 }
 
 .no-data-message {

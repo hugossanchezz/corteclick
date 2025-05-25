@@ -45,13 +45,8 @@ export default {
     <RequireAuth>
         <div class="profile flex">
             <aside class="flex-column">
-
-                <router-link :to="'/user'" class="flex aside__config"
-                    :class="{ 'route--active': isActiveRoute('/user/settings') }">
-                    Configuración <img src="/img/utils/settings.svg" alt="">
-                </router-link>
-                <router-link :to="'/user/appointments'"
-                    :class="{ 'route--active': isActiveRoute('/user/appointments') }">
+                <router-link :to="'/user'"
+                    :class="{ 'route--active': isActiveRoute('/user') }">
                     Mis citas
                 </router-link>
 
@@ -70,6 +65,12 @@ export default {
                     :class="{ 'route--active': isActiveRoute('/admin/dashboard') }">
                     Panel de control
                 </router-link>
+
+                <hr>
+                <router-link :to="'/user/settings'" class="flex aside__config"
+                    :class="{ 'route--active': isActiveRoute('/user/settings') }">
+                    Configuración <img src="/img/utils/settings.svg" alt="">
+                </router-link>
                 
             </aside>
             <section class="profile__main">
@@ -81,6 +82,13 @@ export default {
 
 <style scoped lang="scss">
 @use "@/sass/variables" as *;
+
+hr {
+    background-color: map-get($colores, 'gris_claro');
+    height: 2px;
+    border: none;
+    margin: 1rem 0;
+}
 
 .profile {
     height: 100%;

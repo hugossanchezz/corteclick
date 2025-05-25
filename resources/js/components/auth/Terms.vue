@@ -243,7 +243,7 @@ export default {
         <hr />
 
         <h2 class="flex">
-            <img src="/img/auth/pencil.svg" alt="Icono de firma" /> Firma del
+            <img src="/img/utils/pencil_dark.svg" alt="Icono de firma" /> Firma del
             Usuario
         </h2>
         <p>

@@ -11,7 +11,7 @@ export default {
 </script>
 
 <template>
-    <button>{{ label }}</button>
+    <button v-html="label" class="flex-center"></button>
 </template>
 
 <style scoped lang="scss">
@@ -30,9 +30,12 @@ button {
 
     border: 2px solid map-get($colores, "gris_claro");
     border-radius: 5px;
+    gap: 5px;
     cursor: pointer;
 
     transition: transform 0.2s ease;
+
+    text-decoration: none;
 
     &:hover {
         transform: scale(1.05);

@@ -11,7 +11,7 @@ export default {
 </script>
 
 <template>
-    <button>{{ label }}</button>
+    <button v-html="label" class="flex-center"></button>
 </template>
 
 <style scoped lang="scss">
@@ -26,12 +26,13 @@ button {
 
     border: none;
     border-radius: 5px;
+    gap: 5px;
     cursor: pointer;
 
     transition: transform 0.2s ease;
     &:hover {
         transform: scale(1.02);
-        box-shadow: 0 0 5px rgba(255, 0, 0, 0.75);
+        box-shadow: 0 0 3px rgba(255, 0, 0, 0.75);
     }
 }
 </style>

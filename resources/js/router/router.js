@@ -72,11 +72,11 @@ const routes = [
     {
         path: '/user', name: 'User', component: UserView,
         children: [
-            { path: '', name: 'Settings', component: Settings },
-            { path: 'appointments', name: 'Appointments', component: Appointments },
+            { path: '', name: 'Appointments', component: Appointments },
             { path: 'my-locals', name: 'MyLocals', component: Locals },
             { path: '/admin/dashboard', name: 'Dashboard', component: Dashboard },
             { path: '/admin/requests', name: 'Requests', component: LocalRequests},
+            { path: 'settings', name: 'Settings', component: Settings },
         ],
     },
 

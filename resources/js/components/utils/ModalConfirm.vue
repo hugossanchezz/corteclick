@@ -92,29 +92,4 @@ export default {
   gap: 10px;
 }
 
-.btn {
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  @include fuente("parrafo");
-}
-
-.btn-confirm {
-  background-color: #4CAF50;
-  color: map-get($colores, 'blanco');
-}
-
-.btn-confirm:hover {
-  background-color: #45a049;
-}
-
-.btn-cancel {
-  background-color: #f44336;
-  color: map-get($colores, 'blanco');
-}
-
-.btn-cancel:hover {
-  background-color: #da190b;
-}
 </style>

@@ -1,9 +1,9 @@
 <script>
 import axios from "axios";
 import { useRouter } from "vue-router";
-import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import { ref, computed, watch, onMounted } from "vue";
-import ModalConfirm from "@/js/components/utils/ModalConfirm.vue"; // Importar ModalConfirm
+import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
+import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
 export default {
   name: "FormLocal",

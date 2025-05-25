@@ -29,7 +29,11 @@
     margin: 4rem 0;
 }
 
-// Styling classes
+// Styling font classes
+* {
+    @include fuente("parrafo");
+}
+
 h1 {
     @include fuente("titulo_principal");
     margin: 0;
@@ -77,13 +81,59 @@ ul {
     animation: reveal-color 3s linear forwards;
 }
 
+.btn {
+    border: none;
+    border-radius: 4px;
+    padding: 5px 16px;
+    font-weight: bold;
+    cursor: pointer;
+    @include fuente("parrafo");
+
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 3px rgba(71, 71, 71, 0.3);
+    }
+}
+
+.btn-confirm {
+    background-color: #4CAF50;
+    color: map-get($colores, 'blanco');
+
+    &:hover {
+        background-color: #45a049;
+    }
+}
+
+.btn-cancel {
+    background-color: #f44336;
+    color: map-get($colores, 'blanco');
+
+    &:hover {
+        background-color: #da190b;
+    }
+}
+
+.btn-edit {
+    background-color: map-get($colores, 'naranja');
+    color: map-get($colores, 'blanco');
+
+    &:hover {
+        background-color: map-get($colores, 'naranja_oscuro');
+    }
+}
+
 @keyframes reveal-color {
-  0% {
-    background-position: 200% 0; /* El fondo está completamente a la derecha */
-  }
-  100% {
-    background-position: 0 0; /* El fondo se mueve completamente a la izquierda */
-  }
+    0% {
+        background-position: 200% 0;
+        /* El fondo está completamente a la derecha */
+    }
+
+    100% {
+        background-position: 0 0;
+        /* El fondo se mueve completamente a la izquierda */
+    }
 }
 
 // Mixins
