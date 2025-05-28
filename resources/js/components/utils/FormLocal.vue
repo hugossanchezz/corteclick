@@ -13,7 +13,7 @@ export default {
   setup() {
     const router = useRouter();
 
-    // Form fields
+    // Campos del formulario
     const nombre = ref("");
     const descripcion = ref("");
     const direccion = ref("");
@@ -24,26 +24,25 @@ export default {
     const tipo = ref("");
     const user_id = ref("");
 
-    // Error handling
+    // Errores
     const errores = ref({});
     const generalErrorMessage = ref("");
     const registroExitoso = ref(false);
     const credencialesInvalidas = ref("");
     const isSubmitting = ref(false);
 
-    // Modal state
+    // Modal
     const showModal = ref(false);
     const modalMessage = ref("");
     const modalAction = ref(null);
 
-    // Validation patterns
+    // Patterns de validación
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const telefonoPattern = /^\+?[0-9]{9}$/;
 
 
     const tieneErrores = computed(() => Object.keys(errores.value).length > 0);
 
-    // Update error function
     const actualizarError = (campo, mensaje) => {
       if (mensaje) {
         errores.value[campo] = mensaje;
@@ -52,7 +51,6 @@ export default {
       }
     };
 
-    // Fetch localities and user_id
     onMounted(async () => {
       cargarLocalidades();
 
@@ -130,7 +128,7 @@ export default {
       return Object.keys(errores.value).length === 0;
     };
 
-    // Form submission with modal confirmation
+    // Enviar formulario
     const submitForm = () => {
       generalErrorMessage.value = "";
       credencialesInvalidas.value = "";
