@@ -87,6 +87,7 @@ ul {
     padding: 5px 16px;
     font-weight: bold;
     cursor: pointer;
+    text-decoration: none;
     @include fuente("parrafo");
 
     transition: transform 0.2s ease;
@@ -121,6 +122,17 @@ ul {
 
     &:hover {
         background-color: map-get($colores, 'naranja_oscuro');
+    }
+}
+
+.btn-back {
+    background-color: transparent;
+    border: 2px solid map-get($colores, 'azul_oscuro');
+    color: map-get($colores, 'azul_oscuro');
+
+    &:hover {
+        border-color: map-get($colores, 'gris_oscuro');
+        color: map-get($colores, 'gris_oscuro');
     }
 }
 

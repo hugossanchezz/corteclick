@@ -1,6 +1,7 @@
 <script>
 import SecondaryButton from "@/js/components/actions/SecondaryButton.vue";
 import { ref, onMounted, watch, computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 export default {
     name: "LocalsView",
@@ -10,13 +11,13 @@ export default {
         const peluqueriasFiltradas = ref([]);
         const errorBusqueda = ref(null);
         const loading = ref(true);
-
         const tipoLocalFilter = ref("");
         const ordenValoracion = ref("");
         const codigoPostalBusqueda = ref("");
-
         const paginaActual = ref(1);
         const itemsPorPagina = 12;
+
+        const router = useRouter();
 
         const cargarPeluquerias = async () => {
             loading.value = true;
@@ -30,7 +31,7 @@ export default {
                     if (resLoc.ok) {
                         p.nombreLocalidad = await resLoc.text();
                     } else {
-                        p.nombreLocalidad = "Desconocido"; // Fallback en caso de error
+                        p.nombreLocalidad = "Desconocido";
                     }
                 }
 
@@ -49,7 +50,7 @@ export default {
             errorBusqueda.value = null;
 
             if (tipoLocalFilter.value) {
-                resultado = resultado.filter(p => p.tipo === tipoLocalFilter.value);
+                resultado = resultado.filter((p) => p.tipo === tipoLocalFilter.value);
             }
 
             if (codigoPostalBusqueda.value.trim()) {
@@ -62,9 +63,9 @@ export default {
 
                     if (idsLocalidad.length === 0) {
                         errorBusqueda.value = "No se encontraron resultados.";
-                        resultado = []; // Mostrar mensaje sin resultados
+                        resultado = [];
                     } else {
-                        resultado = resultado.filter(p => idsLocalidad.includes(p.localidad));
+                        resultado = resultado.filter((p) => idsLocalidad.includes(p.localidad));
                         if (resultado.length === 0) {
                             errorBusqueda.value = "No se encontraron peluquerías en las localidades especificadas.";
                         }
@@ -72,7 +73,7 @@ export default {
                 } catch (error) {
                     errorBusqueda.value = "Error al buscar la localidad.";
                     console.error("Error en búsqueda por localidad:", error);
-                    resultado = []; // Mostrar mensaje sin resultados
+                    resultado = [];
                 }
             }
 
@@ -107,17 +108,23 @@ export default {
             if (paginaActual.value > 1) paginaActual.value--;
         };
 
-        const totalPages = computed(() =>
-            Math.ceil(peluqueriasFiltradas.value.length / itemsPorPagina)
-        );
+        const totalPages = computed(() => Math.ceil(peluqueriasFiltradas.value.length / itemsPorPagina));
 
         const peluqueriasPaginadas = computed(() => {
             const start = (paginaActual.value - 1) * itemsPorPagina;
             return peluqueriasFiltradas.value.slice(start, start + itemsPorPagina);
         });
 
+        const goToPeluqueria = (id) => {
+            router.push({ name: "Local", params: { id } });
+        };
+
+
         watch([tipoLocalFilter, ordenValoracion, codigoPostalBusqueda], aplicarFiltros, { deep: true });
-        onMounted(cargarPeluquerias);
+
+        onMounted(() => {
+            cargarPeluquerias();
+        });
 
         return {
             peluqueriasPaginadas,
@@ -131,90 +138,90 @@ export default {
             paginaActual,
             totalPages,
             paginaSiguiente,
-            paginaAnterior
+            paginaAnterior,
+            goToPeluqueria,
         };
-    }
+    },
 };
 </script>
 
 <template>
-    <div class="locals__space grid">
-        <aside class="flex-column">
-            <h2>Filtros</h2>
-
-            <div class="filtro__seccion">
-                <p>Tipo de local</p>
-                <div class="opcion__filtro">
-                    <input type="radio" id="barberias" name="tipo-local" value="BARBERIA" v-model="tipoLocalFilter" />
-                    <label for="barberias">Barberías para Hombres</label>
-                </div>
-                <div class="opcion__filtro">
-                    <input type="radio" id="peluquerias" name="tipo-local" value="PELUQUERIA"
-                        v-model="tipoLocalFilter" />
-                    <label for="peluquerias">Peluquerías para Mujeres</label>
-                </div>
-                <div class="opcion__filtro">
-                    <input type="radio" id="unisex" name="tipo-local" value="UNISEX" v-model="tipoLocalFilter" />
-                    <label for="unisex">Locales Unisex</label>
-                </div>
-            </div>
-
-            <div class="filtro__seccion">
-                <p>Ordenar por valoración</p>
-                <div class="opcion__filtro">
-                    <input type="radio" id="mayor-menor" name="orden-valoracion" value="mayor-menor"
-                        v-model="ordenValoracion" />
-                    <label for="mayor-menor">De mayor a menor <span>★ ★ ★ ★</span></label>
-                </div>
-                <div class="opcion__filtro">
-                    <input type="radio" id="menor-mayor" name="orden-valoracion" value="menor-mayor"
-                        v-model="ordenValoracion" />
-                    <label for="menor-mayor">De menor a mayor <span>★ ★ </span></label>
-                </div>
-            </div>
-
-            <p class="filtro__reset" @click="resetFilters">Restablecer filtros</p>
-        </aside>
-        <main class="flex-column">
-            <div class="peluquerias__buscador">
-                <input type="text" placeholder="Introduce el código postal o nombre de la localidad"
-                    v-model="codigoPostalBusqueda" @input="aplicarFiltros" />
-                <img src="/img/utils/search.svg" alt="Buscador de locales por código postal" />
-            </div>
-            <div v-if="loading">
-                <p class="mg-tb-4 loading">Cargando peluquerías...</p>
-            </div>
-            <div v-else-if="errorBusqueda">
-                <p class="mg-tb-4 error-message">{{ errorBusqueda }}</p>
-            </div>
-            <div v-else class="peluquerias__grid grid">
-                <div v-for="peluqueria in peluqueriasPaginadas" :key="peluqueria.id"
-                    class="peluqueria__card flex-column">
-                    <img src="/img/utils/corteclick.png" alt="Imagen principal de la peluquería" />
-                    <h2 class="card__info flex">
-                        {{ peluqueria.nombre }}
-                        <div>{{ peluqueria.valoracion || 'Sin valoración' }} <span>★</span></div>
-                    </h2>
-                    <p class="card__description">
-                        {{ peluqueria.descripcion }}
-                    </p>
-                    <div class="card__info flex">
-                        <p class="flex">
-                            <img class="card__location" src="/img/locals/location.svg" alt="Icono de la ubicación" />
-                            {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
-                        </p>
-                        <img class="card__bookmark" @click="peluqueria.favorito = !peluqueria.favorito"
-                            src="/img/locals/bookmark.svg" alt="Guardar peluquería como favorita" />
+    <div>
+        <div class="locals__space grid">
+            <aside class="flex-column">
+                <h2>Filtros</h2>
+                <div class="filtro__seccion">
+                    <p>Tipo de local</p>
+                    <div class="opcion__filtro">
+                        <input type="radio" id="barberias" name="tipo-local" value="BARBERIA"
+                            v-model="tipoLocalFilter" />
+                        <label for="barberias">Barberías para Hombres</label>
+                    </div>
+                    <div class="opcion__filtro">
+                        <input type="radio" id="peluquerias" name="tipo-local" value="PELUQUERIA"
+                            v-model="tipoLocalFilter" />
+                        <label for="peluquerias">Peluquerías para Mujeres</label>
+                    </div>
+                    <div class="opcion__filtro">
+                        <input type="radio" id="unisex" name="tipo-local" value="UNISEX" v-model="tipoLocalFilter" />
+                        <label for="unisex">Locales Unisex</label>
                     </div>
                 </div>
-            </div>
-            <div class="pagination__controls flex-center" v-if="totalPages > 1">
-                <button @click="paginaAnterior" :disabled="paginaActual === 1">
-                    << </button>
-                        <p>Página {{ paginaActual }} de {{ totalPages }}</p>
-                        <button @click="paginaSiguiente" :disabled="paginaActual === totalPages"> >> </button>
-            </div>
-        </main>
+                <div class="filtro__seccion">
+                    <p>Ordenar por valoración</p>
+                    <div class="opcion__filtro">
+                        <input type="radio" id="mayor-menor" name="orden-valoracion" value="mayor-menor"
+                            v-model="ordenValoracion" />
+                        <label for="mayor-menor">De mayor a menor <span>★ ★ ★ ★</span></label>
+                    </div>
+                    <div class="opcion__filtro">
+                        <input type="radio" id="menor-mayor" name="orden-valoracion" value="menor-mayor"
+                            v-model="ordenValoracion" />
+                        <label for="menor-mayor">De menor a mayor <span>★ ★ </span></label>
+                    </div>
+                </div>
+                <p class="filtro__reset" @click="resetFilters">Restablecer filtros</p>
+            </aside>
+            <main class="flex-column">
+                <div class="peluquerias__buscador">
+                    <input type="text" placeholder="Introduce el código postal o nombre de la localidad"
+                        v-model="codigoPostalBusqueda" @input="aplicarFiltros" />
+                    <img src="/img/utils/search.svg" alt="Buscador de locales por código postal" />
+                </div>
+                <div v-if="loading">
+                    <p class="mg-tb-4 loading">Cargando peluquerías...</p>
+                </div>
+                <div v-else-if="errorBusqueda">
+                    <p class="mg-tb-4 error-message">{{ errorBusqueda }}</p>
+                </div>
+                <div v-else class="peluquerias__grid grid">
+                    <div @click="goToPeluqueria(peluqueria.id)" v-for="peluqueria in peluqueriasPaginadas"
+                        :key="peluqueria.id" class="peluqueria__card flex-column">
+                        <img src="/img/utils/corteclick.png" alt="Imagen principal de la peluquería" />
+                        <h2 class="card__info flex">
+                            {{ peluqueria.nombre }}
+                            <div>{{ peluqueria.valoracion || "Sin valoración" }} <span>★</span></div>
+                        </h2>
+                        <p class="card__description">{{ peluqueria.descripcion }}</p>
+                        <div class="card__info flex">
+                            <p class="flex">
+                                <img class="card__location" src="/img/locals/location.svg"
+                                    alt="Icono de la ubicación" />
+                                {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
+                            </p>
+                            <!-- <img class="card__bookmark" @click.stop="peluqueria.favorito = !peluqueria.favorito"
+                                src="/img/locals/bookmark.svg" alt="Guardar peluquería como favorita" /> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination__controls flex-center" v-if="totalPages > 1">
+                    <button @click="paginaAnterior" :disabled="paginaActual === 1">
+                        << </button>
+                            <p>Página {{ paginaActual }} de {{ totalPages }}</p>
+                            <button @click="paginaSiguiente" :disabled="paginaActual === totalPages">>></button>
+                </div>
+            </main>
+        </div>
     </div>
 </template>
 
@@ -266,7 +273,6 @@ export default {
     }
 
     main {
-
         align-items: center;
         padding: 3rem 4rem;
 
@@ -312,6 +318,7 @@ export default {
                 &:hover {
                     transform: translateY(-5px);
                     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+                    cursor: pointer;
                 }
 
                 strong {
@@ -322,20 +329,16 @@ export default {
                     width: 100%;
                     height: 200px;
                     object-fit: cover;
-                    border-radius: 8px
+                    border-radius: 8px;
                 }
 
                 .card__description {
                     height: 48px;
                     overflow: hidden;
-                    /* Oculta el texto que se desborda del contenedor */
                     display: -webkit-box;
-                    /* Necesario para la propiedad -webkit-line-clamp */
                     -webkit-line-clamp: 3;
                     line-clamp: 3;
-                    /* Limita el contenido a tres líneas */
                     -webkit-box-orient: vertical;
-                    /* Establece la orientación vertical del contenido */
                     text-overflow: ellipsis;
                 }
 
@@ -363,9 +366,7 @@ export default {
                         color: map-get($colores, "naranja");
                     }
                 }
-
             }
-
         }
 
         .pagination__controls {
@@ -383,20 +384,46 @@ export default {
         }
     }
 
-}
-
-.error-message {
-    color: map-get($colores, "naranja");
-    margin-top: 10px;
-}
-
-@media (max-width: 768px) {
-    .peluquerias__grid {
-        grid-template-columns: 1fr;
+    .error-message {
+        color: map-get($colores, "naranja");
+        margin-top: 10px;
     }
 
-    .peluqueria__card {
-        margin-bottom: 15px;
+    .local-details {
+        background-color: red;
+        padding: 3rem 4rem;
+        text-align: center;
+        min-height: 100vh;
+        /* Ensure it takes full height for visibility */
+
+        .back-button {
+            @include fuente("parrafo");
+            background-color: map-get($colores, "gris_claro");
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+
+            &:hover {
+                background-color: map-get($colores, "naranja");
+                color: white;
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .peluquerias__grid {
+            grid-template-columns: 1fr;
+        }
+
+        .peluqueria__card {
+            margin-bottom: 15px;
+        }
+
+        .local-details {
+            padding: 1.5rem;
+        }
     }
 }
 </style>

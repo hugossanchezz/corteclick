@@ -47,7 +47,7 @@ export default {
     </div>
     <div v-else class="advert flex-center">
         <div class="modal flex-column glass-effect">
-            <p>Por favor, inicia sesión para ver esta página.</p>
+            <h1>Por favor, inicia sesión para ver esta página.</h1>
             <PrimaryButton @click="redirectToLogin" label="Iniciar sesión" />
         </div>
     </div>
@@ -55,11 +55,13 @@ export default {
 
 <style scoped lang="scss">
 @use "@/sass/variables" as *;
+
 .advert {
     background-color: map-get($colores, "gris_claro");
     background-image: url("/img/utils/haircut.jpg");
     background-size: cover;
     background-position: center;
+
     .modal {
 
         border-radius: 10px;
@@ -69,10 +71,9 @@ export default {
         align-items: center;
         gap: 1rem;
 
-        p{
+        h1 {
             color: map-get($colores, "gris_claro");
         }
     }
 }
-
 </style>

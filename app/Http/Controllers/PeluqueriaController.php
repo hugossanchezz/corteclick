@@ -91,4 +91,10 @@ class PeluqueriaController extends Controller
             ], 500);
         }
     }
+
+    public function getPeluqueriaById($id)
+    {
+        $peluqueria = Peluqueria::find($id);
+        return response()->json($peluqueria);
+    }
 }

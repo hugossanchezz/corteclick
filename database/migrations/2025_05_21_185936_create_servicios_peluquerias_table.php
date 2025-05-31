@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::create('servicios_peluqueria', function (Blueprint $table) {
             $table->unsignedBigInteger('id_servicio');
             $table->unsignedBigInteger('id_peluqueria');
+            $table->decimal('precio', 4, 2);
+            $table->integer('duracion')->comment('En minutos');
             $table->timestamps();
 
             $table->foreign('id_servicio')->references('id')->on('servicios');

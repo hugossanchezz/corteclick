@@ -225,8 +225,8 @@ export default {
                     <td>{{ solicitud.user_id }}</td>
                     <td>
                         <div v-if="solicitud.estado === 'PENDIENTE'" class="action-buttons flex-center">
-                            <button class="btn-confirm" @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
-                            <button class="btn-cancel" @click="denegarSolicitud(solicitud.id)">Denegar</button>
+                            <button class="btn btn-confirm" @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
+                            <button class="btn btn-cancel" @click="denegarSolicitud(solicitud.id)">Denegar</button>
                         </div>
                         <div v-else-if="solicitud.estado === 'APROBADA' || solicitud.estado === 'RECHAZADA'"
                             class="action-buttons flex-center">

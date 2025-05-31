@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router';
 
 // Principal pages
 import LandingView from '@/views/pages/LandingView.vue';
-import LocalsView from '@/views/pages/LocalsView.vue';
 import NewLocalView from '@/views/pages/NewLocalView.vue';
+import LocalsView from '@/views/pages/LocalsView.vue';
+import Local from '@/js/components/locals/Local.vue';
 
 // Auth
 import AuthView from '@/views/auth/AuthView.vue';
@@ -17,7 +18,8 @@ import Cookies from "@/js/components/auth/Cookies.vue";
 import UserView from '@/views/user/UserView.vue';
 import Settings from '@/js/components/user/Settings.vue';
 import Appointments from '@/js/components/user/Appointments.vue';
-import Locals from '@/js/components/user/Locals.vue';
+import MyLocals from '@/js/components/user/Locals.vue';
+
 
 // Admin
 import Dashboard from '@/js/components/admin/Dashboard.vue';
@@ -29,6 +31,7 @@ import NotFoundPage from '@/views/pages/NotFoundView.vue';
 const routes = [
     { path: '/', name: 'Home', component: LandingView },
     { path: '/locals', name: 'Locals', component: LocalsView },
+    { path: '/locals/:id', name: 'Local', component: Local },
     { path: '/new-local', name: 'NewLocal', component: NewLocalView },
 
     // Auth
@@ -73,9 +76,9 @@ const routes = [
         path: '/user', name: 'User', component: UserView,
         children: [
             { path: '', name: 'Appointments', component: Appointments },
-            { path: 'my-locals', name: 'MyLocals', component: Locals },
+            { path: 'my-locals', name: 'MyLocals', component: MyLocals },
             { path: '/admin/dashboard', name: 'Dashboard', component: Dashboard },
-            { path: '/admin/requests', name: 'Requests', component: LocalRequests},
+            { path: '/admin/requests', name: 'Requests', component: LocalRequests },
             { path: 'settings', name: 'Settings', component: Settings },
         ],
     },

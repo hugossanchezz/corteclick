@@ -60,4 +60,11 @@ class Peluqueria extends Model
     {
         return $this->belongsTo(Localidad::class, 'localidad');
     }
+
+    public function servicios()
+    {
+        return $this->belongsToMany(Servicio::class, 'servicios_peluqueria', 'id_peluqueria', 'id_servicio')
+            ->using(ServiciosPeluqueria::class)
+            ->withPivot('precio', 'duracion');
+    }
 }

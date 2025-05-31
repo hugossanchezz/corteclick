@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 100);
             $table->string('descripcion', 200);
-            $table->decimal('precio', 4, 2);
-            $table->integer('duracion')->comment('En minutos');
             $table->timestamps();
         });
     }
