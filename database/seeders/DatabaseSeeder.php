@@ -19,5 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PeluqueriasSeeder::class);
         $this->call(ServiciosSeeder::class);
         $this->call(ServiciosPeluqueriaSeeder::class);
+        $this->call(CitasSeeder::class);
     }
 }

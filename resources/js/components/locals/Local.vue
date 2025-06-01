@@ -1,31 +1,99 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
+import { DateTime } from "luxon";
 import RequireAuth from "@/js/components/auth/RequireAuth.vue";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 
 export default {
   name: "Local",
-
   components: { RequireAuth, PrimaryButton },
   setup() {
     const route = useRoute();
     const peluqueriaId = route.params.id;
 
     const peluqueria = ref(null);
-    const servicios = ref([]); // Servicios de la peluquería
+    const servicios = ref([]);
+    const citas = ref([]);
     const loading = ref(true);
     const error = ref(null);
-    const isOpen = ref(false); // Local abierto o cerrado
+    const isOpen = ref(false);
 
+    // Variables for week handling
+    const currentMonday = ref(null);
+    const mondayDay = ref(0);
+    const fridayDay = ref(0);
+    const occupiedSlots = ref({});
+    const currentWeekMonday = ref(null);
+
+    // Helper to get DateTime in UTC+2 Madrid
+    const toMadridDate = (date) => {
+      return date instanceof DateTime
+        ? date.setZone('Europe/Madrid')
+        : DateTime.fromJSDate(date).setZone('Europe/Madrid');
+    };
+
+    // Format date to YYYY-MM-DD in UTC+2 Madrid
+    const formatDateToString = (date) => {
+      return toMadridDate(date).toFormat('yyyy-MM-dd');
+    };
+
+    // Function to get the current week's Monday in UTC+2
+    const getCurrentWeekMonday = () => {
+      const today = toMadridDate(DateTime.now());
+      const dayOfWeek = today.weekday; // 1 (Monday) to 7 (Sunday)
+      const daysToMonday = dayOfWeek === 7 ? 1 : dayOfWeek - 1;
+      return today.minus({ days: daysToMonday }).startOf('day');
+    };
+
+    // Function to check if it's after 14:00 on Friday in UTC+2
+    const isAfterFriday2PM = () => {
+      const now = toMadridDate(DateTime.now());
+      const dayOfWeek = now.weekday; // 1 (Monday) to 7 (Sunday)
+      const hour = now.hour + now.minute / 60;
+      return (
+        (dayOfWeek === 5 && hour >= 14) || // Friday after 14:00
+        dayOfWeek === 6 || // Saturday
+        dayOfWeek === 7 // Sunday
+      );
+    };
+
+    // Function to update week days
+    const updateWeekDays = () => {
+      let date = toMadridDate(currentMonday.value);
+      const dayOfWeek = date.weekday; // 1 (Monday) to 7 (Sunday)
+      const daysToMonday = dayOfWeek === 7 ? 1 : dayOfWeek - 1;
+      date = date.minus({ days: daysToMonday }).startOf('day');
+      currentMonday.value = date;
+
+      mondayDay.value = date.day;
+      const friday = date.plus({ days: 4 });
+      fridayDay.value = friday.day;
+
+      fetchCitas();
+    };
+
+    // Navigate to previous week
+    const goToPreviousWeek = () => {
+      const newMonday = toMadridDate(currentMonday.value).minus({ weeks: 1 });
+      if (newMonday >= currentWeekMonday.value) {
+        currentMonday.value = newMonday;
+        updateWeekDays();
+      }
+    };
+
+    // Navigate to next week
+    const goToNextWeek = () => {
+      const newMonday = toMadridDate(currentMonday.value).plus({ weeks: 1 });
+      currentMonday.value = newMonday;
+      updateWeekDays();
+    };
+
+    // Check salon status
     const checkStatus = () => {
-      const now = new Date();
-      const hours = now.getUTCHours() + 2; // UTC+2 Madrid
-      const minutes = now.getUTCMinutes();
-      const currentTime = hours + minutes / 60;
-
-      // Comprobar si la peluquería está abierta de 9:00 and 14:00 (14:00 = 14.00)
-      isOpen.value = currentTime >= 9 && currentTime < 14;
+      const now = toMadridDate(DateTime.now());
+      const hour = now.hour + now.minute / 60;
+      isOpen.value = hour >= 9 && hour < 14;
     };
 
     const fetchPeluqueria = async () => {
@@ -35,7 +103,6 @@ export default {
         const data = await res.json();
         peluqueria.value = data;
 
-        // Cargar el nombre de la localidad
         const resLoc = await fetch(`/api/localities/${data.localidad}/name`);
         if (resLoc.ok) {
           peluqueria.value.nombreLocalidad = await resLoc.text();
@@ -53,16 +120,96 @@ export default {
         const res = await fetch(`/api/locals/${peluqueriaId}/services`);
         if (!res.ok) throw new Error("Error al cargar los servicios");
         const data = await res.json();
-        servicios.value = data || []; // Asignamos el array directamente
+        servicios.value = data || [];
       } catch (err) {
         error.value = error.value || "Error al cargar los servicios.";
         console.error(err);
       }
     };
 
+    const fetchCitas = async () => {
+      try {
+        const res = await fetch(`/api/appointments/${peluqueriaId}`);
+        if (!res.ok) throw new Error("Error al cargar las citas");
+        const data = await res.json();
+        citas.value = data || [];
+        console.log('Fetched citas:', citas.value);
+        updateOccupiedSlots();
+      } catch (err) {
+        error.value = error.value || "Error al cargar las citas.";
+        console.error(err);
+      }
+    };
+
+    // Calculate occupied time slots
+    const updateOccupiedSlots = () => {
+      occupiedSlots.value = {};
+      const monday = toMadridDate(currentMonday.value);
+      const weekDates = Array.from({ length: 5 }, (_, i) =>
+        formatDateToString(monday.plus({ days: i }))
+      );
+
+      citas.value.forEach(cita => {
+        if (weekDates.includes(cita.fecha)) {
+          const startTime = cita.hora_inicio;
+          const startTimeFormatted = formatTime(parseTime(startTime));
+          const slotKey = `${cita.fecha}:${startTimeFormatted}`;
+          occupiedSlots.value[slotKey] = true;
+        }
+      });
+      console.log('Week dates:', weekDates);
+      console.log('Occupied slots:', occupiedSlots.value);
+    };
+
+    const parseTime = (timeStr) => {
+      const [hours, minutes] = timeStr.split(':').slice(0, 2).map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const formatTime = (minutes) => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
+    };
+
+    const isSlotOccupied = (date, time) => {
+      // Ensure time is in HH:mm format with leading zeros
+      const normalizedTime = time.match(/^\d{1,2}:\d{2}$/)
+        ? time.padStart(5, '0')
+        : time;
+      const slotKey = `${date}:${normalizedTime}`;
+      console.log('Checking slot:', slotKey, 'Occupied:', !!occupiedSlots.value[slotKey]); // Debug
+      return !!occupiedSlots.value[slotKey];
+    };
+
+    const getDateForDay = (dayOffset) => {
+      return formatDateToString(toMadridDate(currentMonday.value).plus({ days: dayOffset }));
+    };
+
+    const getCitasPorDia = (dia) => {
+      return citas.value.filter((cita) => {
+        const citaDate = DateTime.fromFormat(cita.fecha, 'yyyy-MM-dd', { zone: 'Europe/Madrid' });
+        const inputDate = DateTime.fromFormat(dia.fecha, 'yyyy-MM-dd', { zone: 'Europe/Madrid' });
+        return citaDate.hasSame(inputDate, 'day');
+      });
+    };
+
+    const isPreviousWeekDisabled = () => {
+      const newMonday = toMadridDate(currentMonday.value).minus({ weeks: 1 });
+      return newMonday < currentWeekMonday.value;
+    };
 
     onMounted(async () => {
       loading.value = true;
+      currentWeekMonday.value = getCurrentWeekMonday();
+      currentMonday.value = currentWeekMonday.value;
+
+      // Adjust to next Monday if after Friday 14:00
+      if (isAfterFriday2PM()) {
+        currentMonday.value = currentMonday.value.plus({ weeks: 1 });
+      }
+
+      updateWeekDays();
       await Promise.all([fetchPeluqueria(), fetchServicios()]);
       loading.value = false;
       checkStatus();
@@ -71,10 +218,18 @@ export default {
     return {
       peluqueria,
       servicios,
+      citas,
       loading,
       error,
       peluqueriaId,
       isOpen,
+      mondayDay,
+      fridayDay,
+      goToPreviousWeek,
+      goToNextWeek,
+      isSlotOccupied,
+      getDateForDay,
+      isPreviousWeekDisabled,
     };
   },
 };
@@ -103,13 +258,10 @@ export default {
 
         <div class="local__name flex">
           <h1>{{ peluqueria.nombre }}</h1>
-
-          <!-- Estado de la peluquería abierto o cerrado -->
           <div class="local__status">
             <div v-if="isOpen" class="status status--open">ABIERTO</div>
             <div v-else class="status status--closed">CERRADO</div>
           </div>
-
           <div class="type__value flex-column">
             <p>{{ peluqueria.tipo }}</p>
             <strong class="flex">{{ peluqueria.valoracion || "Sin valoración" }} <span class="star">★</span> </strong>
@@ -135,9 +287,11 @@ export default {
         </div>
 
         <div class="local__schedule">
-          <p class="flex-center">
-            <img src="/img/utils/arrow_back.svg" alt="Ir a semana anterior"> Lun 2 - Vie 6 <img
-              src="/img/utils/arrow_forward.svg" alt="Ir a semana siguiente">
+          <p class="schedule__week flex-center">
+            <img src="/img/utils/arrow_back.svg" alt="Ir a semana anterior" @click="goToPreviousWeek"
+              :class="{ 'disabled': isPreviousWeekDisabled() }" />
+            Lun {{ mondayDay }} - Vie {{ fridayDay }}
+            <img src="/img/utils/arrow_forward.svg" alt="Ir a semana siguiente" @click="goToNextWeek" />
           </p>
           <table>
             <tr>
@@ -147,86 +301,21 @@ export default {
               <th>Jueves</th>
               <th>Viernes</th>
             </tr>
-            <tr>
-              <td class="green-cell">9:00</td>
-              <td class="green-cell">9:00</td>
-              <td class="green-cell">9:00</td>
-              <td class="green-cell">9:00</td>
-              <td class="green-cell">9:00</td>
-            </tr>
-            <tr>
-              <td class="green-cell">9:30</td>
-              <td class="green-cell">9:30</td>
-              <td class="green-cell">9:30</td>
-              <td class="green-cell">9:30</td>
-              <td class="green-cell">9:30</td>
-            </tr>
-            <tr>
-              <td class="green-cell">10:00</td>
-              <td class="green-cell">10:00</td>
-              <td class="green-cell">10:00</td>
-              <td class="green-cell">10:00</td>
-              <td class="green-cell">10:00</td>
-            </tr>
-            <tr>
-              <td class="green-cell">10:30</td>
-              <td class="green-cell">10:30</td>
-              <td class="green-cell">10:30</td>
-              <td class="green-cell">10:30</td>
-              <td class="green-cell">10:30</td>
-            </tr>
-            <tr>
-              <td class="green-cell">11:00</td>
-              <td class="green-cell">11:00</td>
-              <td class="green-cell">11:00</td>
-              <td class="green-cell">11:00</td>
-              <td class="green-cell">11:00</td>
-            </tr>
-            <tr>
-              <td class="green-cell">11:30</td>
-              <td class="green-cell">11:30</td>
-              <td class="green-cell">11:30</td>
-              <td class="green-cell">11:30</td>
-              <td class="green-cell">11:30</td>
-            </tr>
-            <tr>
-              <td class="green-cell">12:00</td>
-              <td class="green-cell">12:00</td>
-              <td class="green-cell">12:00</td>
-              <td class="green-cell">12:00</td>
-              <td class="green-cell">12:00</td>
-            </tr>
-            <tr>
-              <td class="green-cell">12:30</td>
-              <td class="green-cell">12:30</td>
-              <td class="green-cell">12:30</td>
-              <td class="green-cell">12:30</td>
-              <td class="green-cell">12:30</td>
-            </tr>
-            <tr>
-              <td class="green-cell">13:00</td>
-              <td class="green-cell">13:00</td>
-              <td class="green-cell">13:00</td>
-              <td class="green-cell">13:00</td>
-              <td class="green-cell">13:00</td>
-            </tr>
-            <tr>
-              <td class="green-cell">13:30</td>
-              <td class="green-cell">13:30</td>
-              <td class="green-cell">13:30</td>
-              <td class="green-cell">13:30</td>
-              <td class="green-cell">13:30</td>
-            </tr>
-            <tr>
-              <td class="green-cell">14:00</td>
-              <td class="green-cell">14:00</td>
-              <td class="green-cell">14:00</td>
-              <td class="green-cell">14:00</td>
-              <td class="green-cell">14:00</td>
+            <tr
+              v-for="time in ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00']"
+              :key="time">
+              <td v-for="day in [0, 1, 2, 3, 4]" :key="day" :class="{
+                'hora__ocupada': isSlotOccupied(getDateForDay(day), time),
+                'hora__disponible': !isSlotOccupied(getDateForDay(day), time),
+                'debug-monday-930': day === 0 && time === '09:30'
+              }">
+                {{ time }}
+              </td>
             </tr>
           </table>
           <div class="schedule__info flex-column">
             <div><span class="square square--green"></span> Huecos disponibles</div>
+            <div><span class="square square--red"></span> Huecos ocupados</div>
           </div>
         </div>
 
@@ -350,7 +439,6 @@ export default {
 
   .local__address {
     grid-area: 5 / 1 / 6 / 2;
-
     align-items: center;
     color: map-get($colores, 'azul_oscuro');
   }
@@ -396,6 +484,12 @@ export default {
         &:hover {
           transform: scale(1.2);
         }
+
+        &.disabled {
+          opacity: 0.5;
+          cursor: auto;
+          transform: none;
+        }
       }
     }
 
@@ -422,10 +516,7 @@ export default {
         border: 1px solid map-get($colores, "gris_claro");
 
         &:hover {
-          font-size: 1.2em;
-          /* Puedes ajustar este valor: 1.2em significa un 20% más grande */
           background-color: #f0f0f0;
-          /* Opcional: cambia el fondo para un feedback visual */
           cursor: pointer;
         }
       }
@@ -444,6 +535,20 @@ export default {
       .square--green {
         background-color: map-get($colores, "verde");
       }
+
+      .square--red {
+        background-color: map-get($colores, "rojo");
+      }
+    }
+
+    .hora__disponible {
+      background-color: map-get($colores, "verde");
+      color: map-get($colores, "blanco");
+    }
+
+    .hora__ocupada {
+      background-color: map-get($colores, "rojo");
+      color: map-get($colores, "blanco");
     }
   }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\PeluqueriaSolicitudController;
 use App\Http\Controllers\LocalidadController;
 use App\Http\Controllers\ServiciosPeluqueriaController;
 use App\Http\Controllers\ServicioController;
+use App\Http\Controllers\CitaController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -30,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/user/update/{id}', [AuthController::class, 'updateUser']);
 });
 
+
 // ------ Locals ----------------------------------------------------------
 Route::post('/new-request', [PeluqueriaSolicitudController::class, 'createLocalRequest']);
 
@@ -45,6 +47,7 @@ Route::get('/locals/{id}/services', [ServiciosPeluqueriaController::class, 'getS
 
 Route::get('/services/{id}/name', [ServicioController::class, 'getNombrePorId']);
 
+
 // ------ Localities ------------------------------------------------------
 Route::get('/localities/{valor}', [LocalidadController::class, 'getIdsByCodigoPostalONombre']);
 
@@ -52,7 +55,14 @@ Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']
 
 Route::get('/localities/{id}/name', [LocalidadController::class, 'getNombreById']);
 
+
 // ------ Appointments ----------------------------------------------------
+Route::get('/appointments', [CitaController::class, 'getCitas']);
+
+Route::post('/appointments/new', [CitaController::class, 'createCita']);
+
+Route::get('/appointments/{id_peluqueria}', [CitaController::class, 'getCitasByIdPeluqueria']);
+
 
 // ------ Admin ----------------------------------------------------------
 Route::get('/admin/requests', [PeluqueriaSolicitudController::class, 'getLocalsRequest']);
