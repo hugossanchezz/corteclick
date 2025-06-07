@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PeluqueriaController;
+use App\Http\Controllers\PeluqueriasController;
 use App\Http\Controllers\PeluqueriaSolicitudController;
 use App\Http\Controllers\LocalidadController;
 use App\Http\Controllers\ServiciosPeluqueriaController;
@@ -45,12 +46,14 @@ Route::get('/locals/{id}', [PeluqueriaController::class, 'getPeluqueriaById']);
 
 Route::get('/locals/{id}/services', [ServiciosPeluqueriaController::class, 'getServiciosByPeluqueriaId']);
 
+Route::get('/locals/search/{valor}', [PeluqueriasController::class, 'getIdsByCodigoPostalONombre']);
+
+
+// ------ Services --------------------------------------------------------
 Route::get('/services/{id}/name', [ServicioController::class, 'getNombrePorId']);
 
 
 // ------ Localities ------------------------------------------------------
-Route::get('/localities/{valor}', [LocalidadController::class, 'getIdsByCodigoPostalONombre']);
-
 Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);
 
 Route::get('/localities/{id}/name', [LocalidadController::class, 'getNombreById']);

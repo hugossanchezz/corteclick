@@ -201,12 +201,21 @@ export default {
 
     const isSlotAvailable = (date, time) => {
       if (!selectedServiceDuration.value) return false;
+
       const startMinutes = parseTime(time);
       const neededSlots = selectedServiceDuration.value / 30;
+      const endMinutes = startMinutes + selectedServiceDuration.value;
+
+      const cierreEnMinutos = 14 * 60 + 30; // 14:30 → 870 min
+
+      // ❌ Si termina después de 14:30, no está permitido
+      if (endMinutes > cierreEnMinutos) return false;
+
       for (let i = 0; i < neededSlots; i++) {
         const nextTime = formatTime(startMinutes + i * 30);
         if (isSlotOccupied(date, nextTime)) return false;
       }
+
       return true;
     };
 
@@ -723,6 +732,7 @@ export default {
 
     .hora__seleccionada {
       background-color: map-get($colores, "naranja");
+      color: map-get($colores, "blanco");
       outline: none;
       font-weight: bold;
     }
@@ -737,6 +747,7 @@ export default {
     }
 
     .hora__seleccionada--end {
+      color: map-get($colores, "blanco");
       border-top: none;
     }
   }
