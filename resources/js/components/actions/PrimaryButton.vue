@@ -22,7 +22,7 @@ button {
     color: map-get($colores, "blanco");
     @include fuente("titulo_secundario");
 
-    padding: 0.65rem 1.25rem ;
+    padding: 0.65rem 1.25rem;
     width: fit-content;
 
     border: none;
@@ -36,5 +36,9 @@ button {
         box-shadow: 0 0 3px rgba(71, 71, 71, 0.3);
     }
 
+    &:disabled {
+        opacity: 0.5;
+        cursor: auto;
+    }
 }
 </style>
