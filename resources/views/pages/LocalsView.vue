@@ -53,23 +53,29 @@ export default {
                 resultado = resultado.filter((p) => p.tipo === tipoLocalFilter.value);
             }
 
-            if (codigoPostalBusqueda.value.trim()) {
+            const valorBusqueda = codigoPostalBusqueda.value.trim().toLowerCase();
+
+            if (valorBusqueda) {
                 try {
-                    const valorBusqueda = codigoPostalBusqueda.value.trim();
-                    const res = await fetch(`/api/localities/${encodeURIComponent(valorBusqueda)}`);
+                    const res = await fetch(`/api/locals/search/${encodeURIComponent(valorBusqueda)}`);
                     if (!res.ok) throw new Error("Localidad no encontrada");
 
                     const idsLocalidad = await res.json();
 
-                    if (idsLocalidad.length === 0) {
-                        errorBusqueda.value = "No se encontraron resultados.";
-                        resultado = [];
-                    } else {
-                        resultado = resultado.filter((p) => idsLocalidad.includes(p.localidad));
-                        if (resultado.length === 0) {
-                            errorBusqueda.value = "No se encontraron peluquerías en las localidades especificadas.";
-                        }
+                    if (!Array.isArray(idsLocalidad)) {
+                        throw new Error("Respuesta de búsqueda inválida");
                     }
+
+                    resultado = resultado.filter((p) => {
+                        const coincideLocalidad = idsLocalidad.includes(p.localidad);
+                        const coincideNombre = p.nombre.toLowerCase().includes(valorBusqueda);
+                        return coincideLocalidad || coincideNombre;
+                    });
+
+                    if (resultado.length === 0) {
+                        errorBusqueda.value = "No se encontraron peluquerías con ese nombre o localidad.";
+                    }
+
                 } catch (error) {
                     errorBusqueda.value = "Error al buscar la localidad.";
                     console.error("Error en búsqueda por localidad:", error);
@@ -79,6 +85,7 @@ export default {
 
             ordenarYGuardar(resultado);
         };
+
 
         const ordenarYGuardar = (lista) => {
             let listaOrdenada = [...lista];
@@ -184,7 +191,7 @@ export default {
             </aside>
             <main class="flex-column">
                 <div class="peluquerias__buscador">
-                    <input type="text" placeholder="Introduce el código postal o nombre de la localidad"
+                    <input type="text" placeholder="Introduce el código postal, localidad o nombre del local"
                         v-model="codigoPostalBusqueda" @input="aplicarFiltros" />
                     <img src="/img/utils/search.svg" alt="Buscador de locales por código postal" />
                 </div>
