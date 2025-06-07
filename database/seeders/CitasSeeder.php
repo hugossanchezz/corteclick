@@ -21,9 +21,9 @@ class CitasSeeder extends Seeder
                 'id_usuario' => 1,
                 'id_peluqueria' => 1,
                 'id_servicio' => 1,
-                'fecha' => '2025-06-02', // Monday
+                'fecha' => '2025-06-11',
                 'hora_inicio' => '09:00:00',
-                'hora_fin' => '09:30:00',
+                'hora_fin' => '10:30:00',
                 'estado' => 'CONFIRMADA',
                 'valoracion' => null,
                 'puntuacion' => null,
@@ -35,7 +35,7 @@ class CitasSeeder extends Seeder
                 'id_usuario' => 1,
                 'id_peluqueria' => 1,
                 'id_servicio' => 1,
-                'fecha' => '2025-06-03', // Tuesday
+                'fecha' => '2025-06-13',
                 'hora_inicio' => '10:30:00',
                 'hora_fin' => '11:00:00',
                 'estado' => 'CONFIRMADA',
@@ -49,7 +49,7 @@ class CitasSeeder extends Seeder
                 'id_usuario' => 1,
                 'id_peluqueria' => 1,
                 'id_servicio' => 1,
-                'fecha' => '2025-06-04', // Wednesday
+                'fecha' => '2025-06-12',
                 'hora_inicio' => '11:00:00',
                 'hora_fin' => '11:30:00',
                 'estado' => 'CONFIRMADA',
@@ -63,7 +63,7 @@ class CitasSeeder extends Seeder
                 'id_usuario' => 1,
                 'id_peluqueria' => 1,
                 'id_servicio' => 1,
-                'fecha' => '2025-06-05', // Thursday
+                'fecha' => '2025-06-11',
                 'hora_inicio' => '09:30:00',
                 'hora_fin' => '10:00:00',
                 'estado' => 'CONFIRMADA',
@@ -77,7 +77,7 @@ class CitasSeeder extends Seeder
                 'id_usuario' => 1,
                 'id_peluqueria' => 1,
                 'id_servicio' => 1,
-                'fecha' => '2025-06-06', // Friday
+                'fecha' => '2025-06-10',
                 'hora_inicio' => '13:00:00',
                 'hora_fin' => '13:30:00',
                 'estado' => 'CONFIRMADA',

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cita;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-
+use Carbon\Carbon;
 class CitaController extends Controller
 {
     /**
@@ -27,7 +27,22 @@ class CitaController extends Controller
      */
     public function getCitasByIdPeluqueria(int $id_peluqueria): JsonResponse
     {
-        $citas = Cita::where('id_peluqueria', $id_peluqueria)->get();
+        $now = Carbon::now('Europe/Madrid');
+        $weekday = $now->dayOfWeekIso; // 1 (lunes) - 7 (domingo)
+        $hour = $now->hour + ($now->minute / 60);
+
+        // Si es viernes (5) y pasan de las 14:00, ir al siguiente lunes
+        if ($weekday === 5 && $hour >= 14 || $weekday > 5) {
+            $startDate = $now->copy()->next(Carbon::MONDAY);
+        } else {
+            // Ir al lunes de la semana actual
+            $startDate = $now->copy()->startOfWeek(Carbon::MONDAY);
+        }
+
+        $citas = Cita::where('id_peluqueria', $id_peluqueria)
+            ->where('fecha', '>=', $startDate->toDateString())
+            ->get();
+
         return response()->json($citas);
     }
 

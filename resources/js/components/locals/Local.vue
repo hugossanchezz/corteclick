@@ -1,67 +1,85 @@
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { DateTime } from "luxon";
 import RequireAuth from "@/js/components/auth/RequireAuth.vue";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
+import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
 export default {
   name: "Local",
-  components: { RequireAuth, PrimaryButton },
+  components: { RequireAuth, PrimaryButton, ModalConfirm },
   setup() {
     const route = useRoute();
     const peluqueriaId = route.params.id;
 
+    const userId = ref(null);
     const peluqueria = ref(null);
     const servicios = ref([]);
     const citas = ref([]);
     const loading = ref(true);
     const error = ref(null);
     const isOpen = ref(false);
+    const selectedServiceDuration = ref(null);
+    const selectedServiceId = ref("");
+    const mensaje = ref("Selecciona un servicio para ver las horas disponibles");
+    const selectedSlot = ref(null);
 
-    // Variables for week handling
     const currentMonday = ref(null);
     const mondayDay = ref(0);
     const fridayDay = ref(0);
     const occupiedSlots = ref({});
     const currentWeekMonday = ref(null);
 
-    // Helper to get DateTime in UTC+2 Madrid
+    // Modal
+    const showModal = ref(false);
+    const modalTitle = ref("");
+    const modalMessage = ref("");
+
     const toMadridDate = (date) => {
       return date instanceof DateTime
         ? date.setZone('Europe/Madrid')
         : DateTime.fromJSDate(date).setZone('Europe/Madrid');
     };
 
-    // Format date to YYYY-MM-DD in UTC+2 Madrid
     const formatDateToString = (date) => {
       return toMadridDate(date).toFormat('yyyy-MM-dd');
     };
 
-    // Function to get the current week's Monday in UTC+2
     const getCurrentWeekMonday = () => {
-      const today = toMadridDate(DateTime.now());
-      const dayOfWeek = today.weekday; // 1 (Monday) to 7 (Sunday)
-      const daysToMonday = dayOfWeek === 7 ? 1 : dayOfWeek - 1;
-      return today.minus({ days: daysToMonday }).startOf('day');
+      const now = toMadridDate(DateTime.now());
+      const dayOfWeek = now.weekday;
+      const hour = now.hour + now.minute / 60;
+
+      let monday;
+      if ((dayOfWeek === 5 && hour >= 14) || dayOfWeek === 6 || dayOfWeek === 7) {
+        // Viernes después de las 14h, sábado o domingo → devolver el lunes siguiente
+        const daysToNextMonday = 8 - dayOfWeek;
+        monday = now.plus({ days: daysToNextMonday }).startOf('day');
+      } else {
+        // Lunes a viernes antes de las 14h → devolver el lunes de esta semana
+        const daysToMonday = dayOfWeek === 7 ? 1 : dayOfWeek - 1;
+        monday = now.minus({ days: daysToMonday }).startOf('day');
+      }
+
+      return monday;
     };
 
-    // Function to check if it's after 14:00 on Friday in UTC+2
+
     const isAfterFriday2PM = () => {
       const now = toMadridDate(DateTime.now());
-      const dayOfWeek = now.weekday; // 1 (Monday) to 7 (Sunday)
+      const dayOfWeek = now.weekday;
       const hour = now.hour + now.minute / 60;
       return (
-        (dayOfWeek === 5 && hour >= 14) || // Friday after 14:00
-        dayOfWeek === 6 || // Saturday
-        dayOfWeek === 7 // Sunday
+        (dayOfWeek === 5 && hour >= 14) ||
+        dayOfWeek === 6 ||
+        dayOfWeek === 7
       );
     };
 
-    // Function to update week days
     const updateWeekDays = () => {
       let date = toMadridDate(currentMonday.value);
-      const dayOfWeek = date.weekday; // 1 (Monday) to 7 (Sunday)
+      const dayOfWeek = date.weekday;
       const daysToMonday = dayOfWeek === 7 ? 1 : dayOfWeek - 1;
       date = date.minus({ days: daysToMonday }).startOf('day');
       currentMonday.value = date;
@@ -73,7 +91,6 @@ export default {
       fetchCitas();
     };
 
-    // Navigate to previous week
     const goToPreviousWeek = () => {
       const newMonday = toMadridDate(currentMonday.value).minus({ weeks: 1 });
       if (newMonday >= currentWeekMonday.value) {
@@ -82,19 +99,21 @@ export default {
       }
     };
 
-    // Navigate to next week
     const goToNextWeek = () => {
       const newMonday = toMadridDate(currentMonday.value).plus({ weeks: 1 });
       currentMonday.value = newMonday;
       updateWeekDays();
     };
 
-    // Check salon status
     const checkStatus = () => {
       const now = toMadridDate(DateTime.now());
       const hour = now.hour + now.minute / 60;
-      isOpen.value = hour >= 9 && hour < 14;
+      const day = now.weekday; // 1 = lunes, 7 = domingo
+
+      // Solo abre de lunes a viernes entre 9:00 y 14:00
+      isOpen.value = day >= 1 && day <= 5 && hour >= 9 && hour < 14;
     };
+
 
     const fetchPeluqueria = async () => {
       try {
@@ -104,11 +123,9 @@ export default {
         peluqueria.value = data;
 
         const resLoc = await fetch(`/api/localities/${data.localidad}/name`);
-        if (resLoc.ok) {
-          peluqueria.value.nombreLocalidad = await resLoc.text();
-        } else {
-          peluqueria.value.nombreLocalidad = "Desconocido";
-        }
+        peluqueria.value.nombreLocalidad = resLoc.ok
+          ? await resLoc.text()
+          : "Desconocido";
       } catch (err) {
         error.value = "Error al cargar los datos de la peluquería.";
         console.error(err);
@@ -133,7 +150,6 @@ export default {
         if (!res.ok) throw new Error("Error al cargar las citas");
         const data = await res.json();
         citas.value = data || [];
-        console.log('Fetched citas:', citas.value);
         updateOccupiedSlots();
       } catch (err) {
         error.value = error.value || "Error al cargar las citas.";
@@ -141,7 +157,6 @@ export default {
       }
     };
 
-    // Calculate occupied time slots
     const updateOccupiedSlots = () => {
       occupiedSlots.value = {};
       const monday = toMadridDate(currentMonday.value);
@@ -150,16 +165,20 @@ export default {
       );
 
       citas.value.forEach(cita => {
-        if (weekDates.includes(cita.fecha)) {
-          const startTime = cita.hora_inicio;
-          const startTimeFormatted = formatTime(parseTime(startTime));
-          const slotKey = `${cita.fecha}:${startTimeFormatted}`;
+        const start = parseTime(cita.hora_inicio); // en minutos
+        const end = parseTime(cita.hora_fin);       // en minutos
+        const fecha = cita.fecha;
+
+        if (!weekDates.includes(fecha)) return;
+
+        // Recorre de 30 en 30 minutos desde inicio hasta justo antes de fin
+        for (let time = start; time < end; time += 30) {
+          const slotKey = `${fecha}:${formatTime(time)}`;
           occupiedSlots.value[slotKey] = true;
         }
       });
-      console.log('Week dates:', weekDates);
-      console.log('Occupied slots:', occupiedSlots.value);
     };
+
 
     const parseTime = (timeStr) => {
       const [hours, minutes] = timeStr.split(':').slice(0, 2).map(Number);
@@ -173,25 +192,69 @@ export default {
     };
 
     const isSlotOccupied = (date, time) => {
-      // Ensure time is in HH:mm format with leading zeros
       const normalizedTime = time.match(/^\d{1,2}:\d{2}$/)
         ? time.padStart(5, '0')
         : time;
       const slotKey = `${date}:${normalizedTime}`;
-      console.log('Checking slot:', slotKey, 'Occupied:', !!occupiedSlots.value[slotKey]); // Debug
       return !!occupiedSlots.value[slotKey];
+    };
+
+    const isSlotAvailable = (date, time) => {
+      if (!selectedServiceDuration.value) return false;
+      const startMinutes = parseTime(time);
+      const neededSlots = selectedServiceDuration.value / 30;
+      for (let i = 0; i < neededSlots; i++) {
+        const nextTime = formatTime(startMinutes + i * 30);
+        if (isSlotOccupied(date, nextTime)) return false;
+      }
+      return true;
+    };
+
+    const getCellClass = (date, time) => {
+      const classes = [];
+
+      if (isSlotOccupied(date, time)) {
+        classes.push('hora__ocupada');
+      } else if (isSlotAvailable(date, time)) {
+        classes.push('hora__disponible');
+      }
+
+      if (selectedServiceDuration.value && selectedSlot.value?.date === date) {
+        const startMinutes = parseTime(selectedSlot.value.time);
+        const neededSlots = selectedServiceDuration.value / 30;
+        const selectedTimes = Array.from({ length: neededSlots }, (_, i) =>
+          formatTime(startMinutes + i * 30)
+        );
+
+        const index = selectedTimes.indexOf(time);
+        if (index !== -1) {
+          classes.push('hora__seleccionada');
+          if (index === 0) classes.push('hora__seleccionada--start');
+          else if (index === neededSlots - 1) classes.push('hora__seleccionada--end');
+          else classes.push('hora__seleccionada--middle');
+        }
+      }
+
+      return classes.join(' ');
+    };
+
+    const handleServiceChange = (event) => {
+      const selected = servicios.value.find(s => s.id === parseInt(event.target.value));
+      selectedServiceId.value = selected?.id || "";
+      selectedServiceDuration.value = selected?.duracion || null;
+      mensaje.value = null;
+      selectedSlot.value = null;
+    };
+
+    const selectSlot = (date, time) => {
+      if (!selectedServiceDuration.value) return;
+      if (isSlotAvailable(date, time)) {
+        selectedSlot.value = { date, time };
+      }
     };
 
     const getDateForDay = (dayOffset) => {
       return formatDateToString(toMadridDate(currentMonday.value).plus({ days: dayOffset }));
-    };
-
-    const getCitasPorDia = (dia) => {
-      return citas.value.filter((cita) => {
-        const citaDate = DateTime.fromFormat(cita.fecha, 'yyyy-MM-dd', { zone: 'Europe/Madrid' });
-        const inputDate = DateTime.fromFormat(dia.fecha, 'yyyy-MM-dd', { zone: 'Europe/Madrid' });
-        return citaDate.hasSame(inputDate, 'day');
-      });
     };
 
     const isPreviousWeekDisabled = () => {
@@ -199,16 +262,77 @@ export default {
       return newMonday < currentWeekMonday.value;
     };
 
+    // Lógica de mandar la cita
+    const canSubmit = computed(() => {
+      return selectedServiceId.value && selectedSlot.value;
+    });
+
+    const pedirCita = async () => {
+      const start = parseTime(selectedSlot.value.time);
+      const end = start + selectedServiceDuration.value;
+      const hora_inicio = formatTime(start);
+      const hora_fin = formatTime(end);
+
+      const citaPayload = {
+        id_usuario: userId.value,
+        id_peluqueria: peluqueriaId,
+        id_servicio: selectedServiceId.value,
+        fecha: selectedSlot.value.date,
+        hora_inicio,
+        hora_fin,
+        estado: 'CONFIRMADA',
+        valoracion: null,
+        puntuacion: null,
+        respuesta: null
+      };
+
+      try {
+        const response = await fetch('/api/appointments/new', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(citaPayload)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          modalTitle.value = "Error al crear la cita";
+          modalMessage.value = errorData?.message || "No se pudo crear la cita. Verifica los datos.";
+          showModal.value = true;
+          return;
+        }
+
+        const result = await response.json();
+        modalTitle.value = "Cita registrada";
+        modalMessage.value = result.mensaje || "La cita se ha creado correctamente.";
+        showModal.value = true;
+
+        // Opcional: limpiar selección
+        selectedSlot.value = null;
+        selectedServiceId.value = "";
+        selectedServiceDuration.value = null;
+        mensaje.value = "Selecciona un servicio para ver las horas disponibles";
+
+        // Refrescar citas para mostrar nuevas ocupadas
+        await fetchCitas();
+      } catch (err) {
+        console.error("Error en la solicitud:", err);
+        alert("Ocurrió un error al crear la cita.");
+      }
+    };
+
+
     onMounted(async () => {
+      const storedUser = sessionStorage.getItem("user");
+
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        userId.value = user.id;
+      }
       loading.value = true;
       currentWeekMonday.value = getCurrentWeekMonday();
       currentMonday.value = currentWeekMonday.value;
-
-      // Adjust to next Monday if after Friday 14:00
-      if (isAfterFriday2PM()) {
-        currentMonday.value = currentMonday.value.plus({ weeks: 1 });
-      }
-
       updateWeekDays();
       await Promise.all([fetchPeluqueria(), fetchServicios()]);
       loading.value = false;
@@ -221,19 +345,34 @@ export default {
       citas,
       loading,
       error,
-      peluqueriaId,
       isOpen,
       mondayDay,
       fridayDay,
       goToPreviousWeek,
       goToNextWeek,
-      isSlotOccupied,
       getDateForDay,
       isPreviousWeekDisabled,
+      handleServiceChange,
+      selectedServiceId,
+      mensaje,
+      getCellClass,
+      selectSlot,
+      userId,
+      canSubmit,
+      pedirCita,
+      selectedSlot,
+      selectedServiceId,
+      selectedServiceDuration,
+
+      // Modal
+      showModal,
+      modalTitle,
+      modalMessage,
     };
-  },
+  }
 };
 </script>
+
 
 <template>
   <RequireAuth>
@@ -241,19 +380,22 @@ export default {
       <div class="btn-back__container">
         <router-link to="/locals">
           <button class="btn btn-back">
-            <img src="/img/utils/arrow_back.svg" alt="Volver al catálogo de locales"> Volver
+            <img src="/img/utils/arrow_back.svg" alt="Volver al catálogo de locales" /> Volver
           </button>
         </router-link>
       </div>
+
       <div v-if="loading" class="loading">
         <p>Cargando datos...</p>
       </div>
+
       <div v-else-if="error">
         <p class="error">{{ error }}</p>
       </div>
+
       <div v-else-if="peluqueria" class="local grid">
         <div class="local__image">
-          <img src="/img/utils/corteclick.png" alt="">
+          <img src="/img/utils/corteclick.png" alt="" />
         </div>
 
         <div class="local__name flex">
@@ -264,7 +406,7 @@ export default {
           </div>
           <div class="type__value flex-column">
             <p>{{ peluqueria.tipo }}</p>
-            <strong class="flex">{{ peluqueria.valoracion || "Sin valoración" }} <span class="star">★</span> </strong>
+            <strong class="flex">{{ peluqueria.valoracion || "Sin valoración" }} <span class="star">★</span></strong>
           </div>
         </div>
 
@@ -278,8 +420,8 @@ export default {
         </div>
 
         <div class="local__service flex-center">
-          <select name="servicios" id="servicios">
-            <option value="" disabled selected>Selecciona un servicio</option>
+          <select name="servicios" id="servicios" @change="handleServiceChange" v-model="selectedServiceId">
+            <option value="" disabled>Selecciona un servicio</option>
             <option v-for="servicio in servicios" :key="servicio.id" :value="servicio.id">
               {{ servicio.nombre }} - {{ servicio.precio }}€ ({{ servicio.duracion }} min)
             </option>
@@ -289,10 +431,11 @@ export default {
         <div class="local__schedule">
           <p class="schedule__week flex-center">
             <img src="/img/utils/arrow_back.svg" alt="Ir a semana anterior" @click="goToPreviousWeek"
-              :class="{ 'disabled': isPreviousWeekDisabled() }" />
+              :class="{ disabled: isPreviousWeekDisabled() }" />
             Lun {{ mondayDay }} - Vie {{ fridayDay }}
             <img src="/img/utils/arrow_forward.svg" alt="Ir a semana siguiente" @click="goToNextWeek" />
           </p>
+
           <table>
             <tr>
               <th>Lunes</th>
@@ -304,23 +447,23 @@ export default {
             <tr
               v-for="time in ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00']"
               :key="time">
-              <td v-for="day in [0, 1, 2, 3, 4]" :key="day" :class="{
-                'hora__ocupada': isSlotOccupied(getDateForDay(day), time),
-                'hora__disponible': !isSlotOccupied(getDateForDay(day), time),
-                'debug-monday-930': day === 0 && time === '09:30'
-              }">
+              <td v-for="day in [0, 1, 2, 3, 4]" :key="day" :class="getCellClass(getDateForDay(day), time)"
+                @click="selectSlot(getDateForDay(day), time)">
+
                 {{ time }}
               </td>
             </tr>
           </table>
-          <div class="schedule__info flex-column">
+          <span v-if="mensaje" class="mensaje__servicio">{{ mensaje }}</span>
+
+          <div class="schedule__info flex">
             <div><span class="square square--green"></span> Huecos disponibles</div>
             <div><span class="square square--red"></span> Huecos ocupados</div>
           </div>
         </div>
 
         <div class="local__button flex-center">
-          <PrimaryButton label="Pedir cita" />
+          <PrimaryButton label="Pedir cita" :disabled="!canSubmit" @click="pedirCita" />
         </div>
       </div>
 
@@ -328,6 +471,10 @@ export default {
         <p>No se encontraron datos para esta peluquería.</p>
       </div>
     </div>
+
+    <!-- Modal -->
+    <ModalConfirm v-model:show="showModal" :message="modalMessage" :showCancel="false" confirmText="Aceptar" />
+
   </RequireAuth>
 </template>
 
@@ -470,6 +617,7 @@ export default {
 
   .local__schedule {
     grid-area: 2 / 2 / 6 / 3;
+    position: relative;
 
     p {
       align-items: center;
@@ -501,6 +649,10 @@ export default {
       border-bottom-right-radius: 10px;
       table-layout: fixed;
 
+
+      filter: blur(4px);
+      pointer-events: none;
+
       th {
         background-color: map-get($colores, 'azul_oscuro');
         color: map-get($colores, 'blanco');
@@ -513,23 +665,41 @@ export default {
       }
 
       td {
-        border: 1px solid map-get($colores, "gris_claro");
+        border: 2px solid map-get($colores, "gris_claro");
 
         &:hover {
-          background-color: #f0f0f0;
+          outline: 2px solid map-get($colores, "naranja");
           cursor: pointer;
         }
       }
+
+    }
+
+    .mensaje__servicio {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.8);
+      color: map-get($colores, "azul_oscuro");
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      white-space: nowrap;
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      pointer-events: none;
     }
 
     .schedule__info {
-      padding: 10px;
+      padding: 10px 2px;
+      gap: 20px;
 
       .square {
         display: inline-block;
         width: 10px;
         height: 10px;
-        margin-right: 5px;
+        margin-right: 2.5px;
       }
 
       .square--green {
@@ -550,6 +720,30 @@ export default {
       background-color: map-get($colores, "rojo");
       color: map-get($colores, "blanco");
     }
+
+    .hora__seleccionada {
+      background-color: map-get($colores, "naranja");
+      outline: none;
+      font-weight: bold;
+    }
+
+    .hora__seleccionada--start {
+      border-bottom: none;
+    }
+
+    .hora__seleccionada--middle {
+      border-top: none;
+      border-bottom: none;
+    }
+
+    .hora__seleccionada--end {
+      border-top: none;
+    }
+  }
+
+  .local__schedule:not(:has(.mensaje__servicio)) table {
+    filter: none;
+    pointer-events: auto;
   }
 
   .local__button {
