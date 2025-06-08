@@ -42,7 +42,7 @@ class CitaController extends Controller
 
         $citas = Cita::where('id_peluqueria', $id_peluqueria)
             ->where('fecha', '>=', $startDate->toDateString())
-            ->where('estado','=', 'CONFIRMADA')
+            ->where('estado', '=', 'CONFIRMADA')
             ->get();
 
         return response()->json($citas);
@@ -107,7 +107,8 @@ class CitaController extends Controller
         ], 201);
     }
 
-    public function deleteCita($id_cita) {
+    public function deleteCita($id_cita)
+    {
         $cita = Cita::find($id_cita);
         $cita->delete();
         return response()->json([
@@ -115,12 +116,24 @@ class CitaController extends Controller
         ], 200);
     }
 
-    public function cancelCita($id_cita) {
+    public function cancelCita($id_cita)
+    {
         $cita = Cita::find($id_cita);
         $cita->estado = 'CANCELADA';
         $cita->save();
         return response()->json([
             'mensaje' => 'Cita cancelada correctamente'
         ], 200);
+    }
+
+    public function marcarCitasTerminadas()
+    {
+        $ahora = Carbon::now('Europe/Madrid');
+
+        $actualizadas = Cita::where('estado', 'CONFIRMADA')
+            ->whereRaw("CONCAT(fecha, ' ', hora_fin) < ?", [$ahora->format('Y-m-d H:i:s')])
+            ->update(['estado' => 'TERMINADA']);
+
+        return response()->json(['updated' => $actualizadas]);
     }
 }
