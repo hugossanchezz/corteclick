@@ -63,7 +63,7 @@ export default {
                 </router-link>
                 <router-link v-if="user.rol_id == 1" :to="'/admin/dashboard'"
                     :class="{ 'route--active': isActiveRoute('/admin/dashboard') }">
-                    Panel de control
+                    Control de usuarios
                 </router-link>
 
                 <hr>

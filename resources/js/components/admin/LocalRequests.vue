@@ -261,7 +261,7 @@ export default {
 
 select {
     padding: 8px;
-    border: 1px solid #ddd;
+    border: 1px solid map-get($colores, "gris_claro");
     border-radius: 4px;
     font-size: 14px;
     cursor: pointer;

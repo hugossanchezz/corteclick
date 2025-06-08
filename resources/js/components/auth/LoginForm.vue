@@ -2,14 +2,15 @@
 // Importamos las librerías necesarias para el componente.
 import axios from "axios";
 import { useRouter } from "vue-router";
-import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import { ref, computed, watch, onMounted } from "vue";
 import { isAuthenticated } from "@/js/auth/eventBus";
+import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
+import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
 export default {
     name: "LoginForm",
 
-    components: { PrimaryButton },
+    components: { PrimaryButton, ModalConfirm },
 
     setup() {
         // Obtenemos la instancia del router para poder navegar entre las rutas.
@@ -21,6 +22,24 @@ export default {
         const errorCorreo = ref("");
         const visibilidadContrasenia = ref(false);
         const credencialesInvalidas = ref("");
+
+        // Modal
+        const showModal = ref(false);
+        const modalMessage = ref("");
+        const redirigirTrasModal = ref(false);
+
+        const mostrarError = (mensaje, redirigir = false) => {
+            modalMessage.value = mensaje;
+            redirigirTrasModal.value = redirigir;
+            showModal.value = true;
+        };
+
+        const handleConfirmModal = () => {
+            showModal.value = false;
+            if (redirigirTrasModal.value) {
+                router.push("/");
+            }
+        };
 
         // Expresión regular para la validación del correo
         const correoPattern =
@@ -106,9 +125,7 @@ export default {
                         error.response.data.errors?.email?.[0] || "";
                 } else {
                     // Otro tipo de error inesperado.
-                    alert(
-                        "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde."
-                    );
+                    mostrarError("Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.");
                 }
             }
         };
@@ -121,10 +138,7 @@ export default {
             // Si "rememberMe" es true y hay un token y un usuario almacenados.
             if (storedToken && storedUser) {
                 try {
-                    alert(
-                        "Ya iniciaste sesión anteriormente. Cierra la sesión para iniciar una nueva."
-                    );
-                    router.push("/"); // Redirige al usuario a la página principal sin necesidad de iniciar sesión de nuevo.
+                    mostrarError("Ya iniciaste sesión anteriormente. Cierra la sesión para iniciar una nueva.", true);
                 } catch (error) {
                     // Si hay un error al parsear el usuario (puede que esté corrupto), limpia el almacenamiento local.
                     console.error("Error al parsear el usuario", error);
@@ -153,6 +167,9 @@ export default {
             submitForm,
             router,
             credencialesInvalidas,
+            showModal,
+            modalMessage,
+            handleConfirmModal,
         };
     },
 };
@@ -211,8 +228,11 @@ export default {
                 <router-link to="/auth/register" class="span"> Regístrate </router-link>
             </p>
         </div>
-
     </form>
+    <ModalConfirm :show="showModal" :message="modalMessage" confirmText="Aceptar" :showCancel="false"
+        @confirm="handleConfirmModal" @close="showModal = false" />
+
+
 </template>
 
 <style scoped lang="scss">

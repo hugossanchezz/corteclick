@@ -65,18 +65,6 @@ export default {
       return monday;
     };
 
-
-    const isAfterFriday2PM = () => {
-      const now = toMadridDate(DateTime.now());
-      const dayOfWeek = now.weekday;
-      const hour = now.hour + now.minute / 60;
-      return (
-        (dayOfWeek === 5 && hour >= 14) ||
-        dayOfWeek === 6 ||
-        dayOfWeek === 7
-      );
-    };
-
     const updateWeekDays = () => {
       let date = toMadridDate(currentMonday.value);
       const dayOfWeek = date.weekday;
@@ -113,7 +101,6 @@ export default {
       // Solo abre de lunes a viernes entre 9:00 y 14:00
       isOpen.value = day >= 1 && day <= 5 && hour >= 9 && hour < 14;
     };
-
 
     const fetchPeluqueria = async () => {
       try {
@@ -208,7 +195,7 @@ export default {
 
       const cierreEnMinutos = 14 * 60 + 30; // 14:30 → 870 min
 
-      // ❌ Si termina después de 14:30, no está permitido
+      // Si termina después de 14:30, no está permitido
       if (endMinutes > cierreEnMinutos) return false;
 
       for (let i = 0; i < neededSlots; i++) {
