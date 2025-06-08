@@ -16,6 +16,7 @@ export default {
         const error = ref(null);
         const showModal = ref(false);
         const citaSeleccionada = ref(null);
+        const accionModal = ref(null);
 
         const fetchNombreServicio = async (id) => {
             try {
@@ -81,36 +82,38 @@ export default {
             return citas.value.filter(c => c.estado === estadoFiltro.value);
         });
 
-        const abrirModalAccionCita = (cita) => {
+        const abrirModalAccionCita = (cita, accion = "cancel") => {
             citaSeleccionada.value = cita;
+            accionModal.value = accion;
             showModal.value = true;
         };
 
-        const confirmarCancelacion = async () => {
+        const confirmarAccion = async () => {
             try {
                 const idCita = citaSeleccionada.value.id;
-                const res = await fetch(`/api/appointments/${idCita}/cancel`, {
-                    method: 'PATCH',
-                });
+                let url = `/api/appointments/${idCita}`;
+                let method = "PATCH";
+
+                if (accionModal.value === "cancel") {
+                    url += "/cancel";
+                } else if (accionModal.value === "delete") {
+                    url += "/delete";
+                    method = "DELETE";
+                }
+
+                const res = await fetch(url, { method });
 
                 if (!res.ok) {
-                    throw new Error("Error al cancelar la cita");
+                    throw new Error(`Error al ${accionModal.value === "cancel" ? "cancelar" : "eliminar"} la cita`);
                 }
 
-                console.log("Cita cancelada:", idCita);
-
-                // Opcional: recargar las citas
-                if (userId.value) {
-                    await fetchCitas(userId.value);
-                }
-
+                if (userId.value) await fetchCitas(userId.value);
                 showModal.value = false;
             } catch (error) {
-                console.error("Error al cancelar la cita:", error);
+                console.error("Error al procesar la cita:", error);
                 showModal.value = false;
             }
         };
-
 
         watch(estadoFiltro, () => {
             if (userId.value) {
@@ -138,7 +141,9 @@ export default {
             estadoFiltro,
             showModal,
             abrirModalAccionCita,
-            confirmarCancelacion
+            confirmarAccion,
+            citaSeleccionada,
+            accionModal
         };
     },
 };
@@ -194,24 +199,27 @@ export default {
                         </router-link>
                     </td>
                     <td class="flex">
-                        <button v-if="cita.estado === 'CONFIRMADA'" @click="abrirModalAccionCita(cita)"
-                            class="btn btn-edit flex">
-                            Cancelar cita
-                            <img src="/img/utils/cancel_white.svg" alt="Cancelar cita">
-                        </button>
-                        <span v-else>{{ cita.estado }}</span>
-                        <button class="btn btn-cancel" @click="abrirModalAccionCita(cita)">
+                        <div class="flex-center">
+                            <button v-if="cita.estado === 'CONFIRMADA'" @click="abrirModalAccionCita(cita)"
+                                class="btn btn-edit flex">
+                                Cancelar cita
+                                <img src="/img/utils/cancel_white.svg" alt="Cancelar cita">
+                            </button>
+                            <span v-else>{{ cita.estado }}</span>
+                        </div>
+                        <button class="btn btn-cancel" @click="abrirModalAccionCita(cita, 'delete')">
                             <img src="/img/utils/delete_white.svg" alt="Eliminar cita">
                         </button>
                     </td>
-
                 </tr>
             </tbody>
         </table>
     </div>
-    <ModalConfirm :show="showModal" :message="'¿Estás seguro de que deseas cancelar esta cita?'" confirmText="Aceptar"
-        cancelText="Cancelar" :showCancel="true" @confirm="confirmarCancelacion" @cancel="showModal = false"
-        @close="showModal = false" />
+    <ModalConfirm :show="showModal"
+        :message="accionModal === 'cancel' ? '¿Estás seguro de que deseas cancelar esta cita?' : '¿Estás seguro de que deseas eliminar esta cita?'"
+        confirmText="Aceptar" cancelText="Cancelar" :showCancel="true" @confirm="confirmarAccion"
+        @cancel="showModal = false" @close="showModal = false" />
+
 
 </template>
 
@@ -262,7 +270,14 @@ export default {
 
         td.flex {
             justify-content: space-between;
-            align-items: center;
+
+            div {
+                width: 100%;
+
+                span {
+                    font-weight: bold;
+                }
+            }
         }
     }
 }
