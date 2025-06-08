@@ -42,21 +42,23 @@ Route::delete('/delete-local/{email}', [PeluqueriaController::class, 'deleteLoca
 
 Route::get('/locals', [PeluqueriaController::class, 'getPeluquerias']);
 
-Route::get('/locals/{id}', [PeluqueriaController::class, 'getPeluqueriaById']);
+Route::get('/locals/{id_peluqueria}', [PeluqueriaController::class, 'getPeluqueriaById']);
 
-Route::get('/locals/{id}/services', [ServiciosPeluqueriaController::class, 'getServiciosByPeluqueriaId']);
+Route::get('/local/{id_peluqueria}/name', [PeluqueriaController::class, 'getPeluqueriaNombreById']);
+
+Route::get('/locals/{id_peluqueria}/services', [ServiciosPeluqueriaController::class, 'getServiciosByPeluqueriaId']);
 
 Route::get('/locals/search/{valor}', [PeluqueriasController::class, 'getIdsByCodigoPostalONombre']);
 
 
 // ------ Services --------------------------------------------------------
-Route::get('/services/{id}/name', [ServicioController::class, 'getNombrePorId']);
+Route::get('/services/{id_servicio}/name', [ServicioController::class, 'getNombrePorId']);
 
 
 // ------ Localities ------------------------------------------------------
 Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);
 
-Route::get('/localities/{id}/name', [LocalidadController::class, 'getNombreById']);
+Route::get('/localities/{id_localidad}/name', [LocalidadController::class, 'getNombreById']);
 
 
 // ------ Appointments ----------------------------------------------------
@@ -66,9 +68,15 @@ Route::post('/appointments/new', [CitaController::class, 'createCita']);
 
 Route::get('/appointments/{id_peluqueria}', [CitaController::class, 'getCitasByIdPeluqueria']);
 
+Route::get('/appointments/user/{id_usuario}', [CitaController::class, 'getCitasByIdUsuario']);
+
+Route::delete('/appointments/{id_cita}/delete', [CitaController::class, 'deleteCita']);
+
+Route::patch('/appointments/{id_cita}/cancel', [CitaController::class, 'cancelCita']);
+
 
 // ------ Admin ----------------------------------------------------------
 Route::get('/admin/requests', [PeluqueriaSolicitudController::class, 'getLocalsRequest']);
 
-Route::post('/admin/requests/{id}/cambiarEstado', [PeluqueriaSolicitudController::class, 'cambiarEstado']);
+Route::post('/admin/requests/{id_solicitud}/cambiarEstado', [PeluqueriaSolicitudController::class, 'cambiarEstado']);
 
