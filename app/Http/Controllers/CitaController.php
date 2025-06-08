@@ -6,6 +6,7 @@ use App\Models\Cita;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 class CitaController extends Controller
 {
     /**
@@ -33,18 +34,36 @@ class CitaController extends Controller
 
         // Si es viernes (5) y pasan de las 14:00, ir al siguiente lunes
         if ($weekday === 5 && $hour >= 14 || $weekday > 5) {
-            $startDate = $now->copy()->next(Carbon::MONDAY);
+            $startDate = $now->copy()->next(CarbonInterface::MONDAY);
         } else {
             // Ir al lunes de la semana actual
-            $startDate = $now->copy()->startOfWeek(Carbon::MONDAY);
+            $startDate = $now->copy()->startOfWeek(CarbonInterface::MONDAY);
         }
 
         $citas = Cita::where('id_peluqueria', $id_peluqueria)
             ->where('fecha', '>=', $startDate->toDateString())
+            ->where('estado','=', 'CONFIRMADA')
             ->get();
 
         return response()->json($citas);
     }
+
+    /**
+     * Obtener todas las citas de un usuario.
+     *
+     * @param int $id_usuario
+     * @return JsonResponse
+     */
+    public function getCitasByIdUsuario(int $id_usuario): JsonResponse
+    {
+        $citas = Cita::where('id_usuario', $id_usuario)
+            ->orderBy('fecha', 'asc')
+            ->orderBy('hora_inicio', 'asc')
+            ->get();
+
+        return response()->json($citas);
+    }
+
 
     /**
      * Crear una cita nueva.
@@ -86,5 +105,22 @@ class CitaController extends Controller
         return response()->json([
             'mensaje' => 'Cita registrada correctamente'
         ], 201);
+    }
+
+    public function deleteCita($id_cita) {
+        $cita = Cita::find($id_cita);
+        $cita->delete();
+        return response()->json([
+            'mensaje' => 'Cita eliminada correctamente'
+        ], 200);
+    }
+
+    public function cancelCita($id_cita) {
+        $cita = Cita::find($id_cita);
+        $cita->estado = 'CANCELADA';
+        $cita->save();
+        return response()->json([
+            'mensaje' => 'Cita cancelada correctamente'
+        ], 200);
     }
 }

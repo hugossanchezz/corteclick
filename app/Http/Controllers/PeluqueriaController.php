@@ -52,7 +52,7 @@ class PeluqueriaController extends Controller
                 'telefono' => $validated['telefono'],
                 'tipo' => $validated['tipo'],
                 'user_id' => $validated['user_id'],
-                'valoracion' => null, 
+                'valoracion' => null,
             ]);
 
             return response()->json([
@@ -97,4 +97,16 @@ class PeluqueriaController extends Controller
         $peluqueria = Peluqueria::find($id);
         return response()->json($peluqueria);
     }
+
+    public function getPeluqueriaNombreById($id)
+    {
+        $peluqueria = Peluqueria::find($id);
+        if (!$peluqueria) {
+            return response('Peluquería no encontrada', 404);
+        }
+
+        return response($peluqueria->nombre, 200)
+            ->header('Content-Type', 'text/plain');
+    }
+
 }
