@@ -25,7 +25,7 @@ button {
     color: map-get($colores, "blanco");
     @include fuente("titulo_secundario");
 
-    padding: 0.50rem 1.15rem ;
+    padding: 0.50rem 1.15rem;
     margin: 0 0.5rem;
 
     border: 2px solid map-get($colores, "gris_claro");
@@ -40,6 +40,11 @@ button {
     &:hover {
         transform: scale(1.05);
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: auto;
     }
 }
 </style>
