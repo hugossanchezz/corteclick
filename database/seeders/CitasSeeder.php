@@ -21,7 +21,7 @@ class CitasSeeder extends Seeder
                 'id_usuario' => 1,
                 'id_peluqueria' => 1,
                 'id_servicio' => 1,
-                'fecha' => '2025-06-11',
+                'fecha' => '2025-06-05',
                 'hora_inicio' => '09:00:00',
                 'hora_fin' => '10:30:00',
                 'estado' => 'CONFIRMADA',
