@@ -4,7 +4,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "serve-dev": "concurrently \"php artisan serve\" \"npm run dev\" \"node resources/js/auth/checkAppointments.js\""
+        "serve-dev": "concurrently \"php artisan serve\" \"npm run dev\" \"node resources/js/checkAppointments.js\""
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
