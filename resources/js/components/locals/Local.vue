@@ -502,8 +502,8 @@ export default {
 
 .space__container {
   border: 2px solid map-get($colores, "gris_claro");
-  width: 70%;
-  height: 85%;
+  width: 80%;
+  height: 80%;
   margin: 3rem auto;
   border-radius: 10px;
   position: relative;

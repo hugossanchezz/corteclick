@@ -282,6 +282,7 @@ export default {
     main {
         align-items: center;
         padding: 3rem 4rem;
+        min-height: 85vh;
 
         .peluquerias__buscador {
             position: relative;
