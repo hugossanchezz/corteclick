@@ -55,38 +55,6 @@ export default {
         };
 
         /**
-         * Al montar el componente, intenta recuperar el usuario del sessionStorage.
-         * Si existe, carga también el nombre de su localidad a través de la API.
-         */
-        onMounted(async () => {
-            cargarLocalidades();
-
-            const storedUser = sessionStorage.getItem("user");
-            if (storedUser) {
-                try {
-                    user.value = JSON.parse(storedUser);
-                    editedUser.value = { ...user.value }; // Inicializa los datos editables
-                    localidad.value = user.value.localidad || ""; // Inicializa el ID de la localidad
-
-                    if (user.value.localidad) {
-                        const res = await fetch(`/api/localities/${user.value.localidad}/name`);
-                        if (res.ok) {
-                            nombreLocalidad.value = await res.text();
-                        } else {
-                            nombreLocalidad.value = "Desconocido";
-                        }
-                    } else {
-                        nombreLocalidad.value = "";
-                    }
-                } catch (error) {
-                    console.error("Error al cargar usuario o localidad:", error);
-                    sessionStorage.removeItem("user");
-                    router.push("/");
-                }
-            }
-        });
-
-        /**
          * Activa el modo de edición y prepara los datos del usuario.
          */
         const startEditing = () => {
@@ -244,6 +212,38 @@ export default {
             }
         };
 
+        /**
+         * Al montar el componente, intenta recuperar el usuario del sessionStorage.
+         * Si existe, carga también el nombre de su localidad a través de la API.
+         */
+        onMounted(async () => {
+            cargarLocalidades();
+
+            const storedUser = sessionStorage.getItem("user");
+            if (storedUser) {
+                try {
+                    user.value = JSON.parse(storedUser);
+                    editedUser.value = { ...user.value }; // Inicializa los datos editables
+                    localidad.value = user.value.localidad || ""; // Inicializa el ID de la localidad
+
+                    if (user.value.localidad) {
+                        const res = await fetch(`/api/localities/${user.value.localidad}/name`);
+                        if (res.ok) {
+                            nombreLocalidad.value = await res.text();
+                        } else {
+                            nombreLocalidad.value = "Desconocido";
+                        }
+                    } else {
+                        nombreLocalidad.value = "";
+                    }
+                } catch (error) {
+                    console.error("Error al cargar usuario o localidad:", error);
+                    sessionStorage.removeItem("user");
+                    router.push("/");
+                }
+            }
+        });
+
         return {
             user,
             nombreLocalidad,
@@ -268,32 +268,41 @@ export default {
 </script>
 
 <template>
-    <div class="settings-container">
+    <div class="settings__container">
         <!-- Datos Personales -->
-        <section class="personal-info">
-            <h1>Datos Personales</h1>
+        <section class="personal__info">
+            <div class="info__rol">
+                <h1>Datos Personales</h1>
+                <h2 v-if="editedUser.rol_id === 1">
+                    Super Administrador
+                </h2>
+                <h2 v-if="editedUser.rol_id === 2">
+                    Administrador
+                </h2>
+            </div>
+
             <div v-if="user">
-                <div class="form-group">
+                <div class="form__group">
                     <label for="name"><strong>Nombre:</strong></label>
                     <input v-model="editedUser.name" id="name" type="text" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form-group">
+                <div class="form__group">
                     <label for="apellidos"><strong>Apellidos:</strong></label>
                     <input v-model="editedUser.apellidos" id="apellidos" type="text" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form-group">
+                <div class="form__group">
                     <label for="email"><strong>Email:</strong></label>
                     <input v-model="editedUser.email" id="email" type="email" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form-group">
+                <div class="form__group">
                     <label for="telefono"><strong>Teléfono:</strong></label>
                     <input v-model="editedUser.telefono" id="telefono" type="tel" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form-group">
+                <div class="form__group">
                     <label for="localidad"><strong>Localidad:</strong></label>
                     <input v-if="!isEditing" :value="nombreLocalidad" id="localidad" type="text" disabled
                         class="input-disabled" />
@@ -335,16 +344,8 @@ export default {
         </section>
 
         <!-- Modal para errores o éxito -->
-        <ModalConfirm
-            v-if="showModal"
-            v-model:show="showModal"
-            :message="modalMessage"
-            :show-cancel="isSuccess"
-            confirm-text="Aceptar"
-            cancel-text="Cancelar"
-            @confirm="handleModalConfirm"
-            @cancel="handleModalCancel"
-        />
+        <ModalConfirm v-if="showModal" v-model:show="showModal" :message="modalMessage" :show-cancel="isSuccess"
+            confirm-text="Aceptar" cancel-text="Cancelar" @confirm="handleModalConfirm" @cancel="handleModalCancel" />
     </div>
 </template>
 
@@ -355,10 +356,6 @@ export default {
     @include fuente("parrafo");
 }
 
-h1 {
-    margin-bottom: 1rem;
-}
-
 hr {
     background-color: map-get($colores, 'gris_claro');
     height: 2px;
@@ -366,7 +363,17 @@ hr {
     margin: 2rem 0;
 }
 
-.form-group {
+.info__rol {
+    align-items: end;
+    margin-bottom: 1rem;
+    gap: 1rem;
+
+    h2{
+        color: map-get($colores, 'naranja');
+    }
+}
+
+.form__group {
     border: 2px solid map-get($colores, 'gris_claro');
     width: 40%;
     height: 2rem;
@@ -401,7 +408,7 @@ hr {
     }
 }
 
-.form-group .input-disabled {
+.form__group .input-disabled {
     background-color: map-get($colores, 'gris_claro');
 }
 

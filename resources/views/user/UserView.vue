@@ -51,17 +51,17 @@ export default {
                 </router-link>
 
                 <!-- Para usuarios con rol de empresario o admin -->
-                <router-link v-if="user.rol_id == 2 || user.rol_id == 1" :to="'/user/my-locals'"
+                <router-link :to="'/user/my-locals'"
                     :class="{ 'route--active': isActiveRoute('/user/my-locals') }">
                     Mis locales
                 </router-link>
 
                 <!-- Para usuarios con rol de admin -->
-                <router-link v-if="user.rol_id == 1" :to="'/admin/requests'"
+                <router-link v-if="user.rol_id == 1 || user.rol_id == 2" :to="'/admin/requests'"
                     :class="{ 'route--active': isActiveRoute('/admin/requests') }">
                     Solicitudes de locales
                 </router-link>
-                <router-link v-if="user.rol_id == 1" :to="'/admin/dashboard'"
+                <router-link v-if="user.rol_id == 1 || user.rol_id == 2" :to="'/admin/dashboard'"
                     :class="{ 'route--active': isActiveRoute('/admin/dashboard') }">
                     Control de usuarios
                 </router-link>

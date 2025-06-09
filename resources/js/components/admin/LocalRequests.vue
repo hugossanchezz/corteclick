@@ -196,7 +196,6 @@ export default {
         <table v-else class="requests-table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Estado</th>
                     <th>Fecha de solicitud</th>
                     <th>Nombre</th>
@@ -206,14 +205,13 @@ export default {
                     <th>Email</th>
                     <th>Teléfono</th>
                     <th>Tipo</th>
-                    <th>Usuario</th>
+                    <th>ID Usuario</th>
                     <th>Acción</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="solicitud in solicitudes" :key="solicitud.id">
-                    <td>{{ solicitud.id }}</td>
-                    <td>{{ solicitud.estado }}</td>
+                    <td><strong>{{ solicitud.estado }}</strong></td>
                     <td>{{ solicitud.fecha }}</td>
                     <td>{{ solicitud.nombre }}</td>
                     <td>{{ solicitud.descripcion }}</td>
