@@ -13,15 +13,22 @@ class RolesSeeder extends Seeder
         DB::table('roles')->insert([
             [
                 'id' => 1,
+                'nombre' => 'Super Administrador',
+                'descripcion' => 'Usuario con todos los privilegios sobre la aplicación y sobre los administradores.',
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ],
+            [
+                'id' => 2,
                 'nombre' => 'Administrador',
-                'descripcion' => 'Rol con todos los privilegios.',
+                'descripcion' => 'Usuario con todos los privilegios sobre la aplicación.',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
             [   
-                'id' => 2,
+                'id' => 3,
                 'nombre' => 'Usuario',
-                'descripcion' => 'Rol de usuario básico.',
+                'descripcion' => 'Usuario básico.',
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
             ],
