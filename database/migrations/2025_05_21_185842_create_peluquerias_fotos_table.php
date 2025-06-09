@@ -14,11 +14,12 @@ return new class extends Migration
         Schema::create('peluquerias_fotos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('id_peluqueria');
-            $table->binary('imagen')->nullable();
             $table->timestamps();
 
             $table->foreign('id_peluqueria')->references('id')->on('peluquerias');
         });
+
+        DB::statement("ALTER TABLE peluquerias_fotos ADD imagen LONGBLOB NULL AFTER id_peluqueria");
     }
 
     /**

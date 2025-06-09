@@ -27,6 +27,8 @@ return new class extends Migration
             $table->foreign('localidad')->references('id')->on('localidades');
             $table->foreign('user_id')->references('id')->on('users');
         });
+
+        DB::statement("ALTER TABLE peluquerias ADD imagen LONGBLOB NULL AFTER user_id");
     }
 
     /**
