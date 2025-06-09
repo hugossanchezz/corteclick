@@ -11,7 +11,7 @@ const INTERVAL_30_MIN = 30 * 60 * 1000;
 const INTERVAL_1_HOUR = 60 * 60 * 1000;
 
 // Selecciona el intervalo deseado aquí
-const INTERVAL_ACTUAL = INTERVAL_30_MIN;
+const INTERVAL_ACTUAL = INTERVAL_5_MIN;
 
 async function verificarCitas() {
     try {
