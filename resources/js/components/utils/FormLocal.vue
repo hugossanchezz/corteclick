@@ -23,6 +23,8 @@ export default {
     const telefono = ref("");
     const tipo = ref("");
     const user_id = ref("");
+    const imagenes = ref([]);
+    const errorImagenes = ref("");
 
     // Errores
     const errores = ref({});
@@ -50,22 +52,6 @@ export default {
         delete errores.value[campo];
       }
     };
-
-    onMounted(async () => {
-      cargarLocalidades();
-
-      const storedUser = sessionStorage.getItem("user");
-      if (storedUser) {
-        try {
-          const user = JSON.parse(storedUser);
-          user_id.value = user.id;
-        } catch (error) {
-          console.error("Error al cargar usuario", error);
-          sessionStorage.removeItem("user");
-          router.push("/");
-        }
-      }
-    });
 
     const cargarLocalidades = async () => {
       try {
@@ -128,6 +114,24 @@ export default {
       return Object.keys(errores.value).length === 0;
     };
 
+    const manejarSeleccionImagenes = (event) => {
+      const archivos = Array.from(event.target.files);
+      errorImagenes.value = "";
+
+      if (archivos.length === 0) return;
+      if (archivos.length > 5) errorImagenes.value = "Solo se permiten un máximo de 5 imágenes. Se tomarán las primeras 5.";
+
+      imagenes.value = archivos.slice(0, 5);
+
+      for (const archivo of imagenes.value) {
+        if (archivo.size > 10 * 1024 * 1024) {
+          errorImagenes.value = `La imagen ${archivo.name} supera el límite de 10MB.`;
+          imagenes.value = [];
+          return;
+        }
+      }
+    };
+
     // Enviar formulario
     const submitForm = () => {
       generalErrorMessage.value = "";
@@ -145,44 +149,45 @@ export default {
     const confirmarEnvio = async () => {
       isSubmitting.value = true;
       try {
-        const response = await axios.post("/api/new-request", {
-          nombre: nombre.value,
-          descripcion: descripcion.value || 'Peluquería sin descripción.',
-          direccion: direccion.value,
-          localidad: localidad.value,
-          email: email.value,
-          telefono: telefono.value,
-          tipo: tipo.value,
-          user_id: user_id.value
-        });
-        if (response.status === 200) {
+        const formData = new FormData();
+        formData.append("nombre", nombre.value);
+        formData.append("descripcion", descripcion.value || 'Peluquería sin descripción.');
+        formData.append("direccion", direccion.value);
+        formData.append("localidad", localidad.value);
+        formData.append("email", email.value);
+        formData.append("telefono", telefono.value);
+        formData.append("tipo", tipo.value);
+        formData.append("user_id", user_id.value);
 
-          // Reiniciar el formulario
-          nombre.value = "";
-          descripcion.value = "";
-          direccion.value = "";
-          localidad.value = "";
-          email.value = "";
-          telefono.value = "";
-          tipo.value = "";
+        if (imagenes.value.length > 0) {
+          formData.append("imagen", imagenes.value[0]);
+          for (let i = 1; i < imagenes.value.length; i++) {
+            formData.append("otras_imagenes[]", imagenes.value[i]);
+          }
+        }
+
+        const response = await axios.post("/api/new-request", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (response.status === 200) {
+          nombre.value = descripcion.value = direccion.value = localidad.value = email.value = telefono.value = tipo.value = "";
+          imagenes.value = [];
           errores.value = {};
+          errorImagenes.value = "";
           generalErrorMessage.value = "";
         }
       } catch (error) {
-        console.error("Error de registro", error.response);
         if (error.response && error.response.status === 422) {
           const erroresServidor = error.response.data.errors;
-          errores.value = {};
-          for (const campo in erroresServidor) {
-            actualizarError(campo, erroresServidor[campo][0]);
-          }
+          for (const campo in erroresServidor) actualizarError(campo, erroresServidor[campo][0]);
           generalErrorMessage.value = "Error en el registro. Por favor, revisa los campos.";
         } else {
           generalErrorMessage.value = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.";
         }
       } finally {
         isSubmitting.value = false;
-        showModal.value = false; // Cerrar el modal después de completar la acción
+        showModal.value = false;
       }
     };
 
@@ -192,28 +197,27 @@ export default {
       modalAction.value = null;
     };
 
+    onMounted(async () => {
+      cargarLocalidades();
+
+      const storedUser = sessionStorage.getItem("user");
+      if (storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          user_id.value = user.id;
+        } catch (error) {
+          console.error("Error al cargar usuario", error);
+          sessionStorage.removeItem("user");
+          router.push("/");
+        }
+      }
+    });
+
     return {
-      nombre,
-      descripcion,
-      direccion,
-      localidad,
-      localidades,
-      email,
-      telefono,
-      tipo,
-      user_id,
-      errores,
-      generalErrorMessage,
-      registroExitoso,
-      credencialesInvalidas,
-      tieneErrores,
-      isSubmitting,
-      submitForm,
-      showModal,
-      modalMessage,
-      modalAction,
-      confirmarEnvio,
-      cancelarEnvio
+      nombre, descripcion, direccion, localidad, localidades, email, telefono, tipo, user_id,
+      errores, generalErrorMessage, registroExitoso, credencialesInvalidas,
+      tieneErrores, isSubmitting, submitForm, showModal, modalMessage, modalAction,
+      confirmarEnvio, cancelarEnvio, manejarSeleccionImagenes, errorImagenes
     };
   }
 };
@@ -314,6 +318,18 @@ export default {
       </div>
     </div>
 
+    <div class="flex-column form__campo">
+      <label for="imagenes">Imágenes del local *</label>
+      <div class="inputForm flex">
+        <img src="/img/auth/image_orange.svg" alt="Imagenes del local" />
+        <input type="file" id="imagenes" multiple accept="image/png, image/jpeg, image/jpg, image/webp"
+          @change="manejarSeleccionImagenes" />
+      </div>
+      <div v-if="errorImagenes" class="errorMensaje">
+        {{ errorImagenes }}
+      </div>
+    </div>
+
     <div v-if="errores.user_id" class="errorMensaje">
       {{ errores.user_id }}
     </div>
@@ -326,8 +342,8 @@ export default {
     </div>
 
     <!-- Modal de confirmación -->
-    <ModalConfirm v-model:show="showModal" :message="modalMessage" :show-cancel="true"
-      @confirm="confirmarEnvio" @cancel="cancelarEnvio" />
+    <ModalConfirm v-model:show="showModal" :message="modalMessage" :show-cancel="true" @confirm="confirmarEnvio"
+      @cancel="cancelarEnvio" />
   </form>
 </template>
 

@@ -22,6 +22,7 @@ class PeluqueriaSolicitud extends Model
         'telefono',
         'tipo',
         'user_id',
+        'imagen',
     ];
 
     // Relaciones (opcional)
@@ -33,5 +34,10 @@ class PeluqueriaSolicitud extends Model
     public function localidadRelacionada()
     {
         return $this->belongsTo(Localidad::class, 'localidad');
+    }
+
+    public function fotosTemporales()
+    {
+        return $this->hasMany(PeluqueriaFotoTemporal::class, 'id_peluqueria_solicitud');
     }
 }
