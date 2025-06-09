@@ -86,8 +86,37 @@ class PeluqueriaSolicitudController extends Controller
     {
         try {
             $estado = $request->query('estado', 'PENDIENTE');
-            $solicitudes = PeluqueriaSolicitud::where('estado', $estado)->get();
-            return response()->json($solicitudes, 200);
+
+            // Cargar solicitudes con fotos temporales
+            $solicitudes = PeluqueriaSolicitud::with('fotosTemporales')
+                ->where('estado', $estado)
+                ->get();
+
+            // Transformar cada solicitud
+            $solicitudesTransformadas = $solicitudes->map(function ($solicitud) {
+                return [
+                    'id' => $solicitud->id,
+                    'estado' => $solicitud->estado,
+                    'fecha' => $solicitud->fecha,
+                    'nombre' => $solicitud->nombre,
+                    'descripcion' => $solicitud->descripcion,
+                    'direccion' => $solicitud->direccion,
+                    'localidad' => $solicitud->localidad,
+                    'email' => $solicitud->email,
+                    'telefono' => $solicitud->telefono,
+                    'tipo' => $solicitud->tipo,
+                    'user_id' => $solicitud->user_id,
+                    'imagen' => $solicitud->imagen ? base64_encode($solicitud->imagen) : null,
+                    'fotos_temporales' => $solicitud->fotosTemporales->map(function ($foto) {
+                        return [
+                            'id' => $foto->id,
+                            'imagen' => $foto->imagen ? base64_encode($foto->imagen) : null,
+                        ];
+                    }),
+                ];
+            });
+
+            return response()->json($solicitudesTransformadas, 200);
         } catch (\Exception $e) {
             \Log::error("Error fetching local requests: " . $e->getMessage());
             return response()->json(['error' => 'Error al cargar las solicitudes'], 500);

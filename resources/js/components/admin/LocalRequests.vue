@@ -22,9 +22,7 @@ export default {
 
         const cargarSolicitudes = async (estado) => {
             try {
-                const response = await axios.get(`/api/admin/requests?estado=${estado}`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                });
+                const response = await axios.get(`/api/admin/requests?estado=${estado}`)
                 solicitudes.value = response.data;
                 await cargarNombresLocalidades();
             } catch (error) {
@@ -180,7 +178,7 @@ export default {
 </script>
 
 <template>
-    <div>
+    <div class="requests-container">
         <div class="filter-section">
             <label for="estado-select">Filtrar por estado:</label>
             <select id="estado-select" v-model="estadoSeleccionado">
@@ -189,54 +187,49 @@ export default {
                 </option>
             </select>
         </div>
+
         <h2>Solicitudes de locales</h2>
+
         <div v-if="solicitudes.length === 0" class="no-data-message">
             No hay solicitudes con el estado "{{ estadoSeleccionado }}".
         </div>
-        <table v-else class="requests-table">
-            <thead>
-                <tr>
-                    <th>Estado</th>
-                    <th>Fecha de solicitud</th>
-                    <th>Nombre</th>
-                    <th>Descripción</th>
-                    <th>Dirección</th>
-                    <th>Localidad</th>
-                    <th>Email</th>
-                    <th>Teléfono</th>
-                    <th>Tipo</th>
-                    <th>ID Usuario</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="solicitud in solicitudes" :key="solicitud.id">
-                    <td><strong>{{ solicitud.estado }}</strong></td>
-                    <td>{{ solicitud.fecha }}</td>
-                    <td>{{ solicitud.nombre }}</td>
-                    <td>{{ solicitud.descripcion }}</td>
-                    <td>{{ solicitud.direccion }}</td>
-                    <td>{{ localidadNames[solicitud.localidad] || "Cargando..." }}</td>
-                    <td>{{ solicitud.email }}</td>
-                    <td>{{ solicitud.telefono }}</td>
-                    <td>{{ solicitud.tipo }}</td>
-                    <td>{{ solicitud.user_id }}</td>
-                    <td>
-                        <div v-if="solicitud.estado === 'PENDIENTE'" class="action-buttons flex-center">
-                            <button class="btn btn-confirm" @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
-                            <button class="btn btn-cancel" @click="denegarSolicitud(solicitud.id)">Denegar</button>
-                        </div>
-                        <div v-else-if="solicitud.estado === 'APROBADA' || solicitud.estado === 'RECHAZADA'"
-                            class="action-buttons flex-center">
-                            <button class="revert-btn" @click="devolverAPendiente(solicitud.id)">Devolver a
-                                pendiente</button>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
 
-        <!-- Modal reutilizable -->
+        <div v-else class="card-grid">
+            <div v-for="solicitud in solicitudes" :key="solicitud.id" class="solicitud-card">
+                <img :src="`data:image/jpeg;base64,${solicitud.imagen}`" alt="Imagen principal" class="main-image" />
+                <div class="card-content">
+                    <p><strong>Estado:</strong> {{ solicitud.estado }}</p>
+                    <p><strong>Fecha:</strong> {{ solicitud.fecha }}</p>
+                    <p><strong>Nombre:</strong> {{ solicitud.nombre }}</p>
+                    <p><strong>Descripción:</strong> {{ solicitud.descripcion }}</p>
+                    <p><strong>Dirección:</strong> {{ solicitud.direccion }}</p>
+                    <p><strong>Localidad:</strong> {{ localidadNames[solicitud.localidad] || "Cargando..." }}</p>
+                    <p><strong>Email:</strong> {{ solicitud.email }}</p>
+                    <p><strong>Teléfono:</strong> {{ solicitud.telefono }}</p>
+                    <p><strong>Tipo:</strong> {{ solicitud.tipo }}</p>
+                    <p><strong>ID Usuario:</strong> {{ solicitud.user_id }}</p>
+
+                    <div class="imagenes-secundarias" v-if="solicitud.fotos_temporales">
+                        <p><strong>Imágenes secundarias:</strong></p>
+                        <div class="miniaturas">
+                            <img v-for="(foto, index) in solicitud.fotos_temporales" :key="index"
+                                :src="`data:image/jpeg;base64,${foto.imagen}`" alt="Imagen secundaria"
+                                class="miniatura" />
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-confirm"
+                            @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
+                        <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-cancel"
+                            @click="denegarSolicitud(solicitud.id)">Denegar</button>
+                        <button v-if="solicitud.estado !== 'PENDIENTE'" class="revert-btn"
+                            @click="devolverAPendiente(solicitud.id)">Devolver a pendiente</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <ModalConfirm v-model:show="showModal" :message="modalMessage" :show-cancel="modalAction !== null"
             @confirm="modalAction ? ejecutarAccion() : null" @cancel="modalAction = null" />
     </div>
@@ -270,31 +263,6 @@ select {
     }
 }
 
-.requests-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th,
-td {
-    padding: 8px;
-    text-align: center;
-}
-
-th {
-    background-color: map-get($colores, "azul_oscuro");
-    color: map-get($colores, "blanco");
-}
-
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-tr:hover {
-    background-color: #f1f1f1;
-}
-
 .action-buttons {
     gap: 10px;
 }
@@ -313,5 +281,54 @@ tr:hover {
     margin-top: 20px;
     color: map-get($colores, 'gris_oscuro');
     font-style: italic;
+}
+
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.solicitud-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.main-image {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+}
+
+.card-content {
+    width: 100%;
+}
+
+.imagenes-secundarias {
+    margin-top: 1rem;
+}
+
+.miniaturas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 0.5rem;
+}
+
+.miniatura {
+    width: 120px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 </style>
