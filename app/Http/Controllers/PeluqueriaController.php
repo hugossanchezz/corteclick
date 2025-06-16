@@ -40,7 +40,10 @@ class PeluqueriaController extends Controller
                 'telefono' => 'required|string|max:20',
                 'tipo' => 'required|string|in:PELUQUERIA,BARBERIA,UNISEX',
                 'user_id' => 'required|integer|exists:users,id',
+                'imagen' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240',
             ]);
+
+            $imagenBlob = file_get_contents($request->file('imagen')->getRealPath());
 
             // Crear un nuevo registro en la tabla peluquerias
             $peluqueria = Peluqueria::create([
@@ -53,6 +56,7 @@ class PeluqueriaController extends Controller
                 'tipo' => $validated['tipo'],
                 'user_id' => $validated['user_id'],
                 'valoracion' => null,
+                'imagen' => $imagenBlob,
             ]);
 
             return response()->json([

@@ -32,6 +32,7 @@ class Peluqueria extends Model
         'tipo',
         'valoracion',
         'user_id',
+        'imagen',
     ];
 
     /**
