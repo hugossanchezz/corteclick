@@ -11,29 +11,26 @@ export default {
 </script>
 <template>
     <footer class="flex-center">
-        <section class="flex-center">
 
-            <div class="copyright flex-center">
-                © {{ currentYear }} Corteclick S.L. Todos los derechos reservados.
-            </div>
-            
-            <div class="developer flex">
-                <strong>Desarrollador</strong>
-                <img src="/img/footer/double_arrow_white.svg" alt="Desarrollador">
-                <div class="logos flex">
-                    <div>
-                        <a class="flex" href="https://www.linkedin.com/in/hugossanchezz/" target="_blank">
-                            <img src="/img/footer/linkedin.svg" alt="Icono de Linkedin" />
-                            Linkedin</a>
-                    </div>
-                    <div>
-                        <a class="flex" href="https://github.com/hugossanchezz" target="_blank"><img
-                                src="/img/footer/github.svg" alt="Icono de Github" />Github</a>
-                    </div>
+        <div class="copyright flex-center">
+            © {{ currentYear }} Corteclick S.L. Todos los derechos reservados.
+        </div>
+
+        <div class="developer flex">
+            <strong>Desarrollador</strong>
+            <img src="/img/footer/double_arrow_white.svg" alt="Desarrollador">
+            <div class="logos flex">
+                <div>
+                    <a class="flex" href="https://www.linkedin.com/in/hugossanchezz/" target="_blank">
+                        <img src="/img/footer/linkedin.svg" alt="Icono de Linkedin" />
+                        Linkedin</a>
+                </div>
+                <div>
+                    <a class="flex" href="https://github.com/hugossanchezz" target="_blank"><img
+                            src="/img/footer/github.svg" alt="Icono de Github" />Github</a>
                 </div>
             </div>
-
-        </section>
+        </div>
     </footer>
 </template>
 
@@ -47,11 +44,7 @@ footer {
 
     width: 100%;
     padding: 2rem 3rem;
-    
-    section {
-        width: 80%;
-        gap: 1rem;
-    }
+    gap: 1rem;
 
     .developer {
         align-items: center;
