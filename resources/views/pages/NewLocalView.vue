@@ -12,16 +12,22 @@ export default {
 </script>
 
 <template>
-    <section>
-
-        <FormLocal />
-    </section>
+    <main>
+        <section>
+            <FormLocal />
+        </section>
+    </main>
 </template>
 
 <style scoped lang="scss">
-section {
-    width: 40%;
-    margin: 0 auto;
+
+main {
+    width: 100%;
+    height: 100%;
+    section {
+        width: 40%;
+        margin: 0 auto;
+    }
 }
 
 </style>

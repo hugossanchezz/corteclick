@@ -5,7 +5,7 @@ export default {
 </script>
 
 <template>
-    <div class="not-found__container flex-center">
+    <main class="not-found__container flex-center">
         <div class="container__modal glass-effect">
             <h1>404 - Página No Encontrada</h1>
             <p>¡Oops! Parece que la página que estás buscando no existe.</p>
@@ -16,7 +16,7 @@ export default {
                 </router-link>.
             </p>
         </div>
-    </div>
+    </main>
 </template>
 
 <style scoped lang="scss">
@@ -25,7 +25,7 @@ export default {
 .not-found__container {
     background-color: map-get($colores, "azul_oscuro");
     width: 100%;
-    height: 100vh;
+    height: 100%;
 
     .container__modal {
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);

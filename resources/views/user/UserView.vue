@@ -43,7 +43,7 @@ export default {
 
 <template>
     <RequireAuth>
-        <div class="profile flex">
+        <main class="profile flex">
             <aside class="flex-column">
                 <router-link :to="'/user'"
                     :class="{ 'route--active': isActiveRoute('/user') }">
@@ -76,7 +76,7 @@ export default {
             <section class="profile__main">
                 <router-view />
             </section>
-        </div>
+        </main>
     </RequireAuth>
 </template>
 
