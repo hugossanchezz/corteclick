@@ -204,7 +204,9 @@ export default {
                 <div v-else class="peluquerias__grid grid">
                     <div @click="goToPeluqueria(peluqueria.id)" v-for="peluqueria in peluqueriasPaginadas"
                         :key="peluqueria.id" class="peluqueria__card flex-column">
-                        <img src="/img/utils/corteclick.png" alt="Imagen principal de la peluquería" />
+                        <img :src="peluqueria.imagen || '/img/utils/corteclick.png'"
+                            alt="Imagen principal de la peluquería" />
+
                         <h2 class="card__info flex">
                             {{ peluqueria.nombre }}
                             <div>{{ peluqueria.valoracion || "Sin valoración" }} <span>★</span></div>

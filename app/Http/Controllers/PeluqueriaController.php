@@ -13,9 +13,27 @@ class PeluqueriaController extends Controller
      */
     public function getPeluquerias(): JsonResponse
     {
-        $peluquerias = Peluqueria::all();
+        $peluquerias = Peluqueria::all()->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'nombre' => $p->nombre,
+                'descripcion' => $p->descripcion,
+                'direccion' => $p->direccion,
+                'localidad' => $p->localidad,
+                'email' => $p->email,
+                'telefono' => $p->telefono,
+                'tipo' => $p->tipo,
+                'valoracion' => $p->valoracion,
+                'user_id' => $p->user_id,
+                'created_at' => $p->created_at,
+                'updated_at' => $p->updated_at,
+                'imagen' => $p->imagen ? 'data:image/jpeg;base64,' . base64_encode($p->imagen) : null,
+            ];
+        });
+
         return response()->json($peluquerias);
     }
+
 
     public function search(Request $request): JsonResponse
     {
@@ -30,7 +48,6 @@ class PeluqueriaController extends Controller
     public function createNewLocal(Request $request)
     {
         try {
-            // Validar los datos recibidos
             $validated = $request->validate([
                 'nombre' => 'required|string|max:255',
                 'descripcion' => 'required|string',
@@ -40,12 +57,22 @@ class PeluqueriaController extends Controller
                 'telefono' => 'required|string|max:20',
                 'tipo' => 'required|string|in:PELUQUERIA,BARBERIA,UNISEX',
                 'user_id' => 'required|integer|exists:users,id',
-                'imagen' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240',
+                'imagen' => 'required|string', //para guardar imagern en base64
             ]);
 
-            $imagenBlob = file_get_contents($request->file('imagen')->getRealPath());
+            // Procesar imagen base64 y convertirla a binario
+            $base64Image = $validated['imagen'];
 
-            // Crear un nuevo registro en la tabla peluquerias
+            if (str_contains($base64Image, ',')) {
+                [, $content] = explode(',', $base64Image, 2);
+            } else {
+                $content = $base64Image; // Ya es solo la parte útil del base64
+            }
+
+            $imagenBlob = base64_decode($content);
+
+
+            // Crear nueva peluquería
             $peluqueria = Peluqueria::create([
                 'nombre' => $validated['nombre'],
                 'descripcion' => $validated['descripcion'],
@@ -61,7 +88,6 @@ class PeluqueriaController extends Controller
 
             return response()->json([
                 'message' => 'Peluquería creada exitosamente',
-                'peluqueria' => $peluqueria,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([

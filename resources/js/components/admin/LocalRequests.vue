@@ -98,15 +98,23 @@ export default {
                     // }
 
                     try {
-                        const response = await axios.post('/api/new-local', {
-                            nombre: solicitud.nombre,
-                            descripcion: solicitud.descripcion,
-                            direccion: solicitud.direccion,
-                            localidad: solicitud.localidad,
-                            email: solicitud.email,
-                            telefono: solicitud.telefono,
-                            tipo: solicitud.tipo,
-                            user_id: solicitud.user_id,
+                        const formData = new FormData();
+                        formData.append("nombre", solicitud.nombre);
+                        formData.append("descripcion", solicitud.descripcion);
+                        formData.append("direccion", solicitud.direccion);
+                        formData.append("localidad", solicitud.localidad);
+                        formData.append("email", solicitud.email);
+                        formData.append("telefono", solicitud.telefono);
+                        formData.append("tipo", solicitud.tipo);
+                        formData.append("user_id", solicitud.user_id);
+
+                        // Asegúrate de que este campo exista
+                        formData.append("imagen", solicitud.imagen);
+
+                        const response = await axios.post("/api/new-local", formData, {
+                            headers: {
+                                "Content-Type": "multipart/form-data"
+                            }
                         });
                     } catch (newLocalError) {
                         console.error("Error al crear el nuevo local:", newLocalError.response ? newLocalError.response.data : newLocalError.message);
@@ -179,7 +187,7 @@ export default {
 
 <template>
     <div class="requests-container">
-        <div class="filter-section">
+        <div class="filter_section">
             <label for="estado-select">Filtrar por estado:</label>
             <select id="estado-select" v-model="estadoSeleccionado">
                 <option v-for="estado in estados" :key="estado" :value="estado">
@@ -190,40 +198,53 @@ export default {
 
         <h2>Solicitudes de locales</h2>
 
-        <div v-if="solicitudes.length === 0" class="no-data-message">
+        <div v-if="solicitudes.length === 0" class="no_data_message">
             No hay solicitudes con el estado "{{ estadoSeleccionado }}".
         </div>
 
-        <div v-else class="card-grid">
-            <div v-for="solicitud in solicitudes" :key="solicitud.id" class="solicitud-card">
-                <img :src="`data:image/jpeg;base64,${solicitud.imagen}`" alt="Imagen principal" class="main-image" />
-                <div class="card-content">
-                    <p><strong>Estado:</strong> {{ solicitud.estado }}</p>
-                    <p><strong>Fecha:</strong> {{ solicitud.fecha }}</p>
-                    <p><strong>Nombre:</strong> {{ solicitud.nombre }}</p>
-                    <p><strong>Descripción:</strong> {{ solicitud.descripcion }}</p>
-                    <p><strong>Dirección:</strong> {{ solicitud.direccion }}</p>
-                    <p><strong>Localidad:</strong> {{ localidadNames[solicitud.localidad] || "Cargando..." }}</p>
-                    <p><strong>Email:</strong> {{ solicitud.email }}</p>
-                    <p><strong>Teléfono:</strong> {{ solicitud.telefono }}</p>
-                    <p><strong>Tipo:</strong> {{ solicitud.tipo }}</p>
-                    <p><strong>ID Usuario:</strong> {{ solicitud.user_id }}</p>
+        <div v-else class="card_grid">
+            <div v-for="solicitud in solicitudes" :key="solicitud.id" class="solicitud_card">
+                <img v-if="solicitud.imagen" :src="`data:image/jpeg;base64,${solicitud.imagen}`" alt="Imagen principal"
+                    class="main_image" />
+                <img v-else src="/img/utils/corteclick.png" alt="Imagen principal" class="main_image">
 
-                    <div class="imagenes-secundarias" v-if="solicitud.fotos_temporales">
-                        <p><strong>Imágenes secundarias:</strong></p>
+                <div class="card_content">
+                    <div class="informacion_principal">
+                        <div class="flex">
+                            <p><strong>Estado:</strong> {{ solicitud.estado }}</p>
+                            <p><strong>Fecha:</strong> {{ solicitud.fecha }}</p>
+                            <p><strong>ID Usuario:</strong> {{ solicitud.user_id }}</p>
+                        </div>
+                        <p><strong>Nombre:</strong> {{ solicitud.nombre }}</p>
+                        <p><strong>Descripción:</strong> <span class="descripcion">{{ solicitud.descripcion }}</span>
+                        </p>
+                        <p><strong>Dirección:</strong> {{ solicitud.direccion }}</p>
+                        <div class="flex">
+                            <p><strong>Tipo:</strong> {{ solicitud.tipo }}</p>
+                            <p><strong>Localidad:</strong> {{ localidadNames[solicitud.localidad] || "Cargando..." }}
+                            </p>
+                            <p><strong>Teléfono:</strong> {{ solicitud.telefono }}</p>
+                        </div>
+                        <p><strong>Email:</strong> {{ solicitud.email }}</p>
+                    </div>
+
+                    <div class="imagenes_secundarias" v-if="solicitud.fotos_temporales">
+                        <strong>Imágenes secundarias:</strong>
                         <div class="miniaturas">
-                            <img v-for="(foto, index) in solicitud.fotos_temporales" :key="index"
+                            <p v-if="!solicitud.fotos_temporales.length" class="no_images_message">No hay imágenes
+                                secundarias.</p>
+                            <img v-else v-for="(foto, index) in solicitud.fotos_temporales" :key="index"
                                 :src="`data:image/jpeg;base64,${foto.imagen}`" alt="Imagen secundaria"
                                 class="miniatura" />
                         </div>
                     </div>
 
-                    <div class="action-buttons">
+                    <div class="action_buttons flex-center">
                         <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-confirm"
                             @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
                         <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-cancel"
                             @click="denegarSolicitud(solicitud.id)">Denegar</button>
-                        <button v-if="solicitud.estado !== 'PENDIENTE'" class="revert-btn"
+                        <button v-if="solicitud.estado !== 'PENDIENTE'" class="btn-revert"
                             @click="devolverAPendiente(solicitud.id)">Devolver a pendiente</button>
                     </div>
                 </div>
@@ -243,7 +264,7 @@ export default {
     @include fuente("parrafo");
 }
 
-.filter-section {
+.filter_section {
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -263,34 +284,35 @@ select {
     }
 }
 
-.action-buttons {
+.action_buttons {
+    margin-top: 5px;
     gap: 10px;
 }
 
-.revert-btn {
+.btn-revert {
     background-color: map-get($colores, 'naranja');
     color: map-get($colores, 'blanco');
 }
 
-.revert-btn:hover {
+.btn-revert:hover {
     background-color: map-get($colores, 'naranja_oscuro');
 }
 
-.no-data-message {
+.no_data_message {
     text-align: center;
     margin-top: 20px;
     color: map-get($colores, 'gris_oscuro');
     font-style: italic;
 }
 
-.card-grid {
+.card_grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 }
 
-.solicitud-card {
+.solicitud_card {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 16px;
@@ -301,7 +323,7 @@ select {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-.main-image {
+.main_image {
     width: 100%;
     max-height: 180px;
     object-fit: cover;
@@ -309,11 +331,37 @@ select {
     margin-bottom: 1rem;
 }
 
-.card-content {
+.card_content {
     width: 100%;
+
+    p {
+        border: 2px solid map-get($colores, "gris_claro");
+        display: flex;
+        flex-direction: column;
+        border-radius: 4px;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 5px;
+
+        strong {
+            background-color: map-get($colores, "blanco");
+            margin-bottom: 5px;
+            text-align: start;
+            padding-left: 5px;
+        }
+
+        .descripcion {
+            height: 2.5rem;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+    }
 }
 
-.imagenes-secundarias {
+.imagenes_secundarias {
     margin-top: 1rem;
 }
 
@@ -322,6 +370,10 @@ select {
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 0.5rem;
+
+    .no_images_message {
+        padding: 5px 0;
+    }
 }
 
 .miniatura {
