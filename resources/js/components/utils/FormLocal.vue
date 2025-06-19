@@ -24,6 +24,7 @@ export default {
     const tipo = ref("");
     const user_id = ref("");
     const imagenes = ref([]);
+    const inputImagenes = ref(null);
     const errorImagenes = ref("");
 
     // Errores
@@ -176,6 +177,10 @@ export default {
           errores.value = {};
           errorImagenes.value = "";
           generalErrorMessage.value = "";
+          imagenes.value = [];
+          if (inputImagenes.value) {
+            inputImagenes.value.value = null;
+          }
         }
       } catch (error) {
         if (error.response && error.response.status === 422) {
@@ -217,7 +222,7 @@ export default {
       nombre, descripcion, direccion, localidad, localidades, email, telefono, tipo, user_id,
       errores, generalErrorMessage, registroExitoso, credencialesInvalidas,
       tieneErrores, isSubmitting, submitForm, showModal, modalMessage, modalAction,
-      confirmarEnvio, cancelarEnvio, manejarSeleccionImagenes, errorImagenes
+      confirmarEnvio, cancelarEnvio, manejarSeleccionImagenes, errorImagenes, inputImagenes,
     };
   }
 };
@@ -232,7 +237,7 @@ export default {
     <hr />
 
     <div class="flex-column form__campo">
-      <label for="nombre">Nombre del negocio *</label>
+      <label for="nombre">Nombre del negocio</label>
       <div class="inputForm flex">
         <img src="/img/auth/person_orange.svg" alt="Icono para input de nombre" />
         <input v-model="nombre" type="text" placeholder="Sin caracteres especiales" required />
@@ -243,7 +248,7 @@ export default {
     </div>
 
     <div class="flex-column form__campo">
-      <label for="descripcion">Descripción</label>
+      <label for="descripcion">Descripción (Opcional)</label>
       <div class="inputForm inputForm-textarea flex">
         <img src="/img/utils/edit.svg" alt="Icono para descripción" />
         <textarea v-model="descripcion" placeholder="Describe tu negocio. Max. 200 caracteres" />
@@ -254,7 +259,7 @@ export default {
     </div>
 
     <div class="flex-column form__campo">
-      <label for="direccion">Dirección *</label>
+      <label for="direccion">Dirección</label>
       <div class="inputForm flex">
         <img src="/img/locals/location.svg" alt="Icono para dirección" />
         <input v-model="direccion" type="text" placeholder="Calle, número, etc." required />
@@ -266,7 +271,7 @@ export default {
 
     <div class="form__horizontal flex">
       <div class="flex-column form__campo">
-        <label for="localidad">Localidad *</label>
+        <label for="localidad">Localidad</label>
         <div class="inputForm flex">
           <select v-model="localidad" required>
             <option selected disabled value="">Selecciona una localidad</option>
@@ -281,7 +286,7 @@ export default {
       </div>
 
       <div class="flex-column form__campo">
-        <label for="telefono">Teléfono *</label>
+        <label for="telefono">Teléfono</label>
         <div class="inputForm flex">
           <img src="/img/auth/phone_orange.svg" alt="Icono de teléfono" />
           <input v-model="telefono" type="tel" placeholder="000 000 000" required />
@@ -293,7 +298,7 @@ export default {
     </div>
 
     <div class="flex-column form__campo">
-      <label for="email">Correo *</label>
+      <label for="email">Correo</label>
       <div class="inputForm flex">
         <img src="/img/auth/at_sign_orange.svg" alt="Icono de correo" />
         <input v-model="email" type="email" placeholder="ejemplo@email.com" required />
@@ -304,7 +309,7 @@ export default {
     </div>
 
     <div class="flex-column form__campo">
-      <label for="tipo">Tipo de servicio *</label>
+      <label for="tipo">Tipo de local</label>
       <div class="inputForm flex">
         <select v-model="tipo" required>
           <option selected disabled value="">Selecciona un tipo</option>
@@ -319,11 +324,11 @@ export default {
     </div>
 
     <div class="flex-column form__campo">
-      <label for="imagenes">Imágenes del local *</label>
+      <label for="imagenes">Imágenes del local</label>
       <div class="inputForm flex">
         <img src="/img/auth/image_orange.svg" alt="Imagenes del local" />
-        <input type="file" id="imagenes" multiple accept="image/png, image/jpeg, image/jpg, image/webp"
-          @change="manejarSeleccionImagenes" />
+        <input ref="inputImagenes" type="file" id="imagenes" multiple
+          accept="image/png, image/jpeg, image/jpg, image/webp" @change="manejarSeleccionImagenes" required/>
       </div>
       <div v-if="errorImagenes" class="errorMensaje">
         {{ errorImagenes }}
