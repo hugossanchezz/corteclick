@@ -228,8 +228,6 @@ export default {
     margin: 0 auto;
     width: 85%;
 
-    padding: 20px;
-
     .filter-section {
         margin-bottom: 20px;
         display: flex;
