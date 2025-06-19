@@ -155,8 +155,9 @@ export default {
             <label for="estado">Filtrar por estado:</label>
             <select id="estado" v-model="estadoFiltro">
                 <option value="TODAS">Todas</option>
-                <option value="CANCELADA">Canceladas</option>
+                <option value="CONFIRMADA">Confirmadas</option>
                 <option value="TERMINADA">Terminadas</option>
+                <option value="CANCELADA">Canceladas</option>
             </select>
         </div>
 
@@ -165,11 +166,8 @@ export default {
         <div v-if="loading" class="mg-tb-4 loading w-100 flex-center">Cargando citas...</div>
         <div v-else-if="error">{{ error }}</div>
         <div v-else-if="citasFiltradas.length === 0">
-            <p v-if="estadoFiltro === 'CANCELADA'">
-                No hay solicitudes con el estado "CANCELADA".
-            </p>
-            <p v-else-if="estadoFiltro === 'TERMINADA'">
-                No hay solicitudes con el estado "TERMINADA".
+            <p v-if="estadoFiltro !== 'TODAS'">
+                No hay solicitudes con el estado "{{ estadoFiltro }}".
             </p>
             <p v-else>
                 No tienes citas registradas.
