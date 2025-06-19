@@ -391,6 +391,10 @@ export default {
                 padding: 2.5px 10px;
                 cursor: pointer;
             }
+
+            button[disabled] {
+                cursor: auto;
+            }
         }
     }
 
