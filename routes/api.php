@@ -77,6 +77,9 @@ Route::patch('/appointments/{id_cita}/cancel', [CitaController::class, 'cancelCi
 Route::patch('/appointments/check-expired', [CitaController::class, 'marcarCitasTerminadas']);
 
 
+// ------ User ----------------------------------------------------------
+
+
 // ------ Admin ----------------------------------------------------------
 Route::get('/admin/requests', [PeluqueriaSolicitudController::class, 'getLocalsRequest']);
 

@@ -50,12 +50,6 @@ export default {
                     Mis citas
                 </router-link>
 
-                <!-- Para usuarios con rol de empresario o admin -->
-                <router-link :to="'/user/my-locals'"
-                    :class="{ 'route--active': isActiveRoute('/user/my-locals') }">
-                    Mis locales
-                </router-link>
-
                 <!-- Para usuarios con rol de admin -->
                 <router-link v-if="user.rol_id == 1 || user.rol_id == 2" :to="'/admin/requests'"
                     :class="{ 'route--active': isActiveRoute('/admin/requests') }">

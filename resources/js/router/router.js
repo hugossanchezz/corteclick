@@ -18,7 +18,6 @@ import Cookies from "@/js/components/auth/Cookies.vue";
 import UserView from '@/views/user/UserView.vue';
 import Settings from '@/js/components/user/Settings.vue';
 import Appointments from '@/js/components/user/Appointments.vue';
-import MyLocals from '@/js/components/user/Locals.vue';
 
 
 // Admin
@@ -76,7 +75,6 @@ const routes = [
         path: '/user', name: 'User', component: UserView,
         children: [
             { path: '', name: 'Appointments', component: Appointments },
-            { path: 'my-locals', name: 'MyLocals', component: MyLocals },
             { path: '/admin/dashboard', name: 'Dashboard', component: Dashboard },
             { path: '/admin/requests', name: 'Requests', component: LocalRequests },
             { path: 'settings', name: 'Settings', component: Settings },
