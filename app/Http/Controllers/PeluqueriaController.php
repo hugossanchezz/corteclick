@@ -125,8 +125,27 @@ class PeluqueriaController extends Controller
     public function getPeluqueriaById($id)
     {
         $peluqueria = Peluqueria::find($id);
-        return response()->json($peluqueria);
+
+        if (!$peluqueria) {
+            return response()->json(['error' => 'Peluquería no encontrada'], 404);
+        }
+
+        return response()->json([
+            'id' => $peluqueria->id,
+            'nombre' => $peluqueria->nombre,
+            'descripcion' => $peluqueria->descripcion,
+            'direccion' => $peluqueria->direccion,
+            'localidad' => $peluqueria->localidad,
+            'email' => $peluqueria->email,
+            'telefono' => $peluqueria->telefono,
+            'tipo' => $peluqueria->tipo,
+            'user_id' => $peluqueria->user_id,
+            'estado' => $peluqueria->estado,
+            'imagen' => $peluqueria->imagen ? base64_encode($peluqueria->imagen) : null,
+            // agrega más campos si tu modelo tiene más
+        ]);
     }
+
 
     public function getPeluqueriaNombreById($id)
     {

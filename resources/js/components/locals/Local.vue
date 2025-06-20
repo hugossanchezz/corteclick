@@ -391,7 +391,8 @@ export default {
 
       <div v-else-if="peluqueria" class="local grid">
         <div class="local__image">
-          <img src="/img/utils/corteclick.png" alt="" />
+          <img v-if="peluqueria.imagen" :src="`data:image/jpeg;base64,${peluqueria.imagen}`" alt="Imagen principal"
+            class="main_image" />
         </div>
 
         <div class="local__name flex">

@@ -244,7 +244,7 @@ export default {
                             @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
                         <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-cancel"
                             @click="denegarSolicitud(solicitud.id)">Denegar</button>
-                        <button v-if="solicitud.estado !== 'PENDIENTE'" class="btn-revert"
+                        <button v-if="solicitud.estado !== 'PENDIENTE'" class="btn btn-revert"
                             @click="devolverAPendiente(solicitud.id)">Devolver a pendiente</button>
                     </div>
                 </div>
@@ -307,7 +307,7 @@ select {
 
 .card_grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 450px));
     gap: 1.5rem;
     margin-top: 2rem;
 }
@@ -368,17 +368,17 @@ select {
 .miniaturas {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
     margin-top: 0.5rem;
-
+    
     .no_images_message {
         padding: 5px 0;
     }
 }
 
 .miniatura {
-    width: 120px;
-    height: 60px;
+    width: calc(50% - 4px);
+    margin: 2px;
+    height: 80px;
     object-fit: cover;
     border-radius: 4px;
     border: 1px solid #ccc;
