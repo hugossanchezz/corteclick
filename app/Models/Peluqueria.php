@@ -68,4 +68,10 @@ class Peluqueria extends Model
             ->using(ServiciosPeluqueria::class)
             ->withPivot('precio', 'duracion');
     }
+
+    public function fotos()
+    {
+        return $this->hasMany(PeluqueriaFoto::class, 'id_peluqueria');
+    }
+
 }
