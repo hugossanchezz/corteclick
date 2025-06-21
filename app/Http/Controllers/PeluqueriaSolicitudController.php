@@ -79,11 +79,9 @@ class PeluqueriaSolicitudController extends Controller
     public function getLocalsRequest(Request $request)
     {
         try {
-            $estado = $request->query('estado', 'PENDIENTE');
 
             // Cargar solicitudes con fotos temporales
             $solicitudes = PeluqueriaSolicitud::with('fotosTemporales')
-                ->where('estado', $estado)
                 ->get();
 
             // Transformar cada solicitud
@@ -175,7 +173,7 @@ class PeluqueriaSolicitudController extends Controller
         }
 
         // Si se rechaza, eliminar la solicitud y sus fotos temporales si las tiene
-        if ($nuevoEstado === 'RECHAZADA') {
+        if ($nuevoEstado === 'RECHAZADA' || $solicitud->estado === 'APROBADA') {
             // Eliminar fotos temporales si están relacionadas
             if (method_exists($solicitud, 'fotosTemporales')) {
                 foreach ($solicitud->fotosTemporales as $foto) {
@@ -184,8 +182,6 @@ class PeluqueriaSolicitudController extends Controller
             }
 
             $solicitud->delete();
-
-            return response()->json(['message' => 'Solicitud rechazada y eliminada correctamente'], 200);
         }
 
         // Si se aprueba, simplemente actualizar el estado

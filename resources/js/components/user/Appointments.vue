@@ -1,6 +1,7 @@
 <script>
 import { ref, computed, onMounted, watch } from "vue";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
+import "@/js/checkAppointments.js";
 
 export default {
     name: "Appointments",

@@ -2,7 +2,6 @@
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
-import "@/js/checkAppointments.js";
 
 export default {
     name: "LocalRequests",
@@ -21,9 +20,9 @@ export default {
 
         const localidadNames = ref({});
 
-        const cargarSolicitudes = async (estado) => {
+        const cargarSolicitudes = async () => {
             try {
-                const response = await axios.get(`/api/admin/requests?estado=${estado}`)
+                const response = await axios.get(`/api/admin/requests`)
                 solicitudes.value = response.data;
                 await cargarNombresLocalidades();
             } catch (error) {
@@ -132,19 +131,12 @@ export default {
             abrirModal("¿Estás seguro de eliminar esta solicitud?", "eliminar", solicitudId);
         };
 
-
-
-        watch(estadoSeleccionado, (nuevoEstado) => {
-            cargarSolicitudes(nuevoEstado);
-        });
-
         onMounted(() => {
-            cargarSolicitudes(estadoSeleccionado.value);
+            cargarSolicitudes();
         });
 
         return {
             solicitudes,
-            estadoSeleccionado,
             estados,
             showModal,
             modalMessage,
@@ -160,19 +152,11 @@ export default {
 
 <template>
     <div class="requests-container">
-        <div class="filter_section">
-            <label for="estado-select">Filtrar por estado:</label>
-            <select id="estado-select" v-model="estadoSeleccionado">
-                <option v-for="estado in estados" :key="estado" :value="estado">
-                    {{ estado }}
-                </option>
-            </select>
-        </div>
 
         <h2>Solicitudes de locales</h2>
 
         <div v-if="solicitudes.length === 0" class="no_data_message">
-            No hay solicitudes con el estado "{{ estadoSeleccionado }}".
+            No hay solicitudes pendientes en este momento.
         </div>
 
         <div v-else class="card_grid">
