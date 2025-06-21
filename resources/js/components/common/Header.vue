@@ -104,6 +104,9 @@ export default {
 
 header {
     background-color: map-get($colores, "azul_oscuro");
+    position: sticky;
+    top: 0;
+    z-index: 1;
 
     a {
         color: map-get($colores, "blanco");
