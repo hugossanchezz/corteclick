@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
+import "@/js/checkAppointments.js";
 
 export default {
     name: "LocalRequests",
@@ -11,7 +12,7 @@ export default {
     setup() {
         const solicitudes = ref([]);
         const estadoSeleccionado = ref("PENDIENTE");
-        const estados = ref(["PENDIENTE", "APROBADA", "RECHAZADA"]);
+        const estados = ref(["PENDIENTE", "RECHAZADA"]);
 
         const showModal = ref(false);
         const modalMessage = ref("");
@@ -51,14 +52,6 @@ export default {
             }
         };
 
-        onMounted(() => {
-            cargarSolicitudes(estadoSeleccionado.value);
-        });
-
-        watch(estadoSeleccionado, (nuevoEstado) => {
-            cargarSolicitudes(nuevoEstado);
-        });
-
         const abrirModal = (message, action, solicitudId) => {
             modalMessage.value = message;
             modalAction.value = action;
@@ -72,12 +65,10 @@ export default {
             const estadoMap = {
                 aprobar: 'APROBADA',
                 denegar: 'RECHAZADA',
-                devolverAPendiente: 'PENDIENTE',
             };
             const mensajesExito = {
                 aprobar: "Solicitud APROBADA exitosamente y peluquería creada.",
                 denegar: "Solicitud DENEGADA exitosamente.",
-                devolverAPendiente: "Solicitud devuelta a PENDIENTE exitosamente y peluquería eliminada si existía.",
             };
 
             try {
@@ -87,15 +78,6 @@ export default {
                 }
 
                 if (action === 'aprobar') {
-                    // let normalizedTipo = solicitud.tipo;
-                    // if (normalizedTipo) {
-                    //     normalizedTipo = normalizedTipo.toLowerCase();
-                    //     if (!['peluqueria', 'barberia', 'estetica'].includes(normalizedTipo)) {
-                    //         throw new Error("El tipo de solicitud no es válido. Debe ser 'peluqueria', 'barberia' o 'estetica'.");
-                    //     }
-                    // } else {
-                    //     throw new Error("El campo 'tipo' está vacío o no definido.");
-                    // }
 
                     try {
                         const formData = new FormData();
@@ -111,29 +93,11 @@ export default {
                         // Asegúrate de que este campo exista
                         formData.append("imagen", solicitud.imagen);
 
-                        const response = await axios.post("/api/new-local", formData, {
-                            headers: {
-                                "Content-Type": "multipart/form-data"
-                            }
-                        });
+                        await axios.post(`/api/approve-request/${solicitudId}`);
+
                     } catch (newLocalError) {
                         console.error("Error al crear el nuevo local:", newLocalError.response ? newLocalError.response.data : newLocalError.message);
                         throw newLocalError;
-                    }
-                }
-
-                // Si la acción es devolver a pendiente y el estado actual es APROBADA, eliminar la peluquería por email
-                if (action === 'devolverAPendiente' && solicitud.estado === 'APROBADA') {
-                    try {
-                        const response = await axios.delete(`/api/delete-local/${encodeURIComponent(solicitud.email)}`);
-                    } catch (deleteError) {
-                        // Si la peluquería no existe (404), continuamos con el cambio de estado
-                        if (deleteError.response && deleteError.response.status !== 404) {
-                            console.error("Error al eliminar la peluquería:", deleteError.response ? deleteError.response.data : deleteError.message);
-                            throw deleteError;
-                        } else {
-                            console.warn("No se encontró una peluquería para eliminar con el email:", solicitud.email);
-                        }
                     }
                 }
 
@@ -164,9 +128,19 @@ export default {
             abrirModal("¿Estás seguro de denegar esta solicitud?", "denegar", solicitudId);
         };
 
-        const devolverAPendiente = (solicitudId) => {
-            abrirModal("¿Estás seguro de devolver esta solicitud a pendiente?", "devolverAPendiente", solicitudId);
+        const eliminarSolicitud = (solicitudId) => {
+            abrirModal("¿Estás seguro de eliminar esta solicitud?", "eliminar", solicitudId);
         };
+
+
+
+        watch(estadoSeleccionado, (nuevoEstado) => {
+            cargarSolicitudes(nuevoEstado);
+        });
+
+        onMounted(() => {
+            cargarSolicitudes(estadoSeleccionado.value);
+        });
 
         return {
             solicitudes,
@@ -177,7 +151,6 @@ export default {
             modalAction,
             aprobarSolicitud,
             denegarSolicitud,
-            devolverAPendiente,
             ejecutarAccion,
             localidadNames,
         };
@@ -244,8 +217,8 @@ export default {
                             @click="aprobarSolicitud(solicitud.id)">Aprobar</button>
                         <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-cancel"
                             @click="denegarSolicitud(solicitud.id)">Denegar</button>
-                        <button v-if="solicitud.estado !== 'PENDIENTE'" class="btn btn-revert"
-                            @click="devolverAPendiente(solicitud.id)">Devolver a pendiente</button>
+                        <button v-if="solicitud.estado === 'RECHAZADA'" class="btn btn-cancel"
+                            @click="eliminarSolicitud(solicitud.id)">Eliminar</button>
                     </div>
                 </div>
             </div>

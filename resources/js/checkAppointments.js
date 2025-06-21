@@ -28,8 +28,8 @@ async function verificarCitas() {
     }
 }
 
-// Espera 5 segundos antes del primer intento, luego ejecuta cada INTERVAL_ACTUAL
+// Tiempo de espera antes del primer intento, luego se ejecuta cada INTERVAL_ACTUAL
 setTimeout(() => {
     verificarCitas();
     setInterval(verificarCitas, INTERVAL_ACTUAL);
-}, 5000);
+}, 200);
