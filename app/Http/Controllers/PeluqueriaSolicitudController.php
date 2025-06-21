@@ -153,17 +153,18 @@ class PeluqueriaSolicitudController extends Controller
 
             DB::commit();
 
-            return response()->json(['mensaje' => 'Solicitud aprobada correctamente'], 200);
+            return response()->json([
+                'message' => 'Solicitud aprobada correctamente.'
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Error al aprobar la solicitud', 'detalles' => $e->getMessage()], 500);
         }
     }
 
-
     public function cambiarEstado(Request $request, $id)
     {
-        $solicitud = PeluqueriaSolicitud::findOrFail($id);
+        $solicitud = PeluqueriaSolicitud::with('fotosTemporales')->findOrFail($id);
         $nuevoEstado = $request->input('estado');
 
         // Validar que el nuevo estado sea válido
@@ -172,23 +173,17 @@ class PeluqueriaSolicitudController extends Controller
             return response()->json(['error' => 'Estado no válido'], 400);
         }
 
-        // Si se rechaza, eliminar la solicitud y sus fotos temporales si las tiene
-        if ($nuevoEstado === 'RECHAZADA' || $solicitud->estado === 'APROBADA') {
-            // Eliminar fotos temporales si están relacionadas
-            if (method_exists($solicitud, 'fotosTemporales')) {
-                foreach ($solicitud->fotosTemporales as $foto) {
-                    $foto->delete();
-                }
-            }
-
-            $solicitud->delete();
+        // Eliminar fotos temporales si existen
+        foreach ($solicitud->fotosTemporales as $foto) {
+            $foto->delete();
         }
 
-        // Si se aprueba, simplemente actualizar el estado
-        $solicitud->estado = $nuevoEstado;
-        $solicitud->save();
+        // Eliminar solicitud
+        $solicitud->delete();
 
-        return response()->json(['message' => "Solicitud cambiada a {$nuevoEstado} exitosamente"], 200);
+        return response()->json([
+            'message' => "Solicitud {$nuevoEstado} y eliminada correctamente."
+        ], 200);
     }
 
 }
