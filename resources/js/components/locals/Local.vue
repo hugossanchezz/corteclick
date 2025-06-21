@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { DateTime } from "luxon";
+import axios from "axios";
 import RequireAuth from "@/js/components/auth/RequireAuth.vue";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
@@ -30,6 +31,10 @@ export default {
     const fridayDay = ref(0);
     const occupiedSlots = ref({});
     const currentWeekMonday = ref(null);
+
+    // Carrusel
+    const imagenesCarrusel = ref([]);
+    const indiceActual = ref(0);
 
     // Modal
     const showModal = ref(false);
@@ -318,22 +323,78 @@ export default {
       }
     };
 
+    // Carrusel
+    const cargarImagenesCarrusel = async () => {
+      try {
+        const responseFotos = await axios.get(`/api/local/${peluqueria.value.id}/photos`);
+        const imagenes = [];
+
+        // Solo agregar la imagen principal si existe
+        if (peluqueria.value.imagen) {
+          imagenes.push(`data:image/jpeg;base64,${peluqueria.value.imagen}`);
+        }
+
+        // Añadir las secundarias si existen
+        if (Array.isArray(responseFotos.data)) {
+          imagenes.push(...responseFotos.data.map(f => `data:image/jpeg;base64,${f.imagen}`));
+        }
+
+        // Si no hay imágenes, usar una por defecto
+        if (imagenes.length === 0) {
+          imagenes.push('/img/utils/corteclick.png');
+        }
+
+        imagenesCarrusel.value = imagenes;
+        indiceActual.value = 0;
+      } catch (error) {
+        console.error("❌ Error al cargar imágenes del carrusel:", error);
+        imagenesCarrusel.value = ['/img/utils/corteclick.png'];
+      }
+    };
+
+
+    const siguienteImagen = () => {
+      if (imagenesCarrusel.value.length === 0) return;
+      indiceActual.value = (indiceActual.value + 1) % imagenesCarrusel.value.length;
+    };
+
+    const anteriorImagen = () => {
+      if (imagenesCarrusel.value.length === 0) return;
+      indiceActual.value =
+        (indiceActual.value - 1 + imagenesCarrusel.value.length) % imagenesCarrusel.value.length;
+    };
 
     onMounted(async () => {
       const storedUser = sessionStorage.getItem("user");
-
       if (storedUser) {
         const user = JSON.parse(storedUser);
         userId.value = user.id;
       }
+
       loading.value = true;
       currentWeekMonday.value = getCurrentWeekMonday();
       currentMonday.value = currentWeekMonday.value;
-      updateWeekDays();
-      await Promise.all([fetchPeluqueria(), fetchServicios()]);
+
+      try {
+        // Esperar a que cargue la peluquería
+        await fetchPeluqueria();
+
+        // Cargar el carrusel solo si la peluquería está definida
+        if (peluqueria.value && peluqueria.value.id) {
+          await cargarImagenesCarrusel();
+        }
+
+        await fetchServicios();
+        updateWeekDays();
+        checkStatus();
+      } catch (e) {
+        console.error("❌ Error en carga inicial:", e);
+        error.value = "No se pudo cargar la información del local.";
+      }
+
       loading.value = false;
-      checkStatus();
     });
+
 
     return {
       peluqueria,
@@ -360,6 +421,13 @@ export default {
       selectedServiceId,
       selectedServiceDuration,
 
+      // Carrusel
+      imagenesCarrusel,
+      indiceActual,
+      cargarImagenesCarrusel,
+      siguienteImagen,
+      anteriorImagen,
+
       // Modal
       showModal,
       modalTitle,
@@ -368,7 +436,6 @@ export default {
   }
 };
 </script>
-
 
 <template>
   <RequireAuth>
@@ -391,9 +458,14 @@ export default {
 
       <div v-else-if="peluqueria" class="local grid">
         <div class="local__image">
-          <img v-if="peluqueria.imagen" :src="`data:image/jpeg;base64,${peluqueria.imagen}`" alt="Imagen principal"
-            class="main_image" />
-          <img v-else src="/img/utils/corteclick.png" alt="Imagen principal" class="main_image">
+          <img :src="imagenesCarrusel[indiceActual]" alt="Imagen del local" class="main_image" />
+
+          <button class="carrusel-btn izquierda" @click="anteriorImagen" :disabled="imagenesCarrusel.length <= 1">
+            <img src="/img/utils/arrow_back_white.svg" alt="">
+          </button>
+          <button class="carrusel-btn derecha" @click="siguienteImagen" :disabled="imagenesCarrusel.length <= 1">
+            <img src="/img/utils/arrow_forward_white.svg" alt="">
+          </button>
         </div>
 
         <div class="local__name flex">
@@ -535,9 +607,40 @@ export default {
   .local__image {
     grid-area: 1 / 1 / 4 / 2;
     height: 100%;
+    max-height: 500px;
+    position: relative;
+    overflow: hidden;
 
     img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       border-top-left-radius: 8px;
+    }
+
+    .carrusel-btn {
+      height: 2.5rem;
+      width: 2rem;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: rgba(94, 94, 94, 0.4);
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      z-index: 1;
+
+      &:disabled {
+        cursor: auto;
+      }
+    }
+
+    .carrusel-btn.izquierda {
+      left: 10px;
+    }
+
+    .carrusel-btn.derecha {
+      right: 10px;
     }
   }
 
@@ -748,15 +851,6 @@ export default {
 
   .local__button {
     grid-area: 6 / 2 / 7 / 3;
-  }
-
-  .local__image {
-    width: 100%;
-
-    img {
-      width: 100%;
-      height: auto;
-    }
   }
 
   .error {

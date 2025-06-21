@@ -44,32 +44,6 @@ class PeluqueriaController extends Controller
         return response()->json($peluquerias);
     }
 
-    public function deleteLocalByEmail($email)
-    {
-        try {
-            // Buscar la peluquería por email
-            $peluqueria = Peluqueria::where('email', $email)->first();
-
-            // Verificar si la peluquería existe
-            if (!$peluqueria) {
-                return response()->json([
-                    'error' => 'Peluquería no encontrada con el email proporcionado.',
-                ], 404);
-            }
-
-            // Eliminar la peluquería
-            $peluqueria->delete();
-
-            return response()->json([
-                'message' => 'Peluquería eliminada exitosamente.',
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error al eliminar la peluquería: ' . $e->getMessage(),
-            ], 500);
-        }
-    }
-
     public function getPeluqueriaById($id)
     {
         $peluqueria = Peluqueria::find($id);

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PeluqueriaController;
+use App\Http\Controllers\PeluqueriaFotoController;
 use App\Http\Controllers\PeluqueriasController;
 use App\Http\Controllers\PeluqueriaSolicitudController;
 use App\Http\Controllers\LocalidadController;
@@ -33,18 +34,20 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
-// ------ Locals ----------------------------------------------------------
+// ------ Local Requests ----------------------------------------------------------
 Route::post('/new-request', [PeluqueriaSolicitudController::class, 'createLocalRequest']);
 
 Route::post('/approve-request/{id_solicitud}', [PeluqueriaSolicitudController::class, 'approveRequest']);
 
-Route::delete('/delete-local/{email}', [PeluqueriaController::class, 'deleteLocalByEmail']);
+
+// ------ Locals ----------------------------------------------------------
+Route::get('/local/{id_peluqueria}/name', [PeluqueriaController::class, 'getPeluqueriaNombreById']);
+
+Route::get('/local/{id_peluqueria}/photos', [PeluqueriaFotoController::class, 'getFotosByPeluqueria']);
 
 Route::get('/locals', [PeluqueriaController::class, 'getPeluquerias']);
 
 Route::get('/locals/{id_peluqueria}', [PeluqueriaController::class, 'getPeluqueriaById']);
-
-Route::get('/local/{id_peluqueria}/name', [PeluqueriaController::class, 'getPeluqueriaNombreById']);
 
 Route::get('/locals/{id_peluqueria}/services', [ServiciosPeluqueriaController::class, 'getServiciosByPeluqueriaId']);
 
