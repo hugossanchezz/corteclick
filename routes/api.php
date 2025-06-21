@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // ------ Locals ----------------------------------------------------------
 Route::post('/new-request', [PeluqueriaSolicitudController::class, 'createLocalRequest']);
 
-Route::post('/new-local', [PeluqueriaController::class, 'createNewLocal']);
+Route::post('/approve-request/{id_solicitud}', [PeluqueriaSolicitudController::class, 'approveRequest']);
 
 Route::delete('/delete-local/{email}', [PeluqueriaController::class, 'deleteLocalByEmail']);
 

@@ -120,7 +120,7 @@ export default {
       errorImagenes.value = "";
 
       if (archivos.length === 0) return;
-      if (archivos.length > 4) errorImagenes.value = "Solo se permiten un máximo de 4 imágenes. Se tomarán las primeras 4.";
+      if (archivos.length > 4) errorImagenes.value = "Solo se permiten un máximo de 5 imágenes. Se tomarán las primeras 5.";
 
       imagenes.value = archivos.slice(0, 5);
 
@@ -369,6 +369,7 @@ form {
   h3 {
     color: map-get($colores, 'gris_oscuro');
     align-items: end !important;
+    white-space: nowrap;
 
     span {
       margin-left: 5px;

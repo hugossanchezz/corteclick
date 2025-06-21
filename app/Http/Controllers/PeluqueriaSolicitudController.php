@@ -7,13 +7,14 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\PeluqueriaSolicitud;
 use App\Models\PeluqueriaFotoTemporal;
+use App\Models\PeluqueriaFoto;
+use App\Models\Peluqueria;
 
 class PeluqueriaSolicitudController extends Controller
 {
     public function createLocalRequest(Request $request)
     {
         try {
-            Log::info('➡️ Iniciando validación...');
             $validated = $request->validate([
                 'nombre' => 'required|string|max:100',
                 'descripcion' => 'nullable|string|max:200',
@@ -23,16 +24,14 @@ class PeluqueriaSolicitudController extends Controller
                 'telefono' => 'nullable|string|max:20',
                 'tipo' => 'required|in:BARBERIA,PELUQUERIA,UNISEX',
                 'user_id' => 'required|exists:users,id',
-                'imagen' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240', // 10MB
+                'imagen' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240',
+                'otras_imagenes' => 'nullable|array|max:4',
                 'otras_imagenes.*' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:10240',
             ]);
 
             DB::beginTransaction();
 
-            Log::info('✅ Validación completada', ['validated' => $validated]);
-
             if (!$request->hasFile('imagen')) {
-                Log::error('❌ No se recibió archivo imagen');
                 return response()->json(['message' => 'No se recibió la imagen principal'], 400);
             }
 
@@ -62,7 +61,6 @@ class PeluqueriaSolicitudController extends Controller
                         'imagen' => $bin,
                     ]);
                 }
-                Log::info('📸 imagenes temporales guardadas');
             }
 
             DB::commit();
@@ -71,10 +69,6 @@ class PeluqueriaSolicitudController extends Controller
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            Log::error('🔥 Error en createLocalRequest', [
-                'exception' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return response()->json([
                 'message' => 'Error al registrar la solicitud.',
                 'error' => $e->getMessage()
@@ -123,21 +117,82 @@ class PeluqueriaSolicitudController extends Controller
         }
     }
 
+    public function approveRequest($id)
+    {
+        DB::beginTransaction();
+
+        try {
+            $solicitud = PeluqueriaSolicitud::with('fotosTemporales')->findOrFail($id);
+
+            // Crear nueva peluquería a partir de la solicitud
+            $peluqueria = Peluqueria::create([
+                'nombre' => $solicitud->nombre,
+                'descripcion' => $solicitud->descripcion,
+                'direccion' => $solicitud->direccion,
+                'localidad' => $solicitud->localidad,
+                'email' => $solicitud->email,
+                'telefono' => $solicitud->telefono,
+                'tipo' => $solicitud->tipo,
+                'user_id' => $solicitud->user_id,
+                'estado' => 'APROBADO',
+                'imagen' => $solicitud->imagen,
+            ]);
+
+            // Mover fotos temporales a peluquerias_fotos
+            foreach ($solicitud->fotosTemporales as $fotoTemporal) {
+                PeluqueriaFoto::create([
+                    'id_peluqueria' => $peluqueria->id,
+                    'imagen' => $fotoTemporal->imagen,
+                ]);
+            }
+
+            // Eliminar fotos temporales
+            PeluqueriaFotoTemporal::where('id_peluqueria_solicitud', $solicitud->id)->delete();
+
+            // Actualizar estado de la solicitud
+            $solicitud->estado = 'APROBADA';
+            $solicitud->save();
+
+            DB::commit();
+
+            return response()->json(['mensaje' => 'Solicitud aprobada correctamente'], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => 'Error al aprobar la solicitud', 'detalles' => $e->getMessage()], 500);
+        }
+    }
+
+
     public function cambiarEstado(Request $request, $id)
     {
         $solicitud = PeluqueriaSolicitud::findOrFail($id);
         $nuevoEstado = $request->input('estado');
 
         // Validar que el nuevo estado sea válido
-        $estadosValidos = ['PENDIENTE', 'APROBADA', 'RECHAZADA'];
+        $estadosValidos = ['APROBADA', 'RECHAZADA'];
         if (!in_array($nuevoEstado, $estadosValidos)) {
             return response()->json(['error' => 'Estado no válido'], 400);
         }
 
-        // Actualizar el estado
+        // Si se rechaza, eliminar la solicitud y sus fotos temporales si las tiene
+        if ($nuevoEstado === 'RECHAZADA') {
+            // Eliminar fotos temporales si están relacionadas
+            if (method_exists($solicitud, 'fotosTemporales')) {
+                foreach ($solicitud->fotosTemporales as $foto) {
+                    $foto->delete();
+                }
+            }
+
+            $solicitud->delete();
+
+            return response()->json(['message' => 'Solicitud rechazada y eliminada correctamente'], 200);
+        }
+
+        // Si se aprueba, simplemente actualizar el estado
         $solicitud->estado = $nuevoEstado;
         $solicitud->save();
 
         return response()->json(['message' => "Solicitud cambiada a {$nuevoEstado} exitosamente"], 200);
     }
+
 }
