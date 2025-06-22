@@ -4,15 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Throwable;
 use App\Models\Peluqueria;
-use App\Models\PeluqueriaFoto;
-use App\Models\PeluqueriaFotoTemporal;
+use App\Models\Localidad;
 
 class PeluqueriaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function getPeluquerias(): JsonResponse
     {
         $peluquerias = Peluqueria::all()->map(function ($p) {
@@ -35,7 +32,6 @@ class PeluqueriaController extends Controller
 
         return response()->json($peluquerias);
     }
-
 
     public function search(Request $request): JsonResponse
     {
@@ -68,7 +64,6 @@ class PeluqueriaController extends Controller
         ]);
     }
 
-
     public function getPeluqueriaNombreById($id)
     {
         $peluqueria = Peluqueria::find($id);
@@ -80,4 +75,34 @@ class PeluqueriaController extends Controller
             ->header('Content-Type', 'text/plain');
     }
 
+    public function getIdsByCodigoPostalONombre(string $valor): JsonResponse
+    {
+        try {
+            if (ctype_digit($valor)) {
+                // Búsqueda por código postal
+                $ids = Localidad::where('codigo_postal', 'LIKE', $valor . '%')
+                    ->pluck('id')
+                    ->toArray();
+            } else {
+                $nombre = strtoupper($valor); // Para búsquedas insensibles a mayúsculas/minúsculas
+
+                // IDs por nombre de localidad
+                $idsLocalidades = Localidad::where('nombre', 'LIKE', '%' . $nombre . '%')
+                    ->pluck('id')
+                    ->toArray();
+
+                // IDs de localidades a través del nombre de peluquerías
+                $idsDesdePeluquerias = Peluqueria::where('nombre', 'LIKE', '%' . $nombre . '%')
+                    ->pluck('localidad')
+                    ->toArray();
+
+                // Unificar y eliminar duplicados
+                $ids = array_unique(array_merge($idsLocalidades, $idsDesdePeluquerias));
+            }
+
+            return response()->json(array_values($ids));
+        } catch (Throwable $e) {
+            return response()->json([], 500);
+        }
+    }
 }
