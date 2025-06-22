@@ -43,7 +43,7 @@ export default {
 <template>
   <div v-if="show" class="modal-overlay">
     <div class="modal-content">
-      <p class="modal-message">{{ message }}</p>
+      <p v-html="message" class="modal-message"></p>
       <div class="modal-buttons flex-center">
         <button v-if="showCancel" class="btn btn-cancel" @click="onCancel">
           {{ cancelText }}
@@ -86,10 +86,13 @@ export default {
   @include fuente("parrafo");
   margin-bottom: 20px;
   color: map-get($colores, 'gris_oscuro');
+
+  a{
+    color: map-get($colores, 'naranja');
+  }
 }
 
 .modal-buttons {
   gap: 10px;
 }
-
 </style>

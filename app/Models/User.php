@@ -32,7 +32,7 @@ class User extends Authenticatable
         'apellidos',
         'telefono',
         'localidad',
-        'foto',
+        'rol_id',
     ];
 
     /**

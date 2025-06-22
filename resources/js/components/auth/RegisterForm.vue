@@ -2,13 +2,14 @@
 // Importamos las librerías
 import axios from "axios";
 import { useRouter } from "vue-router";
-import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import { ref, computed, watch, onMounted } from "vue";
+import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
+import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
 export default {
     name: "RegisterForm",
 
-    components: { PrimaryButton },
+    components: { PrimaryButton, ModalConfirm },
 
     setup() {
         // Obtenemos la instancia del router para poder navegar entre las rutas.
@@ -45,6 +46,24 @@ export default {
         const correoPattern =
             /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         const telefonoPattern = /^\+?[0-9]{9,15}$/;
+
+        // Modal 
+        const showModal = ref(false);
+        const modalMessage = ref("");
+        const modalTitle = ref("");
+
+        watch(showModal, (nuevoValor, valorAnterior) => {
+            if (valorAnterior === true && nuevoValor === false) {
+                // El modal fue visible y ahora ya no lo es → se ha cerrado
+                router.push("/auth");
+            }
+        });
+
+        const mostrarModal = (titulo, mensaje) => {
+            modalTitle.value = titulo;
+            modalMessage.value = mensaje;
+            showModal.value = true;
+        };
 
         // Estados derivados (computados) para la contraseña
         // Los computed properties se utilizan para derivar valores reactivos basados en otros estados reactivos.
@@ -107,10 +126,6 @@ export default {
                 delete errores.value[campo];
             }
         };
-
-        onMounted(() => {
-            cargarLocalidades();
-        });
 
         const cargarLocalidades = async () => {
             try {
@@ -212,12 +227,14 @@ export default {
                 });
                 // Si la respuesta tiene un estado 200 (éxito).
                 if (response.status === 200) {
-                    // Mostramos una alerta de éxito al usuario.
-                    alert(
-                        "¡Gracias por registrarte! Ahora puedes iniciar sesión."
+                    mostrarModal(
+                        "Registro exitoso",
+                        "Tu cuenta ha sido creada correctamente. Ya puedes iniciar sesión."
                     );
-                    // Redirigimos al usuario a la página de autenticación.
-                    router.push("/auth");
+
+                    if (showModal.value === false) {
+                        router.push("/auth");
+                    }
                 }
             } catch (error) {
                 // En caso de error en la petición.
@@ -233,7 +250,7 @@ export default {
                     }
                     // Mostramos un mensaje de error general indicando que hay errores en los campos.
                     generalErrorMessage.value =
-                        "Error en el registro. Por favor, revisa los campos.";
+                        "Error en el registro. Por favor, revisa los campos o prueba con otro correo o teléfono.";
                 } else {
                     // Si el error es diferente a un error de validación del servidor, mostramos un mensaje de error genérico.
                     generalErrorMessage.value =
@@ -241,6 +258,10 @@ export default {
                 }
             }
         };
+
+        onMounted(() => {
+            cargarLocalidades();
+        });
 
         // Retornamos todos los estados y métodos que queremos exponer en la plantilla del componente.
         return {
@@ -274,6 +295,11 @@ export default {
             credencialesInvalidas,
             tieneErrores,
             submitForm,
+
+            showModal,
+            modalTitle,
+            modalMessage,
+            mostrarModal
         };
     },
 };
@@ -286,7 +312,7 @@ export default {
 
         <div class="form__horizontal flex">
             <div class="flex-column form__campo">
-                <label for="nombre"> Nombre * </label>
+                <label for="nombre"> Nombre </label>
                 <div class="inputForm flex">
                     <img src="/img/auth/person.svg" alt="Icono para input de nombre" />
                     <input v-model="nombre" type="text" placeholder="Sin caracteres especiales" required />
@@ -297,7 +323,7 @@ export default {
             </div>
 
             <div class="flex-column form__campo">
-                <label for="apellidos"> Apellidos </label>
+                <label for="apellidos"> Apellidos <span class="span__form_opcional">(Opcional)</span></label>
                 <div class="inputForm flex">
                     <img src="/img/auth/person.svg" alt="Icono para input de apellidos" />
                     <input v-model="apellidos" type="text" placeholder="Sin caracteres especiales" />
@@ -309,7 +335,7 @@ export default {
         </div>
 
         <div class="flex-column form__campo">
-            <label class="label-form" for="correo"> Correo * </label>
+            <label class="label-form" for="correo"> Correo </label>
             <div class="inputForm flex">
                 <img src="/img/auth/at_sign.svg" alt="Icono de correo" />
                 <input v-model="correo" type="email" placeholder="ejemplo@email.com" required />
@@ -320,7 +346,7 @@ export default {
         </div>
 
         <div class="flex-column form__campo">
-            <label class="label-form" for="contrasenia"> Contraseña * </label>
+            <label class="label-form" for="contrasenia"> Contraseña </label>
             <div class="inputForm flex">
                 <img src="/img/auth/lock.svg" alt="Icono de contraseña" />
                 <input v-model="contrasenia" :type="tipoInputContrasenia" placeholder="Contraseña" required />
@@ -351,7 +377,7 @@ export default {
 
         <div class="flex-column form__campo">
             <label class="label-form" for="confirmarContrasenia">
-                Confirma tu Contraseña *
+                Confirma tu Contraseña
             </label>
             <div class="inputForm flex">
                 <img src="/img/auth/lock.svg" alt="Icono de contraseña" />
@@ -370,7 +396,8 @@ export default {
 
         <div class="form__horizontal flex">
             <div class="flex-column form__campo">
-                <label class="label-form" for="localidad"> Localidad </label>
+                <label class="label-form" for="localidad"> Localidad <span
+                        class="span__form_opcional">(Opcional)</span></label>
                 <div class="inputForm flex">
                     <select v-model="localidad">
                         <option selected disabled value="">
@@ -387,7 +414,8 @@ export default {
             </div>
 
             <div class="flex-column form__campo">
-                <label class="label-form" for="telefono"> Teléfono </label>
+                <label class="label-form" for="telefono"> Teléfono <span
+                        class="span__form_opcional">(Opcional)</span></label>
                 <div class="inputForm flex">
                     <img src="/img/auth/phone.svg" alt="Icono de telefono" />
                     <input v-model="telefono" type="tel" placeholder="+34 000 000 000" />
@@ -428,6 +456,8 @@ export default {
         </div>
 
     </form>
+    <ModalConfirm v-model:show="showModal" :title="modalTitle" :message="modalMessage" :showCancel="false"
+        confirmText="Aceptar" />
 </template>
 
 <style scoped lang="scss">
@@ -495,7 +525,7 @@ form {
         }
     }
 
-    .form__bottom{
+    .form__bottom {
         align-items: center;
         gap: 1rem;
     }
@@ -504,7 +534,7 @@ form {
         margin-left: 5px;
     }
 
-    
+
 }
 
 // Estilos para .span

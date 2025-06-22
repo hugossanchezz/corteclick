@@ -17,7 +17,7 @@ class AuthController extends Controller
             'email' => 'required|email|max:150|unique:users',
             'password' => 'required|string|min:8',
             'apellidos' => 'nullable|string|max:100',
-            'telefono' => 'nullable|digits:9',
+            'telefono' => 'nullable|digits:9|unique:users',
             'localidad' => 'nullable|integer|max:20',
             'aceptarTerminos' => 'required|accepted',
         ]);
@@ -33,6 +33,7 @@ class AuthController extends Controller
             'apellidos' => $request->apellidos,
             'telefono' => $request->telefono,
             'localidad' => $request->localidad,
+            'rol_id' => 3, // Rol de usuario por defecto
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -59,7 +60,6 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'message' => 'Hola ' . $user->name,
             'access_token' => $token,
             'token_type' => 'Bearer',
             'user' => auth()->user(), // Usa auth()->user() para obtener el usuario autenticado.
@@ -91,7 +91,6 @@ class AuthController extends Controller
             'apellidos' => 'required|string|max:200',
             'telefono' => 'required|digits:9',
             'localidad' => 'required|exists:localidades,id',
-            'foto' => 'nullable|string', // foto es nullable
         ]);
 
         if ($validator->fails()) {
@@ -112,7 +111,6 @@ class AuthController extends Controller
                 'apellidos' => $request->apellidos,
                 'telefono' => $request->telefono,
                 'localidad' => $request->localidad,
-                'foto' => $request->foto,
             ]);
 
             return response()->json([

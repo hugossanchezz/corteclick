@@ -97,7 +97,7 @@ ul {
     @include fuente("parrafo");
 
     transition: transform 0.2s ease;
-    
+
     display: flex;
     align-items: center;
     justify-content: space-evenly;
@@ -172,6 +172,11 @@ tr:nth-child(even) {
 
 tr:hover {
     background-color: #f1f1f1;
+}
+
+// Estilos formulario
+.span__form_opcional {
+    font-size: 11px !important;
 }
 
 @keyframes reveal-color {
