@@ -18,7 +18,6 @@ return new class extends Migration {
             $table->string('apellidos', 200)->nullable();
             $table->string('telefono', 9)->nullable();
             $table->unsignedBigInteger('localidad')->nullable();
-            $table->binary('foto')->nullable();
             $table->unsignedBigInteger('rol_id')->nullable();
 
             $table->string('email')->unique();
