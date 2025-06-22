@@ -52,9 +52,12 @@ Route::get('/locals/{id_peluqueria}/services', [ServiciosPeluqueriaController::c
 
 Route::get('/locals/search/{valor}', [PeluqueriaController::class, 'getIdsByCodigoPostalONombre']);
 
+Route::get('/locals/user/{user_id}', [PeluqueriaController::class, 'getPeluqueriasByUserId']);
 
 // ------ Services --------------------------------------------------------
 Route::get('/services/{id_servicio}/name', [ServicioController::class, 'getNombrePorId']);
+
+Route::post('/local/new-service', [ServiciosPeluqueriaController::class, 'createServicioParaPeluqueria']);
 
 
 // ------ Localities ------------------------------------------------------

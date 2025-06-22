@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ServiciosPeluqueria;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class ServiciosPeluqueriaController extends Controller
@@ -15,19 +17,10 @@ class ServiciosPeluqueriaController extends Controller
      */
     public function getServiciosByPeluqueriaId($peluqueria_id): JsonResponse
     {
-        // 1. Obtiene todos los registros de la tabla 'servicios_peluqueria' que
-        //    tengan el campo 'id_peluqueria' igual al valor recibido en $peluqueria_id.
-        //    Además, con 'with('servicio')' carga en la misma consulta la relación con
-        //    la tabla 'servicios', para traer los datos relacionados (como el nombre).
         $registros = ServiciosPeluqueria::with('servicio')
             ->where('id_peluqueria', $peluqueria_id)
             ->get();
 
-        // 2. Mapea (transforma) la colección obtenida para devolver solo los campos que quieres
-        //    en la respuesta JSON:
-        //    - 'id' es el id del servicio (id_servicio)
-        //    - 'nombre' viene de la relación con 'servicio'. Si no existe el nombre, pone 'Sin nombre'
-        //    - 'precio' y 'duracion' vienen de la tabla pivot 'servicios_peluqueria'.
         $resultado = $registros->map(function ($item) {
             return [
                 'id' => $item->id_servicio,
@@ -40,4 +33,36 @@ class ServiciosPeluqueriaController extends Controller
         return response()->json($resultado);
     }
 
+    public function createServicioParaPeluqueria(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'id_peluqueria' => 'required|exists:peluquerias,id',
+            'id_servicio' => 'required|exists:servicios,id',
+            'precio' => 'required|numeric|min:0',
+            'duracion' => 'required|integer|min:1',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        try {
+            $nuevo = ServiciosPeluqueria::create([
+                'id_peluqueria' => $request->id_peluqueria,
+                'id_servicio' => $request->id_servicio,
+                'precio' => $request->precio,
+                'duracion' => $request->duracion,
+            ]);
+
+            return response()->json([
+                'message' => 'Servicio añadido correctamente.',
+                'servicio' => $nuevo
+            ], 201);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error al crear el servicio',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

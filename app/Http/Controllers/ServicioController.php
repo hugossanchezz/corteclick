@@ -23,4 +23,10 @@ class ServicioController extends Controller
 
         return response()->json(['nombre' => $servicio->nombre]);
     }
+
+    public function getServicios()
+    {
+        $servicios = Servicio::all();
+        return response()->json($servicios);
+    }
 }

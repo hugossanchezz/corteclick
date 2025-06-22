@@ -60,7 +60,6 @@ class PeluqueriaController extends Controller
             'user_id' => $peluqueria->user_id,
             'estado' => $peluqueria->estado,
             'imagen' => $peluqueria->imagen ? base64_encode($peluqueria->imagen) : null,
-            // agrega más campos si tu modelo tiene más
         ]);
     }
 
@@ -104,5 +103,28 @@ class PeluqueriaController extends Controller
         } catch (Throwable $e) {
             return response()->json([], 500);
         }
+    }
+
+    public function getPeluqueriasByUserId($user_id)
+    {
+        $peluquerias = Peluqueria::where('user_id', $user_id)->get();
+
+        $datos = $peluquerias->map(function ($peluqueria) {
+            return [
+                'id' => $peluqueria->id,
+                'nombre' => $peluqueria->nombre,
+                'descripcion' => $peluqueria->descripcion,
+                'direccion' => $peluqueria->direccion,
+                'localidad' => $peluqueria->localidad,
+                'email' => $peluqueria->email,
+                'telefono' => $peluqueria->telefono,
+                'tipo' => $peluqueria->tipo,
+                'user_id' => $peluqueria->user_id,
+                'estado' => $peluqueria->estado,
+                'imagen' => $peluqueria->imagen ? base64_encode($peluqueria->imagen) : null,
+            ];
+        });
+
+        return response()->json($datos);
     }
 }

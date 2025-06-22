@@ -31,7 +31,7 @@ class PeluqueriasSeeder extends Seeder
                 'valoracion' => $faker->randomFloat(1, 1, 5),
                 'created_at' => now(),
                 'updated_at' => now(),
-                'user_id' => 2,
+                'user_id' => 1,
             ],
             [
                 'id' => 2,
