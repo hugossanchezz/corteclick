@@ -32,10 +32,9 @@ button {
     border-radius: 5px;
     gap: 5px;
     cursor: pointer;
-
-    transition: transform 0.2s ease;
-
+    white-space: nowrap;
     text-decoration: none;
+    transition: transform 0.2s ease;
 
     &:hover {
         transform: scale(1.05);

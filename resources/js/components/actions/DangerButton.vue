@@ -28,7 +28,7 @@ button {
     border-radius: 5px;
     gap: 5px;
     cursor: pointer;
-
+    white-space: nowrap;
     transition: transform 0.2s ease;
 
     &:hover {
