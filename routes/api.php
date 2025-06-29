@@ -55,6 +55,8 @@ Route::get('/locals/search/{valor}', [PeluqueriaController::class, 'getIdsByCodi
 Route::get('/locals/user/{user_id}', [PeluqueriaController::class, 'getPeluqueriasByUserId']);
 
 // ------ Services --------------------------------------------------------
+Route::get('/services', [ServicioController::class, 'getServicios']);
+
 Route::get('/services/{id_servicio}/name', [ServicioController::class, 'getNombrePorId']);
 
 Route::post('/local/new-service', [ServiciosPeluqueriaController::class, 'createServicioParaPeluqueria']);

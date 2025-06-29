@@ -7,6 +7,11 @@ use Illuminate\Http\JsonResponse;
 
 class ServicioController extends Controller
 {
+    public function getServicios(){
+        $servicios = Servicio::all();
+        return response()->json($servicios);
+    }
+
     /**
      * Obtener nombre del servicio por id
      *
@@ -22,11 +27,5 @@ class ServicioController extends Controller
         }
 
         return response()->json(['nombre' => $servicio->nombre]);
-    }
-
-    public function getServicios()
-    {
-        $servicios = Servicio::all();
-        return response()->json($servicios);
     }
 }

@@ -38,8 +38,8 @@ class ServiciosPeluqueriaController extends Controller
         $validator = Validator::make($request->all(), [
             'id_peluqueria' => 'required|exists:peluquerias,id',
             'id_servicio' => 'required|exists:servicios,id',
-            'precio' => 'required|numeric|min:0',
-            'duracion' => 'required|integer|min:1',
+            'precio' => 'required|numeric|min:1',
+            'duracion' => 'required|integer|min:30',
         ]);
 
         if ($validator->fails()) {
