@@ -460,10 +460,10 @@ export default {
         <div class="local__image">
           <img :src="imagenesCarrusel[indiceActual]" alt="Imagen del local" class="main_image" />
 
-          <button class="carrusel-btn izquierda" @click="anteriorImagen" :disabled="imagenesCarrusel.length <= 1">
+          <button class="carrusel-btn izquierda" @click="anteriorImagen" v-if="imagenesCarrusel.length <= 2">
             <img src="/img/utils/arrow_back_white.svg" alt="">
           </button>
-          <button class="carrusel-btn derecha" @click="siguienteImagen" :disabled="imagenesCarrusel.length <= 1">
+          <button class="carrusel-btn derecha" @click="siguienteImagen" v-if="imagenesCarrusel.length <= 2">
             <img src="/img/utils/arrow_forward_white.svg" alt="">
           </button>
         </div>

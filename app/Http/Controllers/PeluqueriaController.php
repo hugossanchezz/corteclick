@@ -57,8 +57,8 @@ class PeluqueriaController extends Controller
             'email' => $peluqueria->email,
             'telefono' => $peluqueria->telefono,
             'tipo' => $peluqueria->tipo,
+            'valoracion' => $peluqueria->valoracion,
             'user_id' => $peluqueria->user_id,
-            'estado' => $peluqueria->estado,
             'imagen' => $peluqueria->imagen ? base64_encode($peluqueria->imagen) : null,
         ]);
     }
