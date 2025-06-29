@@ -82,6 +82,17 @@ footer {
 }
 
 // Estilos para movil
-@media (max-width: 768px) {
+@media (max-width: 500px) {
+    footer{
+        padding: 2rem 1rem;
+    }
+}
+
+@media (max-width: 400px) {
+    footer{
+        .copyright {
+            text-align: center;
+        }
+    }
 }
 </style>
