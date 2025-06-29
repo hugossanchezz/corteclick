@@ -153,10 +153,10 @@ export default {
 </script>
 
 <template>
-    <div>
-        <div class="locals__space grid">
-            <aside class="flex-column">
-                <h2>Filtros</h2>
+    <div class="locals__space">
+        <aside class="flex-column">
+            <h2>Filtros</h2>
+            <div class="filtros">
                 <div class="filtro__seccion">
                     <p>Tipo de local</p>
                     <div class="opcion__filtro">
@@ -187,50 +187,49 @@ export default {
                         <label for="menor-mayor">De menor a mayor <span>★ ★ </span></label>
                     </div>
                 </div>
-                <p class="filtro__reset" @click="resetFilters">Restablecer filtros</p>
-            </aside>
-            <main class="flex-column">
-                <div class="peluquerias__buscador">
-                    <input type="text" placeholder="Introduce el código postal, localidad o nombre del local"
-                        v-model="codigoPostalBusqueda" @input="aplicarFiltros" />
-                    <img src="/img/utils/search.svg" alt="Buscador de locales por código postal" />
-                </div>
-                <div v-if="loading">
-                    <p class="mg-tb-4 loading">Cargando peluquerías...</p>
-                </div>
-                <div v-else-if="errorBusqueda">
-                    <p class="mg-tb-4 error-message">{{ errorBusqueda }}</p>
-                </div>
-                <div v-else class="peluquerias__grid grid">
-                    <div @click="goToPeluqueria(peluqueria.id)" v-for="peluqueria in peluqueriasPaginadas"
-                        :key="peluqueria.id" class="peluqueria__card flex-column">
-                        <img :src="peluqueria.imagen || '/img/utils/corteclick.png'"
-                            alt="Imagen principal de la peluquería" />
+            </div>
+            <p class="filtro__reset" @click="resetFilters">Restablecer filtros</p>
+        </aside>
+        <main class="flex-column">
+            <div class="peluquerias__buscador">
+                <input type="text" placeholder="Introduce el código postal, localidad o nombre del local"
+                    v-model="codigoPostalBusqueda" @input="aplicarFiltros" />
+                <img src="/img/utils/search.svg" alt="Buscador de locales por código postal" />
+            </div>
+            <div v-if="loading">
+                <p class="mg-tb-4 loading">Cargando peluquerías...</p>
+            </div>
+            <div v-else-if="errorBusqueda">
+                <p class="mg-tb-4 error-message">{{ errorBusqueda }}</p>
+            </div>
+            <div v-else class="peluquerias__grid grid">
+                <div @click="goToPeluqueria(peluqueria.id)" v-for="peluqueria in peluqueriasPaginadas"
+                    :key="peluqueria.id" class="peluqueria__card flex-column">
+                    <img :src="peluqueria.imagen || '/img/utils/corteclick.png'"
+                        alt="Imagen principal de la peluquería" />
 
-                        <h2 class="card__info flex">
-                            {{ peluqueria.nombre }}
-                            <div>{{ peluqueria.valoracion || "Sin valoración" }} <span>★</span></div>
-                        </h2>
-                        <p class="card__description">{{ peluqueria.descripcion }}</p>
-                        <div class="card__info flex">
-                            <p class="flex">
-                                <img class="card__location" src="/img/locals/location.svg"
-                                    alt="Icono de la ubicación" />
-                                {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
-                            </p>
-                            <!-- <img class="card__bookmark" @click.stop="peluqueria.favorito = !peluqueria.favorito"
+                    <h2 class="card__info flex">
+                        {{ peluqueria.nombre }}
+                        <div>{{ peluqueria.valoracion || "Sin valoración" }} <span>★</span></div>
+                    </h2>
+                    <p class="card__description">{{ peluqueria.descripcion }}</p>
+                    <div class="card__info flex">
+                        <p class="flex">
+                            <img class="card__location" src="/img/locals/location.svg" alt="Icono de la ubicación" />
+                            {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
+                        </p>
+                        <!-- <img class="card__bookmark" @click.stop="peluqueria.favorito = !peluqueria.favorito"
                                 src="/img/locals/bookmark.svg" alt="Guardar peluquería como favorita" /> -->
-                        </div>
                     </div>
                 </div>
-                <div class="pagination__controls flex-center" v-if="totalPages > 1">
-                    <button @click="paginaAnterior" :disabled="paginaActual === 1">
-                        << </button>
-                            <p>Página {{ paginaActual }} de {{ totalPages }}</p>
-                            <button @click="paginaSiguiente" :disabled="paginaActual === totalPages">>></button>
-                </div>
-            </main>
-        </div>
+            </div>
+            <div class="pagination__controls flex-center" v-if="totalPages > 1">
+                <button @click="paginaAnterior" :disabled="paginaActual === 1">
+                    << </button>
+                        <p>Página {{ paginaActual }} de {{ totalPages }}</p>
+                        <button @click="paginaSiguiente" :disabled="paginaActual === totalPages">>></button>
+            </div>
+        </main>
     </div>
 </template>
 
@@ -238,6 +237,7 @@ export default {
 @use "@/sass/variables" as *;
 
 .locals__space {
+    display: grid;
     grid-template-columns: 1fr 5fr;
 
     aside {
@@ -250,21 +250,28 @@ export default {
             margin-bottom: 1rem;
         }
 
-        .filtro__seccion {
-            margin-bottom: 2rem;
-            width: 100%;
+        .filtros {
+            .filtro__seccion {
+                margin-bottom: 2rem;
+                width: 100%;
 
-            p {
-                margin-bottom: 5px;
-            }
+                p {
+                    margin-bottom: 5px;
+                }
 
-            .opcion__filtro label {
-                @include fuente("parrafo_max");
-                margin-left: 5px;
-                margin-bottom: 5px;
+                .opcion__filtro {
+                    margin-bottom: 5px;
+                    white-space: nowrap;
 
-                span {
-                    color: map-get($colores, "naranja");
+                    label {
+                        @include fuente("parrafo_max");
+                        margin-left: 5px;
+                        margin-bottom: 5px;
+
+                        span {
+                            color: map-get($colores, "naranja");
+                        }
+                    }
                 }
             }
         }
@@ -288,7 +295,7 @@ export default {
 
         .peluquerias__buscador {
             position: relative;
-            width: 40%;
+            width: 60%;
 
             input {
                 @include fuente("parrafo");
@@ -426,17 +433,53 @@ export default {
         }
     }
 
-    @media (max-width: 768px) {
-        .peluquerias__grid {
-            grid-template-columns: 1fr;
+}
+
+@media (max-width: 1268px) {
+    .locals__space {
+        main {
+            .peluquerias__buscador {
+                width: 100%;
+            }
+        }
+    }
+}
+
+@media (max-width: 1024px) {
+    .locals__space {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+
+        aside {
+            border-bottom: 2px solid map-get($colores, "gris_claro");
+            padding-bottom: 2rem;
+            align-items: center;
+
+            .filtros {
+                display: flex;
+                gap: 2rem;
+
+                .filtro__seccion {
+                    margin-bottom: 1rem;
+                }
+            }
         }
 
-        .peluqueria__card {
-            margin-bottom: 15px;
+        main {
+            padding: 2rem 1.5rem;
         }
+    }
+}
 
-        .local-details {
-            padding: 1.5rem;
+@media (max-width: 580px) {
+    .locals__space {
+        aside {
+            .filtros {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
         }
     }
 }
