@@ -256,9 +256,7 @@ section {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     width: 50%;
     height: 40rem;
-    margin: 0 auto;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin: 1rem;
     padding: 1rem;
     border-radius: 10px;
     overflow-y: auto;
@@ -305,7 +303,7 @@ section {
     position: sticky;
     width: 5rem;
     height: 1.5rem;
-    border-radius: 10px;
+    border-radius: 5px;
 
     bottom: 0;
     left: 100%;
@@ -317,6 +315,22 @@ section {
         width: 100%;
         text-decoration: none;
         color: map-get($colores, "blanco");
+    }
+}
+
+@media (max-width: 1024px) {
+    section {
+        width: 70%;
+    }
+}
+@media (max-width: 768px) {
+    section {
+        width: 80%;
+    }
+}
+@media (max-width: 550px) {
+    section {
+        width: 100%;
     }
 }
 </style>

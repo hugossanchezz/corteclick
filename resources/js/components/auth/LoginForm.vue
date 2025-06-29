@@ -340,26 +340,19 @@ label {
     cursor: pointer;
 }
 
-// Ajustes para portátiles o pantallas más pequeñas
-@include responsive-layout(1440px) {
-    .contenedor-inicio-sesion {
-        width: 80%;
-    }
-
-    .form-container {
-        margin-bottom: 1rem;
+@media (max-width: 1024px) {
+    form {
+        width: 60%;
     }
 }
-
-// Estilos para tabletas (≤ 1024px)
-@include responsive-layout(1024px) {
-    .form {
-        width: 100%;
-        padding: 0;
+@media (max-width: 768px) {
+    form {
+        width: 80%;
     }
-
-    .input {
-        margin-left: 0;
+}
+@media (max-width: 500px) {
+    form {
+        width: 100%;
     }
 }
 </style>

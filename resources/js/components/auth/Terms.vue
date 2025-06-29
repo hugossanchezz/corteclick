@@ -265,7 +265,7 @@ export default {
             >
         </div>
     </section>
-    <div v-else>
+    <div v-else class="flex-center">
         <router-view />
     </div>
 </template>
@@ -326,7 +326,7 @@ section {
     position: sticky;
     width: 5rem;
     height: 1.5rem;
-    border-radius: 10px;
+    border-radius: 5px;
 
     bottom: 0;
     left: 100%;
@@ -338,6 +338,22 @@ section {
         width: 100%;
         text-decoration: none;
         color: map-get($colores, "blanco");
+    }
+}
+
+@media (max-width: 1024px) {
+    section {
+        width: 70%;
+    }
+}
+@media (max-width: 768px) {
+    section {
+        width: 80%;
+    }
+}
+@media (max-width: 550px) {
+    section {
+        width: 100%;
     }
 }
 </style>
