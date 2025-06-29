@@ -68,7 +68,7 @@ export default {
                         alt="Local icon"
                     />
                 </div>
-                <div class="timeline__item">
+                <div class="timeline__item timeline__arrow">
                     <img
                         src="/img/landing/timeline/orange-right-arrow.svg"
                         alt="Arrow to next timeline item"
@@ -81,7 +81,7 @@ export default {
                         alt="Calendar icon"
                     />
                 </div>
-                <div class="timeline__item">
+                <div class="timeline__item timeline__arrow">
                     <img
                         src="/img/landing/timeline/orange-right-arrow.svg"
                         alt="Arrow to next timeline item"
@@ -166,6 +166,49 @@ main {
                 img {
                     width: 5rem;
                 }
+            }
+        }
+    }
+}
+
+@media (max-width: 800px) {
+    main {
+        .main__redirect {
+            padding: 2rem 10px;
+        }
+
+        .main__how {
+            .how__timeline {
+                flex-direction: column;
+
+                .timeline__arrow{
+                    transform: rotate(90deg);
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    main {
+        .main__redirect {
+            flex-direction: column;
+
+            .redirect__login {
+                border-right: none;
+                border-bottom: 1px solid map-get($colores, "gris_oscuro");
+            }
+
+            .redirect__register {
+                border-left: none;
+                border-top: 1px solid map-get($colores, "gris_oscuro");
+            }
+        }
+
+        .main__description{
+            .description__title {
+                width: 100%;
+                white-space: nowrap;
             }
         }
     }
