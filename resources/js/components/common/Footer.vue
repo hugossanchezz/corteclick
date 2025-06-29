@@ -72,4 +72,16 @@ footer {
         }
     }
 }
+
+// Estilos para tablet
+@media (max-width: 1024px) {
+
+    footer{
+        flex-direction: column;
+    }
+}
+
+// Estilos para movil
+@media (max-width: 768px) {
+}
 </style>
