@@ -124,6 +124,9 @@ export default {
             </div>
         </div>
 
+        <!-- Fondo para no interactuar con el resto de la página cuando se abre el menú -->
+        <div v-if="menuAbierto" class="modal_backdrop" @click="toggleMenu"></div>
+
         <div v-if="isLandingPage" class="header__carrusel flex-column">
             <div class="carrusel__modal glass-effect flex-column">
                 <div class="modal__text">
@@ -230,13 +233,15 @@ header {
         position: fixed;
         top: 0;
         right: 0;
-        width: 70vw;
+        width: fit-content;
+        max-width: 70vh;
         height: 100vh;
         background-color: map-get($colores, "azul_oscuro");
         z-index: 999;
         display: flex;
         transition: transform 0.3s ease-in-out;
-        transform: translateX(100%); // estado inicial fuera de pantalla
+        transform: translateX(100%);
+        border-left: 2px solid map-get($colores, "blanco");
 
         &.visible {
             transform: translateX(0); // entra desde la derecha
@@ -284,6 +289,19 @@ header {
             transform: translateX(0);
         }
     }
+
+    .modal_backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.2); // oscuro con transparencia
+        z-index: 998; // justo por debajo del menú (999)
+        backdrop-filter: blur(2px); // desenfoque opcional
+        pointer-events: auto;
+    }
+
 
     .header__carrusel {
         height: 30rem;
