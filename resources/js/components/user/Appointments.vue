@@ -175,44 +175,46 @@ export default {
             </p>
         </div>
 
-        <table v-else>
-            <thead>
-                <tr>
-                    <th>Día</th>
-                    <th>Hora Inicio</th>
-                    <th>Hora Fin</th>
-                    <th>Servicio</th>
-                    <th>Peluquería</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(cita, index) in citasFiltradas" :key="index">
-                    <td>{{ cita.fecha }}</td>
-                    <td>{{ cita.hora_inicio }}</td>
-                    <td>{{ cita.hora_fin }}</td>
-                    <td>{{ cita.nombre_servicio }}</td>
-                    <td>
-                        <router-link :to="`/locals/${cita.id_peluqueria}`" class="peluqueria-link">
-                            {{ cita.nombre_peluqueria }}
-                        </router-link>
-                    </td>
-                    <td class="flex">
-                        <div class="flex-center">
-                            <button v-if="cita.estado === 'CONFIRMADA'" @click="abrirModalAccionCita(cita)"
-                                class="btn btn-edit flex">
-                                Cancelar cita
-                                <img src="/img/utils/cancel_white.svg" alt="Cancelar cita">
+        <div v-else class="tabla_scroll ">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Día</th>
+                        <th>Hora Inicio</th>
+                        <th>Hora Fin</th>
+                        <th>Servicio</th>
+                        <th>Peluquería</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(cita, index) in citasFiltradas" :key="index">
+                        <td>{{ cita.fecha }}</td>
+                        <td>{{ cita.hora_inicio }}</td>
+                        <td>{{ cita.hora_fin }}</td>
+                        <td>{{ cita.nombre_servicio }}</td>
+                        <td>
+                            <router-link :to="`/locals/${cita.id_peluqueria}`" class="peluqueria-link">
+                                {{ cita.nombre_peluqueria }}
+                            </router-link>
+                        </td>
+                        <td class="flex">
+                            <div class="flex-center">
+                                <button v-if="cita.estado === 'CONFIRMADA'" @click="abrirModalAccionCita(cita)"
+                                    class="btn btn-edit flex">
+                                    Cancelar cita
+                                    <img src="/img/utils/cancel_white.svg" alt="Cancelar cita">
+                                </button>
+                                <span v-else>{{ cita.estado }}</span>
+                            </div>
+                            <button class="btn btn-cancel" @click="abrirModalAccionCita(cita, 'delete')">
+                                <img src="/img/utils/delete_white.svg" alt="Eliminar cita">
                             </button>
-                            <span v-else>{{ cita.estado }}</span>
-                        </div>
-                        <button class="btn btn-cancel" @click="abrirModalAccionCita(cita, 'delete')">
-                            <img src="/img/utils/delete_white.svg" alt="Eliminar cita">
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     <ModalConfirm :show="showModal"
         :message="accionModal === 'cancel' ? '¿Estás seguro de que deseas cancelar esta cita?' : '¿Estás seguro de que deseas eliminar esta cita?'"
@@ -227,7 +229,7 @@ export default {
 
 .appointments__container {
     margin: 0 auto;
-    width: 85%;
+    width: 90%;
 
     .filter-section {
         margin-bottom: 20px;
@@ -253,26 +255,71 @@ export default {
         margin-bottom: 1rem;
     }
 
-    table {
+    .tabla_scroll {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        display: block;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-        a {
-            color: map-get($colores, "azul_oscuro");
-            text-decoration: none;
+        table {
+            width: 100%;
+            min-width: 900px; // ajustable si necesitas más
+            border-collapse: collapse;
 
-            &:hover {
-                color: map-get($colores, "naranja");
-                text-decoration: underline;
+            th,
+            td {
+                padding: 12px;
+                text-align: left;
+                white-space: nowrap;
+                border-bottom: 1px solid #e5e7eb; // similar a Tailwind divide-gray-200
+            }
+
+            a {
+                color: map-get($colores, "azul_oscuro");
+                text-decoration: none;
+
+                &:hover {
+                    color: map-get($colores, "naranja");
+                    text-decoration: underline;
+                }
+            }
+
+            td.flex {
+                justify-content: space-between;
+
+                div {
+                    width: 100%;
+
+                    span {
+                        font-weight: bold;
+                    }
+                }
             }
         }
+    }
+}
 
-        td.flex {
-            justify-content: space-between;
+$breakpoints: (
+    1250px: 800px,
+    1100px: 700px,
+    800px: 600px,
+    670px: 500px,
+    570px: 400px,
+    470px: 340px,
+    400px: 300px
+);
 
-            div {
-                width: 100%;
-
-                span {
-                    font-weight: bold;
+@each $screen, $width in $breakpoints {
+    @media (max-width: #{$screen}) {
+        .profile {
+            main {
+                .appointments__container {
+                    .tabla_scroll {
+                        max-width: $width;
+                    }
                 }
             }
         }

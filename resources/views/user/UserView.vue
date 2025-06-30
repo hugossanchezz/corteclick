@@ -159,6 +159,7 @@ export default {
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 
             .aside_btn {
+                background-color: white;
                 position: absolute;
                 top: 1rem;
                 right: -40px;
