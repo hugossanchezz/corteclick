@@ -64,8 +64,6 @@ export default {
                     locales</router-link>
                 <router-link v-if="user.rol_id == 1 || user.rol_id == 2" to="/admin/requests"
                     :class="{ 'route--active': isActiveRoute('/admin/requests') }">Solicitudes de locales</router-link>
-                <router-link v-if="user.rol_id == 1 || user.rol_id == 2" to="/admin/dashboard"
-                    :class="{ 'route--active': isActiveRoute('/admin/dashboard') }">Control de usuarios</router-link>
 
                 <hr>
                 <router-link to="/user/settings" class="flex aside__config"
@@ -96,7 +94,6 @@ export default {
         padding: 3rem 2rem;
         gap: 5px;
         background-color: white;
-        z-index: 1000;
 
         a {
             color: map-get($colores, "naranja");
@@ -155,7 +152,6 @@ export default {
             height: 100%;
             padding: 3rem 1rem;
             transition: left 0.3s ease-in-out;
-            z-index: 10;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
 
             .aside_btn {
@@ -170,7 +166,6 @@ export default {
                 border-bottom-right-radius: 5px;
                 border: 2px solid map-get($colores, "gris_claro");
                 cursor: pointer;
-                z-index: 20;
             }
         }
 

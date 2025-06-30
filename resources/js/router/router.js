@@ -22,7 +22,6 @@ import MyLocals from '@/js/components/user/MyLocals.vue';
 
 
 // Admin
-import Dashboard from '@/js/components/admin/Dashboard.vue';
 import LocalRequests from '@/js/components/admin/LocalRequests.vue';
 
 // 404 Not Found
@@ -77,7 +76,6 @@ const routes = [
         children: [
             { path: '', name: 'Appointments', component: Appointments },
             { path: 'my-locals', name: 'MyLocals', component: MyLocals },
-            { path: '/admin/dashboard', name: 'Dashboard', component: Dashboard },
             { path: '/admin/requests', name: 'Requests', component: LocalRequests },
             { path: 'settings', name: 'Settings', component: Settings },
         ],
