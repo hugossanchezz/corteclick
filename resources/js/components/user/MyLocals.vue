@@ -156,7 +156,7 @@ export default {
         </div>
 
         <div v-else class="tarjetas_container">
-            <div v-for="local in peluquerias" :key="local.id" class="tarjeta_local">
+            <div v-for="local in peluquerias" :key="local.id" class="tarjeta_local flex-column">
                 <div class="imagen_local">
                     <img v-if="local.imagen" :src="`data:image/jpeg;base64,${local.imagen}`" alt="Imagen del local" />
                     <img v-else src="/img/utils/corteclick.png" alt="Imagen por defecto" />
@@ -167,7 +167,7 @@ export default {
                         <p>{{ local.direccion }}</p>
                     </div>
                     <br>
-                    <div>
+                    <div class="servicios_disponibles">
                         <p><strong>Servicios disponibles:</strong></p>
                         <ul class="lista_servicios">
                             <li v-if="local.servicios.length === 0">No hay servicios disponibles.</li>
@@ -176,47 +176,48 @@ export default {
                             </li>
                         </ul>
                         <br>
-                        <button v-if="!formularioVisible[local.id]" class="btn btn-edit" @click="toggleFormulario(local.id)">
-                            <img src="/img/utils/plus.svg" alt="Añadir servicio"> Añadir nuevo servicio
-                        </button>
 
-                        <div v-if="formularioVisible[local.id]" class="formulario_servicio">
-                            <br>
-                            <div class="inputForm">
+                    </div>
+                    <button v-if="!formularioVisible[local.id]" class="btn btn-edit"
+                        @click="toggleFormulario(local.id)">
+                        <img src="/img/utils/plus.svg" alt="Añadir servicio"> Añadir nuevo servicio
+                    </button>
 
-                                <select v-model="nuevoServicio[local.id].id_servicio">
-                                    <option value="" disabled selected>Seleccione un servicio</option>
-                                    <option v-for="serv in serviciosDisponiblesFiltrados(local.id)" :key="serv.id"
-                                        :value="serv.id">
-                                        {{ serv.nombre }}
-                                    </option>
-                                </select>
-                            </div>
-                            <br>
-                            <div class="inputForm">
-                                <input type="number" min="1" step="0.01" placeholder="Precio (€)"
-                                    v-model="nuevoServicio[local.id].precio" />
-                            </div>
-                            <br>
-                            <div class="inputForm">
-                                <select v-model="nuevoServicio[local.id].duracion">
-                                    <option v-for="dur in [30, 60, 90, 120, 150, 180]" :key="dur" :value="dur">
-                                        {{ dur }} minutos
-                                    </option>
-                                </select>
-                            </div>
-                            <br>
-                            <div class="flex">
-                                <button class="btn btn-confirm" @click="crearServicio(local.id)">
-                                    <img src="/img/utils/tick.svg" alt="Guardar nuevo servicio">
-                                    Guardar
-                                </button>
-                                <button class="btn btn-cancel" @click="toggleFormulario(local.id)">
-                                    <img src="/img/utils/close.svg" alt="Cancelar nuevo servicio">
-                                    Cancelar
-                                </button>
+                    <div v-if="formularioVisible[local.id]" class="formulario_servicio">
+                        <br>
+                        <div class="inputForm">
+                            <select v-model="nuevoServicio[local.id].id_servicio">
+                                <option value="" disabled selected>Seleccione un servicio</option>
+                                <option v-for="serv in serviciosDisponiblesFiltrados(local.id)" :key="serv.id"
+                                    :value="serv.id">
+                                    {{ serv.nombre }}
+                                </option>
+                            </select>
+                        </div>
+                        <br>
+                        <div class="inputForm">
+                            <input type="number" min="1" step="0.01" placeholder="Precio (€)"
+                                v-model="nuevoServicio[local.id].precio" />
+                        </div>
+                        <br>
+                        <div class="inputForm">
+                            <select v-model="nuevoServicio[local.id].duracion">
+                                <option v-for="dur in [30, 60, 90, 120, 150, 180]" :key="dur" :value="dur">
+                                    {{ dur }} minutos
+                                </option>
+                            </select>
+                        </div>
+                        <br>
+                        <div class="flex">
+                            <button class="btn btn-confirm" @click="crearServicio(local.id)">
+                                <img src="/img/utils/tick.svg" alt="Guardar nuevo servicio">
+                                Guardar
+                            </button>
+                            <button class="btn btn-cancel" @click="toggleFormulario(local.id)">
+                                <img src="/img/utils/close.svg" alt="Cancelar nuevo servicio">
+                                Cancelar
+                            </button>
 
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -239,22 +240,21 @@ export default {
 
     .tarjetas_container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
         gap: 1.5rem;
         margin-top: 1rem;
 
         .tarjeta_local {
+            min-height: 400px;
             background-color: #f9f9f9;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: row;
 
             .imagen_local {
+                width: 100%;
                 flex-shrink: 0;
-                width: 120px;
-                height: 120px;
+                height: 150px;
                 overflow: hidden;
                 display: flex;
                 align-items: center;
@@ -268,7 +268,8 @@ export default {
             }
 
             .info_local {
-            width: 100%;
+                height: 100%;
+                width: 100%;
                 padding: 0.75rem 1rem;
                 justify-content: space-between;
 
@@ -288,6 +289,10 @@ export default {
                     list-style: disc;
                     font-size: 0.95rem;
                     color: map-get($colores, 'gris_oscuro');
+                }
+
+                .servicios_disponibles {
+                    height: 100%;
                 }
 
                 .formulario_servicio {
@@ -345,8 +350,15 @@ export default {
                     }
                 }
 
+                .btn{
+                    align-self: flex-end;
+                    margin: 0 auto;
+                }
+
             }
         }
     }
 }
+
+@media (max-width: 628px) {}
 </style>
