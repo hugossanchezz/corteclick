@@ -57,7 +57,10 @@ export default {
             <!-- Menú lateral -->
             <aside class="flex-column" :class="{ 'aside--mobile-open': menuAbierto }">
                 <!-- Botón para abrir el menú visible en móviles -->
-                <img class="aside_btn" @click="toggleMenu" src="/img/utils/arrow_forward.svg" alt="Abrir menú" />
+                <img class="aside_btn" @click="toggleMenu"
+                    :src="menuAbierto ? '/img/utils/arrow_back.svg' : '/img/utils/arrow_forward.svg'"
+                    :alt="menuAbierto ? 'Cerrar menú' : 'Abrir menú'" />
+
 
                 <router-link to="/user" :class="{ 'route--active': isActiveRoute('/user') }">Mis citas</router-link>
                 <router-link to="/user/my-locals" :class="{ 'route--active': isActiveRoute('/user/my-locals') }">Mis

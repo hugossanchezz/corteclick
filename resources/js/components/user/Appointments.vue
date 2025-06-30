@@ -272,9 +272,11 @@ export default {
             th,
             td {
                 padding: 12px;
-                text-align: left;
                 white-space: nowrap;
-                border-bottom: 1px solid #e5e7eb; // similar a Tailwind divide-gray-200
+                border-bottom: 1px solid #e5e7eb;
+            }
+            td {
+                text-align: left;
             }
 
             a {
