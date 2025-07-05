@@ -309,7 +309,7 @@ $breakpoints: (
     1100px: 700px,
     800px: 600px,
     670px: 500px,
-    570px: 400px,
+    570px: 420px,
     470px: 340px,
     400px: 300px
 );
