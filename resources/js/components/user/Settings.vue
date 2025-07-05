@@ -281,28 +281,28 @@ export default {
                 </h2>
             </div>
 
-            <div v-if="user">
-                <div class="form__group">
+            <div v-if="user" class="form__container">
+                <div class="form__group flex">
                     <label for="name"><strong>Nombre:</strong></label>
                     <input v-model="editedUser.name" id="name" type="text" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form__group">
+                <div class="form__group flex">
                     <label for="apellidos"><strong>Apellidos:</strong></label>
                     <input v-model="editedUser.apellidos" id="apellidos" type="text" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form__group">
+                <div class="form__group flex">
                     <label for="email"><strong>Email:</strong></label>
                     <input v-model="editedUser.email" id="email" type="email" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form__group">
+                <div class="form__group flex">
                     <label for="telefono"><strong>Teléfono:</strong></label>
                     <input v-model="editedUser.telefono" id="telefono" type="tel" :disabled="!isEditing"
                         :class="{ 'input-disabled': !isEditing }" />
                 </div>
-                <div class="form__group">
+                <div class="form__group flex">
                     <label for="localidad"><strong>Localidad:</strong></label>
                     <input v-if="!isEditing" :value="nombreLocalidad" id="localidad" type="text" disabled
                         class="input-disabled" />
@@ -337,7 +337,7 @@ export default {
 
         <hr>
         <!-- Gestión de Cuenta -->
-        <section class="account-management">
+        <section class="account_management">
             <h1>Gestión de Cuenta</h1>
             <DangerButton @click="handleLogout"
                 label="Cerrar sesión <img src='/img/utils/logout.svg' alt='Cerrar sesión'>" />
@@ -368,7 +368,7 @@ hr {
     margin-bottom: 1rem;
     gap: 1rem;
 
-    h2{
+    h2 {
         color: map-get($colores, 'naranja');
     }
 }
@@ -379,14 +379,12 @@ hr {
     height: 2rem;
     margin-bottom: 1rem;
     border-radius: 5px;
-    position: relative;
+
+    align-items: center;
 
     label {
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        padding: 0 5px;
+        width: 50%;
+        padding: 0 10px;
     }
 
     input,
@@ -394,7 +392,7 @@ hr {
         background-color: transparent;
         width: 100%;
         height: 100%;
-        padding-left: 20%;
+        padding-left: 20px;
         border: 0;
 
         &:focus {
@@ -422,5 +420,42 @@ hr {
 
 .edit-buttons {
     gap: 1rem;
+}
+
+.account_management {
+    h1 {
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    .settings__container {
+        padding-left: 3rem;
+
+    }
+
+    .form__group {
+        width: 50%;
+    }
+
+    hr {
+        width: 95%;
+    }
+}
+
+@media (max-width: 768px) {
+    .form__group {
+        width: 70%;
+    }
+
+    hr {
+        width: 90%;
+    }
+}
+
+@media (max-width: 628px) {
+    .form__group {
+        width: 90%;
+    }
 }
 </style>
