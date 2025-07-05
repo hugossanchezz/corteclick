@@ -1,5 +1,5 @@
 <script>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
@@ -9,21 +9,27 @@ export default {
         ModalConfirm,
     },
     setup() {
+        // Lista de solicitudes recibidas del backend
         const solicitudes = ref([]);
+
+        // Estados disponibles de las solicitudes
         const estados = ref(["PENDIENTE", "RECHAZADA"]);
 
+        // Variables para controlar el modal de confirmación
         const showModal = ref(false);
         const modalMessage = ref("");
         const modalAction = ref(null);
         const modalSolicitudId = ref(null);
 
+        // Mapeo de IDs de localidades a sus nombres
         const localidadNames = ref({});
 
+        // Obtiene todas las solicitudes del backend
         const cargarSolicitudes = async () => {
             try {
-                const response = await axios.get(`/api/admin/requests`)
+                const response = await axios.get(`/api/admin/requests`);
                 solicitudes.value = response.data;
-                await cargarNombresLocalidades();
+                await cargarNombresLocalidades(); // Carga los nombres de las localidades
             } catch (error) {
                 console.error("Error fetching local requests:", error);
                 solicitudes.value = [];
@@ -33,6 +39,7 @@ export default {
             }
         };
 
+        // Carga los nombres de las localidades únicas encontradas en las solicitudes
         const cargarNombresLocalidades = async () => {
             const uniqueLocalityIds = [...new Set(solicitudes.value.map(s => s.localidad))];
             for (const id of uniqueLocalityIds) {
@@ -50,6 +57,7 @@ export default {
             }
         };
 
+        // Abre el modal de confirmación con mensaje, acción y solicitud asociada
         const abrirModal = (message, action, solicitudId) => {
             modalMessage.value = message;
             modalAction.value = action;
@@ -57,6 +65,7 @@ export default {
             showModal.value = true;
         };
 
+        // Ejecuta la acción seleccionada (aprobar o denegar)
         const ejecutarAccion = async () => {
             const action = modalAction.value;
             const solicitudId = modalSolicitudId.value;
@@ -71,12 +80,10 @@ export default {
 
             try {
                 const solicitud = solicitudes.value.find(s => s.id === solicitudId);
-                if (!solicitud) {
-                    throw new Error("Solicitud no encontrada");
-                }
+                if (!solicitud) throw new Error("Solicitud no encontrada");
 
+                // Si se aprueba, crea el nuevo local
                 if (action === 'aprobar') {
-
                     try {
                         const formData = new FormData();
                         formData.append("nombre", solicitud.nombre);
@@ -87,49 +94,47 @@ export default {
                         formData.append("telefono", solicitud.telefono);
                         formData.append("tipo", solicitud.tipo);
                         formData.append("user_id", solicitud.user_id);
-
-                        // Asegúrate de que este campo exista
-                        formData.append("imagen", solicitud.imagen);
+                        formData.append("imagen", solicitud.imagen); // imagen principal
 
                         await axios.post(`/api/approve-request/${solicitudId}`);
-
                     } catch (newLocalError) {
                         console.error("Error al crear el nuevo local:", newLocalError.response ? newLocalError.response.data : newLocalError.message);
                         throw newLocalError;
                     }
                 }
 
-                // Cambiar el estado de la solicitud
-                await axios.post(`/api/admin/requests/${solicitudId}/cambiarEstado`, { estado: estadoMap[action] }, {
+                // Cambia el estado de la solicitud (APROBADA o RECHAZADA)
+                await axios.post(`/api/admin/requests/${solicitudId}/cambiarEstado`, {
+                    estado: estadoMap[action]
+                }, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
 
-                // Filtrar la solicitud de la lista
+                // Elimina la solicitud de la lista
                 solicitudes.value = solicitudes.value.filter(s => s.id !== solicitudId);
-                abrirModal(mensajesExito[action], null, null);
+                abrirModal(mensajesExito[action], null, null); // Muestra mensaje de éxito
             } catch (error) {
                 console.error(`Error al ${action}:`, error.response ? error.response.data : error.message);
                 abrirModal(
-                    `Error al ${action === 'aprobar' ? 'aprobar' : action === 'denegar' ? 'denegar' : 'devolver a pendiente'} la solicitud. ` +
-                    (error.message || (error.response && error.response.data && error.response.data.error ? error.response.data.error : 'Por favor, intenta de nuevo.')),
+                    `Error al ${action === 'aprobar' ? 'aprobar' : 'denegar'} la solicitud. ` +
+                    (error.message || (error.response?.data?.error ?? 'Por favor, intenta de nuevo.')),
                     null,
                     null
                 );
             }
         };
 
+        // Inicia el proceso de aprobación con confirmación
         const aprobarSolicitud = (solicitudId) => {
             abrirModal("¿Estás seguro de aprobar esta solicitud?", "aprobar", solicitudId);
         };
 
+        // Inicia el proceso de denegación con confirmación
         const denegarSolicitud = (solicitudId) => {
             abrirModal("¿Estás seguro de denegar esta solicitud?", "denegar", solicitudId);
         };
 
-        const eliminarSolicitud = (solicitudId) => {
-            abrirModal("¿Estás seguro de eliminar esta solicitud?", "eliminar", solicitudId);
-        };
-
+        // Ejecuta la carga inicial de solicitudes al montar el componente
         onMounted(() => {
             cargarSolicitudes();
         });

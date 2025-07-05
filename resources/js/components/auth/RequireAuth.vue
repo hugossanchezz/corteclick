@@ -7,24 +7,24 @@ export default {
     name: "RequireAuth",
     components: { PrimaryButton },
     setup() {
-        const isLoggedIn = ref(false);
-        const router = useRouter();
+        const isLoggedIn = ref(false); // Variable reactiva para saber si el usuario está logueado
+        const router = useRouter();    // Acceso al enrutador de Vue
 
+        // Redirige al usuario a la página de login
         const redirectToLogin = () => {
             router.push("/auth");
         };
 
+        // Al montar el componente, verifica si hay un usuario guardado en sessionStorage
         onMounted(() => {
             const storedUser = sessionStorage.getItem("user");
             if (storedUser) {
                 try {
-                    JSON.parse(storedUser);
+                    JSON.parse(storedUser); // Verifica que el JSON esté bien formado
                     isLoggedIn.value = true;
                 } catch (error) {
-                    console.error(
-                        "Error al parsear el objeto de usuario:",
-                        error
-                    );
+                    // Si hay error, se elimina el dato corrupto y se redirige al inicio
+                    console.error("Error al parsear el objeto de usuario:", error);
                     sessionStorage.removeItem("user");
                     isLoggedIn.value = false;
                     router.push("/");
@@ -41,10 +41,14 @@ export default {
     },
 };
 </script>
+
 <template>
+    <!-- Si el usuario está logueado, muestra el contenido hijo (slot) -->
     <div v-if="isLoggedIn">
         <slot />
     </div>
+
+    <!-- Si NO está logueado, muestra un mensaje y un botón para ir al login -->
     <div v-else class="advert flex-center">
         <div class="modal flex-column glass-effect">
             <h1>Por favor, inicia sesión para ver esta página.</h1>

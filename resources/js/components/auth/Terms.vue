@@ -6,6 +6,7 @@ export default {
     name: "Terms",
     setup() {
         const router = useRoute();
+        // Obtener el año actual
         const currentYear = ref(new Date().getFullYear());
         // Usa computed para que isRouteTerms se actualice automáticamente
         const isRouteTerms = computed(() => router.path === '/auth/register/terms');
@@ -17,6 +18,7 @@ export default {
     },
 };
 </script>
+
 <template>
     <section v-if="isRouteTerms">
         <div>

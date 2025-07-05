@@ -15,14 +15,18 @@ export default {
     },
 
     setup() {
-        const route = useRoute();
+        const route = useRoute(); // Accede a la ruta actual
+
+        // Detecta si estamos en la página de inicio (landing page)
         const isLandingPage = computed(() => route.path === "/");
 
-        // IMPORTANTE: computar isAuthenticated para que se reactive correctamente
+        // Reactivo: indica si el usuario está autenticado
         const estaLogueado = computed(() => isAuthenticated.value);
 
+        // Controla si el menú móvil está abierto
         const menuAbierto = ref(false);
 
+        // Alterna el estado del menú (abrir/cerrar)
         const toggleMenu = () => {
             menuAbierto.value = !menuAbierto.value;
         };

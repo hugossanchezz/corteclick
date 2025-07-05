@@ -533,8 +533,6 @@ form {
     label {
         margin-left: 5px;
     }
-
-
 }
 
 // Estilos para .span
@@ -563,11 +561,13 @@ form {
         width: 70%;
     }
 }
+
 @media (max-width: 768px) {
     form {
         width: 80%;
     }
 }
+
 @media (max-width: 550px) {
     form {
         width: 100%;
