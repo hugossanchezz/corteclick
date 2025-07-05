@@ -231,11 +231,11 @@ export default {
 <template>
   <form class="flex-column" @submit.prevent="submitForm">
     <h1 class="flex-center">¿Quieres que tu negocio llegue a más gente?</h1>
-    <h3 class="flex-center">Entra en <span class="span__corteclick">Corteclick</span> como empresario con esta
+    <h3 class="flex-center">Únete a <span class="span__corteclick">Corteclick</span> con esta
       solicitud. </h3>
 
     <hr />
-
+ 
     <div class="flex-column form__campo">
       <label for="nombre">Nombre del negocio</label>
       <div class="inputForm flex">
@@ -328,7 +328,7 @@ export default {
       <div class="inputForm flex">
         <img src="/img/auth/image_orange.svg" alt="Imagenes del local" />
         <input ref="inputImagenes" type="file" id="imagenes" multiple
-          accept="image/png, image/jpeg, image/jpg, image/webp" @change="manejarSeleccionImagenes" required/>
+          accept="image/png, image/jpeg, image/jpg, image/webp" @change="manejarSeleccionImagenes" required />
       </div>
       <div v-if="errorImagenes" class="errorMensaje">
         {{ errorImagenes }}
@@ -365,6 +365,10 @@ form {
   padding: 20px 30px;
   gap: 10px;
   border-radius: 20px;
+
+  h1 {
+    white-space: nowrap;
+  }
 
   h3 {
     color: map-get($colores, 'gris_oscuro');
@@ -481,24 +485,12 @@ form {
   cursor: pointer;
 }
 
-@include responsive-layout(1440px) {
-  .contenedor-inicio-sesion {
-    width: 80%;
-  }
-
-  .form-container {
-    margin-bottom: 1rem;
-  }
-}
-
-@include responsive-layout(1024px) {
+@media (max-width: 700px) {
   form {
-    width: 100%;
-    padding: 0;
-  }
-
-  .input {
-    margin-left: 0;
+    h1 {
+      white-space: wrap;
+      text-align: center;
+    }
   }
 }
 </style>
