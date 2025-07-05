@@ -150,7 +150,7 @@ export default {
 </script>
 
 <template>
-    <div class="requests-container">
+    <div class="requests_container">
 
         <h1>Solicitudes de locales</h1>
 
@@ -197,9 +197,11 @@ export default {
 
                     <div class="action_buttons flex">
                         <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-confirm"
-                            @click="aprobarSolicitud(solicitud.id)">Aprobar <img src="/img/utils/tick.svg" alt="Aprobar solicitud"></button>
+                            @click="aprobarSolicitud(solicitud.id)">Aprobar <img src="/img/utils/tick.svg"
+                                alt="Aprobar solicitud"></button>
                         <button v-if="solicitud.estado === 'PENDIENTE'" class="btn btn-cancel"
-                            @click="denegarSolicitud(solicitud.id)">Denegar <img src="/img/utils/close.svg" alt="Denegar solicitud"></button>
+                            @click="denegarSolicitud(solicitud.id)">Denegar <img src="/img/utils/close.svg"
+                                alt="Denegar solicitud"></button>
                     </div>
                 </div>
             </div>
@@ -247,12 +249,12 @@ select {
 
 .card_grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 450px));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
     margin-top: 2rem;
 
     .solicitud_card {
-        height: 100%; 
+        height: 100%;
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 16px;
@@ -261,7 +263,7 @@ select {
         flex-direction: column;
         align-items: center;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    
+
         .main_image {
             width: 100%;
             max-height: 180px;
@@ -269,11 +271,11 @@ select {
             border-radius: 6px;
             margin-bottom: 1rem;
         }
-    
+
         .card_content {
             width: 100%;
             flex-grow: 1;
-    
+
             p {
                 border: 2px solid map-get($colores, "gris_claro");
                 display: flex;
@@ -283,14 +285,14 @@ select {
                 text-align: center;
                 margin-bottom: 5px;
                 padding-bottom: 2.5px;
-    
+
                 strong {
                     background-color: map-get($colores, "blanco");
                     margin-bottom: 5px;
                     text-align: start;
                     padding-left: 5px;
                 }
-    
+
                 .descripcion {
                     height: 2.5rem;
                     overflow: hidden;
@@ -300,30 +302,30 @@ select {
                     -webkit-box-orient: vertical;
                 }
             }
-    
+
             .action_buttons {
                 width: 100%;
                 margin-top: auto;
                 padding: 5px 2.5px;
                 justify-content: space-evenly;
             }
-    
+
             .imagenes_secundarias {
                 margin-top: 1rem;
-    
+
                 .miniaturas {
                     margin-top: 0.5rem;
                     grid-template-columns: 1fr 1fr;
                     grid-template-rows: 1fr 1fr;
                     gap: 2.5px;
-    
+
                     .miniatura {
                         width: 100%;
                         height: 80px;
                         object-fit: cover;
                         border-radius: 4px;
                     }
-    
+
                     .no_images_message {
                         padding: 5px 0;
                     }
@@ -333,4 +335,16 @@ select {
     }
 }
 
+@media (max-width: 1024px) {
+    .requests_container {
+        margin-top: 1rem;
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 800px) {
+    .requests_container {
+        padding: 0 2.5rem;
+    }
+}
 </style>
