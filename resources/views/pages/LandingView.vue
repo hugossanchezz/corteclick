@@ -40,15 +40,9 @@ export default {
 
         <section class="main__description flex-column">
             <div class="description__title flex">
-                <img
-                    src="img/landing/tools/perfume_comb.svg"
-                    alt="Decorative perfume and comb icon"
-                />
+                <img src="img/landing/tools/perfume_comb.svg" alt="Decorative perfume and comb icon" />
                 <h1>¿Qué ofrecemos?</h1>
-                <img
-                    src="/img/landing/tools/razor.svg"
-                    alt="Decorative razor icon"
-                />
+                <img src="/img/landing/tools/razor.svg" alt="Decorative razor icon" />
             </div>
 
             <p>
@@ -63,36 +57,21 @@ export default {
             <div class="how__timeline flex">
                 <div class="timeline__item flex-column">
                     <p>Selecciona el local</p>
-                    <img
-                        src="/img/landing/timeline/local.svg"
-                        alt="Local icon"
-                    />
+                    <img src="/img/landing/timeline/local.svg" alt="Local icon" />
                 </div>
                 <div class="timeline__item timeline__arrow">
-                    <img
-                        src="/img/landing/timeline/orange-right-arrow.svg"
-                        alt="Arrow to next timeline item"
-                    />
+                    <img src="/img/landing/timeline/orange-right-arrow.svg" alt="Arrow to next timeline item" />
                 </div>
                 <div class="timeline__item flex-column">
                     <p>Elige día y hora</p>
-                    <img
-                        src="/img/landing/timeline/calendar.svg"
-                        alt="Calendar icon"
-                    />
+                    <img src="/img/landing/timeline/calendar.svg" alt="Calendar icon" />
                 </div>
                 <div class="timeline__item timeline__arrow">
-                    <img
-                        src="/img/landing/timeline/orange-right-arrow.svg"
-                        alt="Arrow to next timeline item"
-                    />
+                    <img src="/img/landing/timeline/orange-right-arrow.svg" alt="Arrow to next timeline item" />
                 </div>
                 <div class="timeline__item flex-column">
                     <p>Reserva tu cita y ¡Listo!</p>
-                    <img
-                        src="/img/landing/timeline/check.svg"
-                        alt="Appointment icon"
-                    />
+                    <img src="/img/landing/timeline/check.svg" alt="Appointment icon" />
                 </div>
             </div>
         </section>
@@ -112,6 +91,7 @@ main {
 
     .main__redirect {
         margin-bottom: 0;
+
         div {
             width: 25rem;
             padding: 1rem 2rem;
@@ -148,6 +128,7 @@ main {
                 margin: 0 1rem;
             }
         }
+
         p {
             width: 55%;
         }
@@ -159,13 +140,35 @@ main {
         .how__timeline {
             align-items: center;
             justify-content: center;
+
             .timeline__item {
                 padding: 1rem 2rem;
                 gap: 1rem;
                 align-items: center;
+
                 img {
                     width: 5rem;
                 }
+            }
+        }
+    }
+}
+
+@media (max-width: 1280px) {
+    main {
+        .main__description {
+            p {
+                width: 80%;
+            }
+        }
+    }
+}
+
+@media (max-width: 900px) {
+    main {
+        .main__description {
+            p {
+                width: 90%;
             }
         }
     }
@@ -181,7 +184,7 @@ main {
             .how__timeline {
                 flex-direction: column;
 
-                .timeline__arrow{
+                .timeline__arrow {
                     transform: rotate(90deg);
                 }
             }
@@ -205,10 +208,14 @@ main {
             }
         }
 
-        .main__description{
+        .main__description {
             .description__title {
                 width: 100%;
                 white-space: nowrap;
+            }
+
+            p {
+                width: 100%;
             }
         }
     }
