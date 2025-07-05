@@ -249,7 +249,7 @@ select {
 
 .card_grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 450px));
     gap: 1.5rem;
     margin-top: 2rem;
 
@@ -335,6 +335,12 @@ select {
     }
 }
 
+@media (max-width: 1224px) {
+    .card_grid {
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    }
+}
+
 @media (max-width: 1024px) {
     .requests_container {
         margin-top: 1rem;
@@ -345,6 +351,18 @@ select {
 @media (max-width: 800px) {
     .requests_container {
         padding: 0 2.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .requests_container {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .requests_container {
+        padding: 0;
     }
 }
 </style>
