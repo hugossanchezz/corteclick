@@ -149,7 +149,7 @@ export default {
 
 <template>
     <div class="mis_locales_container">
-        <h2>Mis Locales</h2>
+        <h1>Mis Locales</h1>
 
         <div v-if="peluquerias.length === 0" class="no_locales">
             No tienes locales registrados actualmente.
