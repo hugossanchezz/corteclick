@@ -20,7 +20,7 @@ export default {
         // Detecta si estamos en la página de inicio (landing page)
         const isLandingPage = computed(() => route.path === "/");
 
-        // Reactivo: indica si el usuario está autenticado
+        // Si el usuario está autenticado
         const estaLogueado = computed(() => isAuthenticated.value);
 
         // Controla si el menú móvil está abierto

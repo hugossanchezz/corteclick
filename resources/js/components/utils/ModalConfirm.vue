@@ -1,40 +1,56 @@
 <script>
 export default {
   name: "ModalConfirm",
+
+  // Props que recibe el componente desde el padre
   props: {
+    // Controla si el modal se muestra o no
     show: {
       type: Boolean,
       required: true,
       default: false,
     },
+    // Mensaje que se mostrará dentro del modal
     message: {
       type: String,
       required: true,
     },
+    // Texto del botón de confirmación
     confirmText: {
       type: String,
       default: "Confirmar",
     },
+    // Texto del botón de cancelar
     cancelText: {
       type: String,
       default: "Cancelar",
     },
+    // Controla si se muestra el botón de cancelar
     showCancel: {
       type: Boolean,
-      default: true, // Si es false, solo muestra el botón de confirmación (para mensajes de éxito/error)
+      default: true, // Si es false, se muestra solo el botón de confirmación (ideal para mensajes simples)
     },
   },
+
+  // Métodos del componente
   methods: {
+    // Lógica cuando se hace clic en el botón de confirmar
     onConfirm() {
-      this.$emit("confirm");
-      this.close();
+      this.$emit("confirm"); // Emite un evento personalizado 'confirm' al componente padre
+      this.close();          // Cierra el modal
     },
+
+    // Lógica cuando se hace clic en el botón de cancelar
     onCancel() {
-      this.$emit("cancel");
-      this.close();
+      this.$emit("cancel"); // Emite un evento personalizado 'cancel' al componente padre
+      this.close();         // Cierra el modal
     },
+
+    // Método para cerrar el modal manualmente
     close() {
-      this.$emit("update:show", false); // Actualiza la prop show para cerrar el modal
+      // Emite un evento para actualizar la prop `show` a false,
+      // esto permite cerrar el modal desde el componente padre usando v-model:show
+      this.$emit("update:show", false);
     },
   },
 };

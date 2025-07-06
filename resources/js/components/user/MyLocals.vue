@@ -16,6 +16,12 @@ export default {
         const formularioVisible = ref({}); // objeto
         const nuevoServicio = ref({});
 
+        /**
+         * Carga el usuario desde el almacenamiento de sesi n en el navegador.
+         * Si no hay un usuario almacenado, redirige al usuario a la p gina de inicio.
+         * Si hay un error al parsear el objeto de usuario, muestra un mensaje de error
+         * en la consola y redirige al usuario a la p gina de inicio.
+         */
         const cargarUsuario = () => {
             const storedUser = sessionStorage.getItem("user");
             if (storedUser) {
@@ -31,6 +37,16 @@ export default {
             }
         };
 
+        /**
+         * Carga los servicios disponibles para un local específico utilizando su ID.
+         * Realiza una solicitud GET a la API y devuelve los datos de los servicios,
+         * que incluyen el ID, nombre, precio y duración de cada servicio.
+         * En caso de error, se registra en la consola y retorna un arreglo vacío.
+         * 
+         * @param {number} id_peluqueria - ID del local para el cual cargar los servicios.
+         * @returns {Array} - Lista de servicios con sus detalles.
+         */
+
         const cargarServiciosLocal = async (id_peluqueria) => {
             try {
                 const response = await axios.get(`/api/locals/${id_peluqueria}/services`);
@@ -41,6 +57,14 @@ export default {
             }
         };
 
+        /**
+         * Carga los servicios disponibles en la base de datos.
+         * Realiza una solicitud GET a la API y devuelve los datos de los servicios,
+         * que incluyen el ID, nombre, precio y duraci n de cada servicio.
+         * En caso de error, se registra en la consola y no se hace nada.
+         * 
+         * @returns {Array} - Lista de servicios con sus detalles.
+         */
         const cargarServiciosDisponibles = async () => {
             try {
                 const response = await axios.get("/api/services");
@@ -50,6 +74,13 @@ export default {
             }
         };
 
+        /**
+         * Filtra los servicios disponibles para un local específico. Devuelve una lista
+         * de servicios que no est n asignados al local.
+         * 
+         * @param {number} id_peluqueria - ID del local para el cual filtrar los servicios.
+         * @returns {Array} - Lista de servicios que pueden ser agregados al local.
+         */
         const serviciosDisponiblesFiltrados = (id_peluqueria) => {
             const local = peluquerias.value.find(l => l.id === id_peluqueria);
             if (!local) return [];
@@ -59,6 +90,12 @@ export default {
             return serviciosDisponibles.value.filter(serv => !idsActuales.includes(serv.id));
         };
 
+        /**
+         * Carga las peluquerías asociadas al usuario actual.
+         * Realiza una solicitud GET a la API para obtener la lista de locales
+         * y por cada local, carga los servicios disponibles para ese local.
+         * En caso de error, se registra en la consola y no se hace nada.
+         */
         const cargarPeluquerias = async () => {
             try {
                 const response = await axios.get(`/api/locals/user/${user.value.id}`);
@@ -74,6 +111,15 @@ export default {
             }
         };
 
+        /**
+         * Crea un nuevo servicio para un local específico.
+         * Realiza una solicitud POST a la API para crear el servicio
+         * y en caso de éxito, recarga los servicios del local y resetea
+         * el formulario.
+         * En caso de error, se registra en la consola y no se hace nada.
+         * 
+         * @param {number} id_peluqueria - ID del local para el cual crear el servicio.
+         */
         const crearServicio = async (id_peluqueria) => {
             const datos = nuevoServicio.value[id_peluqueria];
 
@@ -102,6 +148,13 @@ export default {
             }
         };
 
+        /**
+         * Alterna la visibilidad del formulario para crear un servicio para un local
+         * específico. Si se está cerrando, limpia los datos del formulario. Si se
+         * está abriendo, inicializa el formulario con los campos vacíos.
+         * 
+         * @param {number} id - ID del local para el cual se va a crear el servicio.
+         */
         const toggleFormulario = (id) => {
             const visible = formularioVisible.value[id];
             formularioVisible.value[id] = !visible;
@@ -350,7 +403,7 @@ export default {
                     }
                 }
 
-                .btn{
+                .btn {
                     align-self: flex-end;
                     margin: 0 auto;
                 }

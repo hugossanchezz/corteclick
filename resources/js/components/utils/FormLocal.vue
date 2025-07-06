@@ -46,6 +46,13 @@ export default {
 
     const tieneErrores = computed(() => Object.keys(errores.value).length > 0);
 
+    /**
+     * Actualiza el objeto de errores con un mensaje de error para el campo especificado.
+     * Si el mensaje es vacío, elimina la propiedad del objeto de errores.
+     *
+     * @param {string} campo - El nombre del campo que se desea actualizar.
+     * @param {string} mensaje - El mensaje de error para el campo.
+     */
     const actualizarError = (campo, mensaje) => {
       if (mensaje) {
         errores.value[campo] = mensaje;
@@ -54,6 +61,10 @@ export default {
       }
     };
 
+    /**
+     * Obtiene la lista de localidades desde la API y las asigna al estado `localidades`.
+     * Muestra un error en la consola si la operación de obtención falla.
+     */
     const cargarLocalidades = async () => {
       try {
         const response = await fetch('/api/localities');
@@ -115,6 +126,18 @@ export default {
       return Object.keys(errores.value).length === 0;
     };
 
+    /**
+     * Maneja el evento de selección de imágenes.
+     *
+     * @param {Event} event - Evento de selección de archivos.
+     * @return {void}
+     *
+     * Verifica que el usuario haya seleccionado algo y que no haya seleccionado
+     * más de 5 archivos. Si se seleccionaron más de 5, se toman solo las primeras 5.
+     * Luego verifica que cada archivo tenga un tamaño menor o igual a 10MB.
+     * Si alguno de los archivos supera el límite, se muestra un mensaje de error y
+     * se resetean las imágenes.
+     */
     const manejarSeleccionImagenes = (event) => {
       const archivos = Array.from(event.target.files);
       errorImagenes.value = "";
@@ -235,7 +258,7 @@ export default {
       solicitud. </h3>
 
     <hr />
- 
+
     <div class="flex-column form__campo">
       <label for="nombre">Nombre del negocio</label>
       <div class="inputForm flex">

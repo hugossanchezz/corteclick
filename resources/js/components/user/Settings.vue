@@ -199,6 +199,10 @@ export default {
             errorMessage.value = ""; // Limpia el mensaje de error si se cancela
         };
 
+        /**
+         * Carga la lista de localidades desde la API y las asigna al estado `localidades`.
+         * En caso de error, registra el error en la consola.
+         */
         const cargarLocalidades = async () => {
             try {
                 const response = await fetch('/api/localities');

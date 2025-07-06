@@ -19,6 +19,12 @@ export default {
         const citaSeleccionada = ref(null);
         const accionModal = ref(null);
 
+        /**
+         * Obtiene el nombre de un servicio a partir de su ID.
+         * Si no se encuentra o hay error, devuelve null.
+         * @param {number} id - ID del servicio.
+         * @returns {Promise<string|null>} - Nombre del servicio o null si falla.
+         */
         const fetchNombreServicio = async (id) => {
             try {
                 const res = await fetch(`/api/services/${id}/name`);
@@ -30,6 +36,12 @@ export default {
             }
         };
 
+        /**
+         * Obtiene el nombre de una peluquería a partir de su ID.
+         * Si hay error, devuelve null.
+         * @param {number} id - ID de la peluquería.
+         * @returns {string|null} - Nombre de la peluquería o null si falla.
+         */
         const fetchNombrePeluqueria = async (id) => {
             try {
                 const res = await fetch(`/api/local/${id}/name`);
@@ -40,7 +52,11 @@ export default {
             }
         };
 
-
+        /**
+         * Obtiene las citas de un usuario según su ID y estado de filtro.
+         * Si el filtro es "TODAS", las obtiene sin filtrar.
+         * @param {number} idUsuario - ID del usuario.
+         */
         const fetchCitas = async (idUsuario) => {
             try {
                 let url = `/api/appointments/user/${idUsuario}`;
@@ -83,12 +99,23 @@ export default {
             return citas.value.filter(c => c.estado === estadoFiltro.value);
         });
 
+        /**
+         * Abre el modal de confirmación para cancelar o eliminar una cita.
+         * @param {Object} cita - La cita a cancelar o eliminar.
+         * @param {"cancel"|"eliminar"} [accion="cancel"] - La acción a realizar en la cita.
+         */
         const abrirModalAccionCita = (cita, accion = "cancel") => {
             citaSeleccionada.value = cita;
             accionModal.value = accion;
             showModal.value = true;
         };
 
+        /**
+         * Procesa la acción de cancelar o eliminar una cita.
+         * Si userId.value tiene un valor, vuelve a cargar las citas del usuario.
+         * Cierra el modal de confirmación.
+         * @throws Error si no se puede procesar la acción
+         */
         const confirmarAccion = async () => {
             try {
                 const idCita = citaSeleccionada.value.id;
@@ -275,6 +302,7 @@ export default {
                 white-space: nowrap;
                 border-bottom: 1px solid #e5e7eb;
             }
+
             td {
                 text-align: left;
             }
