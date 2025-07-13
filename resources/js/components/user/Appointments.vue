@@ -303,10 +303,6 @@ export default {
                 border-bottom: 1px solid #e5e7eb;
             }
 
-            td {
-                text-align: left;
-            }
-
             a {
                 color: map-get($colores, "azul_oscuro");
                 text-decoration: none;
