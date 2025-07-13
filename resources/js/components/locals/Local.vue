@@ -595,7 +595,9 @@ export default {
 
 <template>
   <RequireAuth>
-    <div class="space__container">
+    <div class="space__container  flex-column">
+
+      <!-- Botón de volver -->
       <div class="btn-back__container">
         <router-link to="/locals">
           <button class="btn btn-back">
@@ -605,124 +607,133 @@ export default {
         </router-link>
       </div>
 
-      <div v-if="loading" class="loading">
-        <p>Cargando datos...</p>
-      </div>
-
-      <div v-else-if="error">
-        <p class="error">{{ error }}</p>
-      </div>
-
-      <div v-else-if="peluqueria" class="local grid">
-        <div class="local__image">
-          <img :src="imagenesCarrusel[indiceActual]" alt="Imagen del local" class="main_image" />
-
-          <button class="carrusel-btn izquierda" @click="anteriorImagen" v-if="imagenesCarrusel.length <= 2">
-            <img src="/img/utils/arrow_back_white.svg" alt="" />
-          </button>
-          <button class="carrusel-btn derecha" @click="siguienteImagen" v-if="imagenesCarrusel.length <= 2">
-            <img src="/img/utils/arrow_forward_white.svg" alt="" />
-          </button>
+      <!-- Tarjeta del local -->
+      <div class="local__container">
+        <div v-if="loading" class="loading">
+          <p>Cargando datos...</p>
         </div>
 
-        <div class="local__name flex">
-          <h1>{{ peluqueria.nombre }}</h1>
-          <div class="local__status">
-            <div v-if="isOpen" class="status status--open">
-              ABIERTO
-            </div>
-            <div v-else class="status status--closed">CERRADO</div>
+        <div v-else-if="error">
+          <p class="error">{{ error }}</p>
+        </div>
+
+        <div v-else-if="peluqueria" class="local grid">
+          <div class="local__image">
+            <img :src="imagenesCarrusel[indiceActual]" alt="Imagen del local" class="main_image" />
+
+            <button class="carrusel-btn izquierda" @click="anteriorImagen" v-if="imagenesCarrusel.length <= 2">
+              <img src="/img/utils/arrow_back_white.svg" alt="" />
+            </button>
+            <button class="carrusel-btn derecha" @click="siguienteImagen" v-if="imagenesCarrusel.length <= 2">
+              <img src="/img/utils/arrow_forward_white.svg" alt="" />
+            </button>
           </div>
-          <div class="type__value flex-column">
-            <p>{{ peluqueria.tipo }}</p>
-            <strong class="flex">{{ peluqueria.valoracion || "Sin valoración" }}
-              <span class="star">★</span></strong>
-          </div>
-        </div>
 
-        <div class="local__address flex">
-          <img class="card__location" src="/img/locals/location.svg" alt="Ubicación" />
-          {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
-        </div>
-
-        <div class="local__description">
-          <p>{{ peluqueria.descripcion }}</p>
-        </div>
-
-        <div class="local__service flex-center">
-          <select name="servicios" id="servicios" @change="handleServiceChange" v-model="selectedServiceId">
-            <option value="" disabled>
-              Selecciona un servicio
-            </option>
-            <option v-for="servicio in servicios" :key="servicio.id" :value="servicio.id">
-              {{ servicio.nombre }} - {{ servicio.precio }}€ ({{
-                servicio.duracion
-              }}
-              min)
-            </option>
-          </select>
-        </div>
-
-        <div class="local__schedule">
-          <p class="schedule__week flex-center">
-            <img src="/img/utils/arrow_back.svg" alt="Ir a semana anterior" @click="goToPreviousWeek"
-              :class="{ disabled: isPreviousWeekDisabled() }" />
-            Lun {{ mondayDay }} - Vie {{ fridayDay }}
-            <img src="/img/utils/arrow_forward.svg" alt="Ir a semana siguiente" @click="goToNextWeek" />
-          </p>
-
-          <table>
-            <tr>
-              <th>Lunes</th>
-              <th>Martes</th>
-              <th>Miércoles</th>
-              <th>Jueves</th>
-              <th>Viernes</th>
-            </tr>
-            <tr v-for="time in [
-              '09:00',
-              '09:30',
-              '10:00',
-              '10:30',
-              '11:00',
-              '11:30',
-              '12:00',
-              '12:30',
-              '13:00',
-              '13:30',
-              '14:00',
-            ]" :key="time">
-              <td v-for="day in [0, 1, 2, 3, 4]" :key="day" :class="getCellClass(getDateForDay(day), time)"
-                @click="selectSlot(getDateForDay(day), time)">
-                {{ time }}
-              </td>
-            </tr>
-          </table>
-          <span v-if="mensaje" class="mensaje__servicio">{{
-            mensaje
-          }}</span>
-
-          <div class="schedule__info flex">
-            <div>
-              <span class="square square--green"></span> Huecos
-              disponibles
+          <div class="local__name flex">
+            <h1>{{ peluqueria.nombre }}</h1>
+            <div class="local__status">
+              <div v-if="isOpen" class="status status--open">
+                ABIERTO
+              </div>
+              <div v-else class="status status--closed">CERRADO</div>
             </div>
-            <div>
-              <span class="square square--red"></span> Huecos
-              ocupados
+            <div class="type__value flex-column">
+              <p>{{ peluqueria.tipo }}</p>
+              <strong class="flex">{{ peluqueria.valoracion || "Sin valoración" }}
+                <span class="star">★</span></strong>
             </div>
           </div>
+
+          <div class="local__address flex">
+            <img class="card__location" src="/img/locals/location.svg" alt="Ubicación" />
+            {{ peluqueria.direccion }} {{ peluqueria.nombreLocalidad }}
+          </div>
+
+          <div class="local__description">
+            <p>{{ peluqueria.descripcion }}</p>
+          </div>
+
+          <div class="local__service flex-center">
+            <select name="servicios" id="servicios" @change="handleServiceChange" v-model="selectedServiceId">
+              <option value="" disabled>
+                Selecciona un servicio
+              </option>
+              <option v-for="servicio in servicios" :key="servicio.id" :value="servicio.id">
+                {{ servicio.nombre }} - {{ servicio.precio }}€ ({{
+                  servicio.duracion
+                }}
+                min)
+              </option>
+            </select>
+          </div>
+
+          <div class="local__schedule">
+            <p class="schedule__week flex-center">
+              <img src="/img/utils/arrow_back.svg" alt="Ir a semana anterior" @click="goToPreviousWeek"
+                :class="{ disabled: isPreviousWeekDisabled() }" />
+              Lun {{ mondayDay }} - Vie {{ fridayDay }}
+              <img src="/img/utils/arrow_forward.svg" alt="Ir a semana siguiente" @click="goToNextWeek" />
+            </p>
+
+            <table>
+              <tr>
+                <th>Lunes</th>
+                <th>Martes</th>
+                <th>Miércoles</th>
+                <th>Jueves</th>
+                <th>Viernes</th>
+              </tr>
+              <tr v-for="time in [
+                '09:00',
+                '09:30',
+                '10:00',
+                '10:30',
+                '11:00',
+                '11:30',
+                '12:00',
+                '12:30',
+                '13:00',
+                '13:30',
+                '14:00',
+              ]" :key="time">
+                <td v-for="day in [0, 1, 2, 3, 4]" :key="day" :class="getCellClass(getDateForDay(day), time)"
+                  @click="selectSlot(getDateForDay(day), time)">
+                  {{ time }}
+                </td>
+              </tr>
+            </table>
+            <span v-if="mensaje" class="mensaje__servicio">{{
+              mensaje
+            }}</span>
+
+            <div class="schedule__info flex">
+              <div>
+                <span class="square square--green"></span> Huecos
+                disponibles
+              </div>
+              <div>
+                <span class="square square--red"></span> Huecos
+                ocupados
+              </div>
+            </div>
+          </div>
+
+          <div class="local__button flex-center">
+            <PrimaryButton label="Pedir cita" :disabled="!canSubmit" @click="pedirCita" />
+          </div>
         </div>
 
-        <div class="local__button flex-center">
-          <PrimaryButton label="Pedir cita" :disabled="!canSubmit" @click="pedirCita" />
+        <div v-else>
+          <p>No se encontraron datos para esta peluquería.</p>
         </div>
       </div>
 
-      <div v-else>
-        <p>No se encontraron datos para esta peluquería.</p>
+      <!-- Apartado de las valoraciones -->
+      <div>
+
       </div>
     </div>
+
 
     <!-- Modal -->
     <ModalConfirm v-model:show="showModal" :message="modalMessage" :showCancel="false" confirmText="Aceptar" />
@@ -735,9 +746,6 @@ export default {
 
 .btn-back__container {
   padding: 2rem 0 0 2rem;
-  position: absolute;
-  z-index: 10;
-  left: -12rem;
 
   a {
     text-decoration: none;
@@ -755,7 +763,7 @@ export default {
   }
 }
 
-.space__container {
+.local__container {
   border: 2px solid map-get($colores, "gris_claro");
   width: 80%;
   height: 80%;
@@ -1034,6 +1042,45 @@ export default {
 
   .error {
     color: map-get($colores, "naranja");
+  }
+}
+
+
+@media (max-width: 1400px) {
+  .local__container {
+    width: 90%;
+  }
+}
+
+@media (max-width: 1150px) {
+  .local__container {
+    width: 95%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .local__container {
+    width: 70%;
+  }
+  .local {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 800px) {
+  .local__container {
+    width: 80%;
+  }
+}
+@media (max-width: 650px) {
+  .local__container {
+    width: 90%;
+  }
+}
+@media (max-width: 550px) {
+  .local__status {
+    margin-right: 10px;
   }
 }
 </style>
