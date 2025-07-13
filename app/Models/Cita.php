@@ -21,7 +21,6 @@ class Cita extends Model
         'estado',
         'valoracion',
         'puntuacion',
-        'respuesta',
     ];
 
     // Relaciones

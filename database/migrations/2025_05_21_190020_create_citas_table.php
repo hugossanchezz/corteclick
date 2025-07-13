@@ -22,7 +22,6 @@ return new class extends Migration
             $table->enum('estado', ['CONFIRMADA', 'CANCELADA', 'TERMINADA']);
             $table->string('valoracion', 200)->nullable();
             $table->tinyInteger('puntuacion')->nullable();
-            $table->string('respuesta', 200)->nullable();
             $table->timestamps();
 
             $table->foreign('id_usuario')->references('id')->on('users');
