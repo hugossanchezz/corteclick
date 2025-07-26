@@ -136,4 +136,25 @@ class CitaController extends Controller
 
         return response()->json(['updated' => $actualizadas]);
     }
+
+    public function usuarioTieneCita($id_peluqueria, $id_usuario)
+    {
+        // Comprobar si existe al menos una cita de ese usuario en esa peluquería
+        $existeCita = Cita::where('id_peluqueria', $id_peluqueria)
+            ->where('id_usuario', $id_usuario)
+            ->where('estado', 'TERMINADA')
+            ->exists();
+
+        return response()->json(['tieneCita' => $existeCita]);
+    }
+
+    public function getValoracionesById($id_peluqueria)
+    {
+        $citas = Cita::where('id_peluqueria', $id_peluqueria)
+            ->where('estado', 'TERMINADA')
+            ->whereNotNull('puntuacion') // solo citas que tengan texto
+            ->get(['valoracion', 'puntuacion', 'respuesta', 'fecha']);
+
+        return response()->json($citas);
+    }
 }

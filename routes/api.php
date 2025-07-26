@@ -61,6 +61,10 @@ Route::get('/services/{id_servicio}/name', [ServicioController::class, 'getNombr
 
 Route::post('/local/new-service', [ServiciosPeluqueriaController::class, 'createServicioParaPeluqueria']);
 
+// ------ Valorations ------------------------------------------------------
+Route::get('/citas/{id_peluqueria}/usuario/{id_usuario}', [CitaController::class, 'usuarioTieneCita']);
+
+Route::get('/valorations/{id_peluqueria}', [CitaController::class, 'getValoracionesById']);
 
 // ------ Localities ------------------------------------------------------
 Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);
@@ -75,16 +79,13 @@ Route::post('/appointments/new', [CitaController::class, 'createCita']);
 
 Route::get('/appointments/{id_peluqueria}', [CitaController::class, 'getCitasByIdPeluqueria']);
 
-Route::get('/appointments/user/{id_usuario}', [CitaController::class, 'getCitasByIdUsuario']);
+Route::get('/appointments/user-{id_usuario}', [CitaController::class, 'getCitasByIdUsuario']);
 
 Route::delete('/appointments/{id_cita}/delete', [CitaController::class, 'deleteCita']);
 
 Route::patch('/appointments/{id_cita}/cancel', [CitaController::class, 'cancelCita']);
 
 Route::patch('/appointments/check-expired', [CitaController::class, 'marcarCitasTerminadas']);
-
-
-// ------ User ----------------------------------------------------------
 
 
 // ------ Admin ----------------------------------------------------------

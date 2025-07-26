@@ -6,13 +6,14 @@ import axios from "axios";
 import RequireAuth from "@/js/components/auth/RequireAuth.vue";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
+import Valorations from "@/js/components/locals/Valorations.vue";
 
 export default {
   name: "Local",
-  components: { RequireAuth, PrimaryButton, ModalConfirm },
+  components: { RequireAuth, PrimaryButton, ModalConfirm, Valorations },
   setup() {
     const route = useRoute();
-    const peluqueriaId = route.params.id;
+    const peluqueriaId = Number(route.params.id);
 
     const userId = ref(null);
     const peluqueria = ref(null);
@@ -553,6 +554,7 @@ export default {
     });
 
     return {
+      peluqueriaId,
       peluqueria,
       servicios,
       citas,
@@ -729,11 +731,8 @@ export default {
       </div>
 
       <!-- Apartado de las valoraciones -->
-      <div>
-
-      </div>
+      <Valorations :idPeluqueria="peluqueriaId" :idUsuario="userId" />
     </div>
-
 
     <!-- Modal -->
     <ModalConfirm v-model:show="showModal" :message="modalMessage" :showCancel="false" confirmText="Aceptar" />
@@ -1062,6 +1061,7 @@ export default {
   .local__container {
     width: 70%;
   }
+
   .local {
     display: flex;
     flex-direction: column;
@@ -1073,11 +1073,13 @@ export default {
     width: 80%;
   }
 }
+
 @media (max-width: 650px) {
   .local__container {
     width: 90%;
   }
 }
+
 @media (max-width: 550px) {
   .local__status {
     margin-right: 10px;
