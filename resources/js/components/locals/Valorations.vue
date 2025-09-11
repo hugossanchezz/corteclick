@@ -1,3 +1,4 @@
+<!-- // prueba -->
 <script>
 import { ref, onMounted, computed } from 'vue';
 
