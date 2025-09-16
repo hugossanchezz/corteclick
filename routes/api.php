@@ -54,6 +54,7 @@ Route::get('/locals/search/{valor}', [PeluqueriaController::class, 'getIdsByCodi
 
 Route::get('/locals/user/{user_id}', [PeluqueriaController::class, 'getPeluqueriasByUserId']);
 
+
 // ------ Services --------------------------------------------------------
 Route::get('/services', [ServicioController::class, 'getServicios']);
 
@@ -61,10 +62,12 @@ Route::get('/services/{id_servicio}/name', [ServicioController::class, 'getNombr
 
 Route::post('/local/new-service', [ServiciosPeluqueriaController::class, 'createServicioParaPeluqueria']);
 
+
 // ------ Valorations ------------------------------------------------------
 Route::get('/citas/{id_peluqueria}/usuario/{id_usuario}', [CitaController::class, 'usuarioTieneCita']);
 
 Route::get('/valorations/{id_peluqueria}', [CitaController::class, 'getValoracionesById']);
+
 
 // ------ Localities ------------------------------------------------------
 Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);

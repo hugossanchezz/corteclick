@@ -413,7 +413,6 @@ export default {
         estado: "CONFIRMADA",
         valoracion: null,
         puntuacion: null,
-        respuesta: null,
       };
 
       try {

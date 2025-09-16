@@ -77,7 +77,6 @@ class CitaController extends Controller
      * @bodyParam estado string required Estado de la cita (CONFIRMADA, CANCELADA, TERMINADA).
      * @bodyParam valoracion string nullable Comentario de la valoración de la cita.
      * @bodyParam puntuacion integer nullable Puntuación de la cita (entre 1 y 5).
-     * @bodyParam respuesta string nullable Respuesta de la peluquería a la valoración de la cita.
      *
      * @response 201 {
      *   "mensaje": "Cita registrada correctamente"
@@ -96,7 +95,6 @@ class CitaController extends Controller
             'estado' => 'required|in:CONFIRMADA,CANCELADA,TERMINADA',
             'valoracion' => 'nullable|string|max:200',
             'puntuacion' => 'nullable|integer|min:1|max:5',
-            'respuesta' => 'nullable|string|max:200',
         ]);
 
         // Crear la cita
@@ -153,7 +151,7 @@ class CitaController extends Controller
         $citas = Cita::where('id_peluqueria', $id_peluqueria)
             ->where('estado', 'TERMINADA')
             ->whereNotNull('puntuacion') // solo citas que tengan texto
-            ->get(['valoracion', 'puntuacion', 'respuesta', 'fecha']);
+            ->get(['valoracion', 'puntuacion', 'fecha']);
 
         return response()->json($citas);
     }
