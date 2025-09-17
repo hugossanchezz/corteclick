@@ -1,8 +1,10 @@
 <script>
 import { ref, onMounted, computed } from 'vue';
+import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
 export default {
     name: 'ValoracionesLocal',
+    components: { ModalConfirm },
     props: {
         idPeluqueria: {
             type: Number,
@@ -20,6 +22,10 @@ export default {
         const puedeValorar = ref(false);
         const mostrarFormulario = ref(false);
         const comentario = ref('');
+        // Variables para el modal
+        const showModal = ref(false);
+        const modalTitle = ref('');
+        const modalMessage = ref('');
 
         const valoracionesMostradas = computed(() => {
             return mostrarTodas.value
@@ -33,47 +39,114 @@ export default {
                 const resCheck = await fetch(
                     `/api/citas/${props.idPeluqueria}/usuario/${props.idUsuario}`
                 );
-                if (!resCheck.ok) {
-                    throw new Error(`❌ Error en resCheck (${resCheck.status})`);
-                }
-
+                if (!resCheck.ok) throw new Error(`❌ Error en resCheck (${resCheck.status})`);
                 const dataCheck = await resCheck.json();
                 puedeValorar.value = dataCheck.tieneCita;
 
+                // 2. Obtener valoraciones
+                const resVal = await fetch(`/api/valorations/${props.idPeluqueria}`);
+                const rawText = await resVal.text();
+                const dataVal = JSON.parse(rawText);
 
-                try {
-                    // 2. Obtener valoraciones
-                    const resVal = await fetch(`/api/valorations/${props.idPeluqueria}`);
-                    const rawText = await resVal.text(); // obtenemos la respuesta como texto plano
-                    const dataVal = JSON.parse(rawText); // intenta convertirla a JSON
+                // 3. Obtener nombres de usuarios
+                const valoracionesConNombres = await Promise.all(
+                    dataVal.map(async (v) => {
+                        let nombreUsuario = 'Usuario';
+                        try {
+                            console.log(`Obteniendo nombre del usuario ${v.id_usuario}`);
+                            const resUser = await fetch(`/api/user/${v.id_usuario}/name`);
+                            if (resUser.ok) {
+                                const dataUser = await resUser.text();
+                                nombreUsuario = dataUser || 'Usuario';
+                            }
+                        } catch (e) {
+                            console.warn(`No se pudo obtener el nombre del usuario ${v.id_usuario}`);
+                        }
 
+                        return {
+                            estrellas: v.puntuacion,
+                            fecha: new Date(v.fecha).toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                year: 'numeric',
+                                month: 'long',
+                            }),
+                            texto: v.valoracion,
+                            nombreUsuario,
+                        };
+                    })
+                );
 
-                    valoraciones.value = dataVal.map((v) => ({
-                        estrellas: v.puntuacion,
-                        fecha: new Date(v.fecha).toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            year: 'numeric',
-                            month: 'long',
-                        }),
-                        texto: v.valoracion,
-                    }));
-
-                } catch (jsonError) {
-                    console.error("❌ Error al parsear JSON de /api/valorations:", rawText);
-                    throw jsonError; // vuelve a lanzar para que lo capture el catch exterior
-                }
+                valoraciones.value = valoracionesConNombres;
             } catch (error) {
                 console.error('❌ Error al cargar valoraciones:', error);
             }
         };
 
-        const enviarValoracion = () => {
-            console.log('Enviar valoración:', {
-                idUsuario: props.idUsuario,
-                idPeluqueria: props.idPeluqueria,
-                estrellas: puntuacionSeleccionada.value,
-                texto: comentario.value,
-            });
+        const confirmarValoracion = () => {
+            if (!puntuacionSeleccionada.value) {
+                modalTitle.value = 'Error';
+                modalMessage.value = 'Selecciona una puntuación antes de enviar la valoración.';
+                showModal.value = true;
+                return;
+            }
+
+            // Mostrar modal de confirmación
+            modalTitle.value = 'Confirmar valoración';
+            modalMessage.value = comentario.value.trim()
+                ? '¿Estás seguro de que quieres enviar esta valoración?'
+                : '¿Estás seguro de que quieres enviar una valoración sin descripción?';
+            showModal.value = true;
+        };
+
+        const enviarValoracion = async () => {
+            try {
+                const response = await fetch("/api/valorations", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        id_usuario: props.idUsuario,
+                        id_peluqueria: props.idPeluqueria,
+                        puntuacion: puntuacionSeleccionada.value,
+                        valoracion: comentario.value,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    modalTitle.value = 'Error al enviar valoración';
+                    modalMessage.value = err.error || 'Error al enviar valoración.';
+                    showModal.value = true;
+                    return;
+                }
+
+                const resJson = await response.json();
+                modalTitle.value = 'Valoración enviada';
+                modalMessage.value = 'La valoración se ha enviado correctamente.';
+                showModal.value = true;
+
+                // Reset formulario
+                puntuacionSeleccionada.value = null;
+                comentario.value = '';
+                mostrarFormulario.value = false;
+
+                // Recargar valoraciones y volver a comprobar
+                await cargarValoraciones();
+            } catch (error) {
+                console.error("❌ Error en la petición:", error);
+                modalTitle.value = 'Error';
+                modalMessage.value = 'Error inesperado al enviar valoración.';
+                showModal.value = true;
+            }
+        };
+
+        const handleModalConfirm = () => {
+            // Si el usuario confirma el modal, enviar la valoración
+            if (modalTitle.value === 'Confirmar valoración') {
+                enviarValoracion();
+            }
+            showModal.value = false; // Cerrar el modal
         };
 
         const verMasValoraciones = () => {
@@ -91,9 +164,13 @@ export default {
             mostrarFormulario,
             comentario,
             puntuacionSeleccionada,
-            enviarValoracion,
+            confirmarValoracion,
             verMasValoraciones,
             mostrarTodas,
+            showModal,
+            modalTitle,
+            modalMessage,
+            handleModalConfirm,
         };
     },
 };
@@ -101,7 +178,6 @@ export default {
 
 <template>
     <div class="valoraciones_local">
-
         <div class="valoracion_top flex">
             <p>
                 Hay {{ valoraciones.length }} {{ valoraciones.length === 1 ? 'valoración' : 'valoraciones' }}
@@ -126,11 +202,11 @@ export default {
                             placeholder="Escriba aquí su valoración del local"> </textarea>
 
                         <div class="valoracion_text_botones flex">
-                            <button @click="enviarValoracion" class="btn btn-confirm">
+                            <button @click="confirmarValoracion" class="btn btn-confirm">
                                 <img src="/img/utils/send.svg" alt="Enviar valoración">
                             </button>
                             <button @click="mostrarFormulario = false" class="btn btn-cancel">
-                                <img src="/img/utils/close.svg" alt="Enviar valoración">
+                                <img src="/img/utils/close.svg" alt="Cancelar valoración">
                             </button>
                         </div>
                     </div>
@@ -146,8 +222,11 @@ export default {
         <!-- Lista de valoraciones -->
         <div class="valoracion_card" v-for="(valoracion, index) in valoracionesMostradas" :key="index">
             <div class="valoracion_card_top flex">
-                <div class="valoracion_estrellas estrellas_doradas">
-                    <span v-for="n in valoracion.estrellas" :key="n">★</span>
+                <div class="valoracion_estrellas flex">
+                    <div class="estrellas flex">
+                        <span v-for="n in valoracion.estrellas" :key="n" class="estrellas_doradas">★</span>
+                    </div>
+                    <div class="valoracion_usuario">{{ valoracion.nombreUsuario }}</div>
                 </div>
                 <p class="valoracion_fecha">{{ valoracion.fecha }}</p>
             </div>
@@ -158,6 +237,11 @@ export default {
         <button class="ver_mas flex" v-if="valoraciones.length > 10" @click="verMasValoraciones">
             {{ mostrarTodas ? 'Ver menos valoraciones' : 'Ver más valoraciones' }}
         </button>
+
+        <!-- Modal de confirmación -->
+        <ModalConfirm v-model:show="showModal" :message="modalMessage" :title="modalTitle"
+            :showCancel="modalTitle === 'Confirmar valoración'" confirmText="Aceptar" @confirm="handleModalConfirm"
+            @cancel="showModal = false" />
     </div>
 </template>
 
@@ -203,7 +287,7 @@ export default {
                     cursor: pointer;
                 }
 
-                .valoracion_seleccionada{
+                .valoracion_seleccionada {
                     border-color: gold;
                     color: gold;
                 }
@@ -244,6 +328,17 @@ export default {
 
     .valoracion_estrellas {
         font-weight: bold;
+
+        .estrellas {
+            width: 5rem;
+        }
+
+        .valoracion_usuario {
+            color: rgb(180, 180, 180);
+        }
+    }
+
+    .estrellas_doradas {
         color: gold;
     }
 

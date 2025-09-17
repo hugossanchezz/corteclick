@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UsuariosController;
 use App\Http\Controllers\PeluqueriaController;
 use App\Http\Controllers\PeluqueriaFotoController;
 use App\Http\Controllers\PeluqueriaSolicitudController;
@@ -68,6 +69,8 @@ Route::get('/citas/{id_peluqueria}/usuario/{id_usuario}', [CitaController::class
 
 Route::get('/valorations/{id_peluqueria}', [CitaController::class, 'getValoracionesById']);
 
+Route::post('/valorations', [CitaController::class, 'crearValoracion']);
+
 
 // ------ Localities ------------------------------------------------------
 Route::get('/localities', [LocalidadController::class, 'getLocalidadesIdNombre']);
@@ -96,3 +99,6 @@ Route::get('/admin/requests', [PeluqueriaSolicitudController::class, 'getLocalsR
 
 Route::post('/admin/requests/{id_solicitud}/cambiarEstado', [PeluqueriaSolicitudController::class, 'cambiarEstado']);
 
+
+// ------ User ----------------------------------------------------------
+Route::get('/user/{id_user}/name', [UsuariosController::class, 'getNombreByUserId']);

@@ -151,8 +151,40 @@ class CitaController extends Controller
         $citas = Cita::where('id_peluqueria', $id_peluqueria)
             ->where('estado', 'TERMINADA')
             ->whereNotNull('puntuacion') // solo citas que tengan texto
-            ->get(['valoracion', 'puntuacion', 'fecha']);
+            ->get(['id_usuario', 'valoracion', 'puntuacion', 'fecha']);
 
         return response()->json($citas);
+    }
+
+    public function crearValoracion(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'id_usuario' => 'required|exists:users,id',
+                'id_peluqueria' => 'required|exists:peluquerias,id',
+                'puntuacion' => 'required|integer|min:1|max:5',
+                'valoracion' => 'nullable|string|max:200',
+            ]);
+
+            $cita = Cita::where('id_usuario', $request->id_usuario)
+                ->where('id_peluqueria', $request->id_peluqueria)
+                ->where('estado', 'TERMINADA')
+                ->whereNull('puntuacion')
+                ->orderBy('fecha', 'desc')
+                ->first();
+
+            if (!$cita) {
+                return response()->json(['error' => 'No hay ninguna cita pendiente de valoración.'], 400);
+            }
+
+            $cita->puntuacion = $request->puntuacion;
+            $cita->valoracion = $request->valoracion;
+            $cita->save();
+
+            return response()->json(['mensaje' => 'Valoración registrada correctamente.'], 201);
+
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Error al registrar la valoración.', 'detalle' => $e->getMessage()], 500);
+        }
     }
 }
