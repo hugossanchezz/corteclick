@@ -815,7 +815,6 @@ export default {
       border-radius: 5px;
       border: none;
       cursor: pointer;
-      z-index: 1;
 
       &:disabled {
         cursor: auto;

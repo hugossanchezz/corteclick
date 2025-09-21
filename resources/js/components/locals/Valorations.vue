@@ -197,6 +197,8 @@ export default {
                             {{ n }} ★
                         </button>
                     </div>
+                    <p class="mensaje_info">La valoración se asignará automaticamente a la última cita realizada sin
+                        valoración.</p>
                     <div class="valoracion_text flex">
                         <textarea type="text" v-model="comentario"
                             placeholder="Escriba aquí su valoración del local"> </textarea>
@@ -228,7 +230,9 @@ export default {
                     </div>
                     <div class="valoracion_usuario">{{ valoracion.nombreUsuario }}</div>
                 </div>
-                <p class="valoracion_fecha">{{ valoracion.fecha }}</p>
+                <div>
+                    <p class="valoracion_fecha">{{ valoracion.fecha }}</p>
+                </div>
             </div>
             <p class="valoracion_texto">{{ valoracion.texto }}</p>
         </div>
@@ -267,13 +271,19 @@ export default {
         }
 
         .enviar_valoracion {
-            width: 50%;
+            width: 60%;
             justify-content: end;
 
             .valoracion_formulario {
                 width: 100%;
                 display: flex;
                 gap: 0.5rem;
+
+                .mensaje_info {
+                    font-style: italic;
+                    color: map-get($colores, 'gris');
+                    font-size: smaller !important;
+                }
             }
 
             .estrellas_selector {
@@ -285,6 +295,10 @@ export default {
                     border-radius: 5px;
                     padding: 0.3rem;
                     cursor: pointer;
+
+                    &:hover {
+                        border-color: gold;
+                    }
                 }
 
                 .valoracion_seleccionada {
@@ -296,13 +310,14 @@ export default {
             .valoracion_text textarea {
                 width: 100%;
                 height: 5rem;
-                border: 2px solid map-get($colores, "gris_claro");
+                border: 2px solid map-get($colores, "gris");
                 border-radius: 5px;
                 padding: 10px;
                 resize: none;
 
                 &:focus {
                     border-color: map-get($colores, "naranja");
+                    outline: map-get($colores, 'naranja');
                 }
             }
 

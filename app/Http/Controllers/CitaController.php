@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cita;
+use App\Models\Peluqueria;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -180,6 +181,18 @@ class CitaController extends Controller
             $cita->puntuacion = $request->puntuacion;
             $cita->valoracion = $request->valoracion;
             $cita->save();
+
+            // Calcular la media de puntuaciones y actualizar la peluquería
+            $peluqueria = Peluqueria::find($request->id_peluqueria);
+            if ($peluqueria) {
+                $media = Cita::where('id_peluqueria', $peluqueria->id)
+                    ->where('estado', 'TERMINADA')
+                    ->whereNotNull('puntuacion')
+                    ->average('puntuacion');
+
+                $peluqueria->valoracion = $media ? round($media, 1) : null; // Redondea a 1 decimal, o ajusta según necesites
+                $peluqueria->save();
+            }
 
             return response()->json(['mensaje' => 'Valoración registrada correctamente.'], 201);
 

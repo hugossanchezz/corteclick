@@ -158,6 +158,7 @@ header {
 
     .header__navigation {
         padding: 10px 50px;
+        border-bottom: 1px solid map-get($colores, "gris_claro");
 
         .navigation__logo {
             width: 10%;
