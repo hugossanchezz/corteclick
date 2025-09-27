@@ -85,7 +85,7 @@ Route::post('/appointments/new', [CitaController::class, 'createCita']);
 
 Route::get('/appointments/{id_peluqueria}', [CitaController::class, 'getCitasByIdPeluqueria']);
 
-Route::get('/appointments/user-{id_usuario}', [CitaController::class, 'getCitasByIdUsuario']);
+Route::get('/appointments/user/{id_usuario}', [CitaController::class, 'getCitasByIdUsuario']);
 
 Route::delete('/appointments/{id_cita}/delete', [CitaController::class, 'deleteCita']);
 

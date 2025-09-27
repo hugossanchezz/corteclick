@@ -158,7 +158,7 @@ header {
 
     .header__navigation {
         padding: 10px 50px;
-        border-bottom: 1px solid map-get($colores, "gris_claro");
+        // border-bottom: 1px solid map-get($colores, "gris_claro");
 
         .navigation__logo {
             width: 10%;
@@ -341,6 +341,7 @@ header {
 
 .header_fijo {
     position: sticky;
+    border-bottom: 1px solid map-get($colores, "gris_claro");
     top: 0;
     z-index: 1;
 }

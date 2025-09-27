@@ -179,7 +179,10 @@ export default {
 <template>
     <div class="valoraciones_local">
         <div class="valoracion_top flex">
-            <p>
+            <p v-if="valoraciones.length === 0">
+                Cargando valoraciones...
+            </p>
+            <p v-else>
                 Hay {{ valoraciones.length }} {{ valoraciones.length === 1 ? 'valoración' : 'valoraciones' }}
             </p>
 
