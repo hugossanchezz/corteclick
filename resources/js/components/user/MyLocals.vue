@@ -222,14 +222,27 @@ export default {
                     <br>
                     <div class="servicios_disponibles">
                         <p><strong>Servicios disponibles:</strong></p>
-                        <ul class="lista_servicios">
-                            <li v-if="local.servicios.length === 0">No hay servicios disponibles.</li>
-                            <li v-else v-for="(servicio, idx) in local.servicios" :key="idx">
-                                {{ servicio.nombre }} --- {{ servicio.precio }} € --- {{ servicio.duracion }} min
-                            </li>
-                        </ul>
-                        <br>
 
+                        <table class="tabla_servicios" v-if="local.servicios.length > 0">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Precio (€)</th>
+                                    <th>Duración (min)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(servicio, idx) in local.servicios" :key="idx">
+                                    <td>{{ servicio.nombre }}</td>
+                                    <td>{{ servicio.precio }}</td>
+                                    <td>{{ servicio.duracion }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <p v-else>No hay servicios disponibles.</p>
+
+                        <br>
                     </div>
                     <button v-if="!formularioVisible[local.id]" class="btn btn-edit"
                         @click="toggleFormulario(local.id)">
@@ -293,12 +306,13 @@ export default {
 
     .tarjetas_container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 460px));
         gap: 1.5rem;
         margin-top: 1rem;
 
         .tarjeta_local {
             min-height: 400px;
+            // max-width: 50%;
             background-color: #f9f9f9;
             border-radius: 12px;
             overflow: hidden;
@@ -346,6 +360,16 @@ export default {
 
                 .servicios_disponibles {
                     height: 100%;
+
+                    .tabla_servicios {
+                        border: 1px solid map-get($colores, "gris_claro");
+                        border-radius: 5px;
+
+                        th {
+                            background-color: map-get($colores, 'gris_claro') ;
+                            color: map-get($colores, 'gris_oscuro');
+                        }
+                    }
                 }
 
                 .formulario_servicio {
@@ -412,5 +436,4 @@ export default {
         }
     }
 }
-
 </style>

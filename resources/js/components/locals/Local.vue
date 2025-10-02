@@ -765,6 +765,7 @@ export default {
   border: 2px solid map-get($colores, "gris_claro");
   width: 80%;
   height: 80%;
+  max-height: 70vh;
   margin: 3rem auto;
   border-radius: 10px;
   position: relative;

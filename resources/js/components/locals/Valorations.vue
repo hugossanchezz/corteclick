@@ -376,4 +376,25 @@ export default {
     align-items: center;
     gap: 10px;
 }
+
+@media (max-width: 1024px) {
+    .valoraciones_local {
+        width: 70%;
+        padding: 1rem 3rem;
+    }
+}
+
+@media (max-width: 800px) {
+    .valoraciones_local {
+        width: 80%;
+        padding: 1rem 2rem;
+    }
+}
+
+@media (max-width: 650px) {
+    .valoraciones_local {
+        width: 90%;
+        padding: 1rem;
+    }
+}
 </style>
