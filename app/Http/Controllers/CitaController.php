@@ -58,8 +58,8 @@ class CitaController extends Controller
     public function getCitasByIdUsuario(int $id_usuario): JsonResponse
     {
         $citas = Cita::where('id_usuario', $id_usuario)
-            ->orderBy('fecha', 'asc')
-            ->orderBy('hora_inicio', 'asc')
+            ->orderBy('fecha', 'desc')
+            ->orderBy('hora_inicio', 'desc')
             ->get();
 
         return response()->json($citas);

@@ -225,18 +225,18 @@ export default {
                                 {{ cita.nombre_peluqueria }}
                             </router-link>
                         </td>
-                        <td class="flex">
-                            <div class="flex-center">
+                        <td class="flex-center">
                                 <button v-if="cita.estado === 'CONFIRMADA'" @click="abrirModalAccionCita(cita)"
                                     class="btn btn-edit flex">
                                     Cancelar cita
                                     <img src="/img/utils/cancel_white.svg" alt="Cancelar cita">
                                 </button>
-                                <span v-else>{{ cita.estado }}</span>
-                            </div>
-                            <button class="btn btn-cancel" @click="abrirModalAccionCita(cita, 'delete')">
+                                <span v-else class="estado" :class="{ terminada: cita.estado === 'TERMINADA' }">
+                                    {{ cita.estado }}
+                                </span>
+                            <!-- <button v-if="cita.estado === 'TERMINADA'" class="btn btn-cancel" @click="abrirModalAccionCita(cita, 'delete')">
                                 <img src="/img/utils/delete_white.svg" alt="Eliminar cita">
-                            </button>
+                            </button> -->
                         </td>
                     </tr>
                 </tbody>
@@ -324,6 +324,14 @@ export default {
                     }
                 }
             }
+        }
+
+        .estado{
+            font-weight: bold;
+        }
+        
+        .terminada{
+            color: map-get($colores, "rojo");
         }
     }
 }

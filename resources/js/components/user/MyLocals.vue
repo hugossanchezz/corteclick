@@ -296,7 +296,6 @@ export default {
 @use "@/sass/variables" as *;
 
 .mis_locales_container {
-    padding: 1rem;
 
     .no_locales {
         text-align: center;
@@ -364,6 +363,7 @@ export default {
                     .tabla_servicios {
                         border: 1px solid map-get($colores, "gris_claro");
                         border-radius: 5px;
+                        margin-top: 5px;
 
                         th {
                             background-color: map-get($colores, 'gris_claro') ;
