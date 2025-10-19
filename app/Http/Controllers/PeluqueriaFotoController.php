@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Models\PeluqueriaFoto;
 
 class PeluqueriaFotoController extends Controller
 {
-    public function getFotosByPeluqueria($peluqueriaId)
+    public function getFotosByPeluqueria($peluqueriaId): JsonResponse
     {
         try {
             $fotos = PeluqueriaFoto::where('id_peluqueria', $peluqueriaId)->get();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use App\Models\PeluqueriaSolicitud;
@@ -12,7 +13,7 @@ use App\Models\Peluqueria;
 
 class PeluqueriaSolicitudController extends Controller
 {
-    public function createLocalRequest(Request $request)
+    public function createLocalRequest(Request $request): JsonResponse
     {
         try {
             $validated = $request->validate([
@@ -76,7 +77,7 @@ class PeluqueriaSolicitudController extends Controller
         }
     }
 
-    public function getLocalsRequest(Request $request)
+    public function getLocalsRequest(): JsonResponse
     {
         try {
 
@@ -115,7 +116,7 @@ class PeluqueriaSolicitudController extends Controller
         }
     }
 
-    public function approveRequest($id)
+    public function approveRequest($id): JsonResponse
     {
         DB::beginTransaction();
 
@@ -162,7 +163,7 @@ class PeluqueriaSolicitudController extends Controller
         }
     }
 
-    public function cambiarEstado(Request $request, $id)
+    public function cambiarEstado(Request $request, $id): JsonResponse
     {
         $solicitud = PeluqueriaSolicitud::with('fotosTemporales')->findOrFail($id);
         $nuevoEstado = $request->input('estado');

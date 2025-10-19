@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:150',
@@ -19,7 +20,6 @@ class AuthController extends Controller
             'apellidos' => 'nullable|string|max:100',
             'telefono' => 'nullable|digits:9|unique:users',
             'localidad' => 'nullable|integer|max:20',
-            'aceptarTerminos' => 'required|accepted',
         ]);
 
         if ($validator->fails()) {
@@ -45,7 +45,7 @@ class AuthController extends Controller
         ], 200); //Devolver 200 en caso de éxito
     }
 
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email',
@@ -66,7 +66,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout()
+    public function logout(): JsonResponse
     {
         auth()->user()->tokens()->delete();
 
@@ -75,7 +75,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function updateUser(Request $request, $id)
+    public function updateUser(Request $request, $id): JsonResponse
     {
         // Verifica que el usuario autenticado coincide con el ID proporcionado
         if (Auth::id() != $id) {

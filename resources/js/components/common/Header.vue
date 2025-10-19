@@ -341,7 +341,6 @@ header {
 
 .header_fijo {
     position: sticky;
-    border-bottom: 1px solid map-get($colores, "gris_claro");
     top: 0;
     z-index: 1;
 }

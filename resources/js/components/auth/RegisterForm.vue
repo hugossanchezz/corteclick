@@ -223,7 +223,6 @@ export default {
                     password: contrasenia.value,
                     telefono: telefono.value,
                     localidad: localidad.value,
-                    aceptarTerminos: aceptarTerminos.value,
                 });
                 // Si la respuesta tiene un estado 200 (éxito).
                 if (response.status === 200) {

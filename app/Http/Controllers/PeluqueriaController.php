@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Throwable;
 use App\Models\Peluqueria;
 use App\Models\Localidad;
@@ -33,14 +34,14 @@ class PeluqueriaController extends Controller
         return response()->json($peluquerias);
     }
 
-    public function search(Request $request): JsonResponse
+    public function searchPeluquerias(Request $request): JsonResponse
     {
         $query = $request->input('query');
         $peluquerias = Peluqueria::where('nombre', 'like', '%' . $query . '%')->get();
         return response()->json($peluquerias);
     }
 
-    public function getPeluqueriaById($id)
+    public function getPeluqueriaById($id): JsonResponse
     {
         $peluqueria = Peluqueria::find($id);
 
@@ -63,7 +64,7 @@ class PeluqueriaController extends Controller
         ]);
     }
 
-    public function getPeluqueriaNombreById($id)
+    public function getPeluqueriaNombreById($id): Response
     {
         $peluqueria = Peluqueria::find($id);
         if (!$peluqueria) {
@@ -105,7 +106,7 @@ class PeluqueriaController extends Controller
         }
     }
 
-    public function getPeluqueriasByUserId($user_id)
+    public function getPeluqueriasByUserId($user_id): JsonResponse
     {
         $peluquerias = Peluqueria::where('user_id', $user_id)->get();
 

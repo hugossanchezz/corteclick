@@ -7,7 +7,8 @@ use Illuminate\Http\JsonResponse;
 
 class ServicioController extends Controller
 {
-    public function getServicios(){
+    public function getServicios(): JsonResponse
+    {
         $servicios = Servicio::all();
         return response()->json($servicios);
     }

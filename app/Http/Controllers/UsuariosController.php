@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
 
 class UsuariosController extends Controller
 {
-    public function getNombreByUserId($id_user){
+    public function getNombreByUserId($id_user): string
+    {
         $user = User::find($id_user);
         return $user->name;
     }
