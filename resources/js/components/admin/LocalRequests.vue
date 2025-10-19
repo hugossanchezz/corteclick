@@ -281,6 +281,12 @@ select {
             width: 100%;
             flex-grow: 1;
 
+            .informacion_principal{
+                div.flex{
+                    gap: 2.5px;
+                }
+            }
+
             p {
                 border: 2px solid map-get($colores, "gris_claro");
                 display: flex;
