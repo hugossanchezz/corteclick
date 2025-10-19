@@ -178,6 +178,18 @@ export default {
             }
         };
 
+        const eliminarServicio = async (id_peluqueria, id_servicio) => {
+            try {
+                await axios.delete(`/api/local/delete-service/${id_peluqueria}/${id_servicio}`);
+                // Reload servicios del local
+                const nuevosServicios = await cargarServiciosLocal(id_peluqueria);
+                const local = peluquerias.value.find((l) => l.id === id_peluqueria);
+                if (local) local.servicios = nuevosServicios;
+            } catch (error) {
+                console.error("❌ Error al eliminar servicio:", error);
+            }
+        }
+
         onMounted(async () => {
             cargarUsuario();
             if (user.value) {
@@ -195,6 +207,7 @@ export default {
             nuevoServicio,
             toggleFormulario,
             crearServicio,
+            eliminarServicio,
         };
     },
 };
@@ -229,6 +242,7 @@ export default {
                                     <th>Nombre</th>
                                     <th>Precio (€)</th>
                                     <th>Duración (min)</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -236,6 +250,11 @@ export default {
                                     <td>{{ servicio.nombre }}</td>
                                     <td>{{ servicio.precio }}</td>
                                     <td>{{ servicio.duracion }}</td>
+                                    <td>
+                                        <button class="btn btn-cancel" @click="eliminarServicio(local.id, servicio.id)">
+                                            <img src="/img/utils/delete_white.svg" alt="Eliminar servicio">
+                                        </button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -366,7 +385,7 @@ export default {
                         margin-top: 5px;
 
                         th {
-                            background-color: map-get($colores, 'gris_claro') ;
+                            background-color: map-get($colores, 'gris_claro');
                             color: map-get($colores, 'gris_oscuro');
                         }
                     }

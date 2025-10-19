@@ -6,6 +6,7 @@ use App\Models\ServiciosPeluqueria;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Laravel\Pail\ValueObjects\Origin\Console;
 
 class ServiciosPeluqueriaController extends Controller
 {
@@ -63,6 +64,19 @@ class ServiciosPeluqueriaController extends Controller
                 'message' => 'Error al crear el servicio',
                 'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function deleteServicioPeluqueria($id_peluqueria, $id_servicio): JsonResponse
+    {
+        $deleted = ServiciosPeluqueria::where('id_peluqueria', $id_peluqueria)
+            ->where('id_servicio', $id_servicio)
+            ->delete();
+
+        if ($deleted) {
+            return response()->json(['message' => 'Servicio eliminado correctamente.']);
+        } else {
+            return response()->json(['message' => 'Servicio no encontrado.'], 404);
         }
     }
 }

@@ -63,6 +63,7 @@ Route::get('/services/{id_servicio}/name', [ServicioController::class, 'getNombr
 
 Route::post('/local/new-service', [ServiciosPeluqueriaController::class, 'createServicioParaPeluqueria']);
 
+Route::delete('/local/delete-service/{id_peluqueria}/{id_servicio}', [ServiciosPeluqueriaController::class, 'deleteServicioPeluqueria']);
 
 // ------ Valorations ------------------------------------------------------
 Route::get('/citas/{id_peluqueria}/usuario/{id_usuario}', [CitaController::class, 'usuarioTieneCita']);
