@@ -48,7 +48,7 @@ export default {
     }">
         <div class=" header__navigation flex">
             <div class="navigation__logo">
-                <router-link to="/"> Corteclik </router-link>
+                <router-link to="/"> Corteclick </router-link>
             </div>
             <button class="hamburger" @click="toggleMenu" aria-label="Menú">
                 <img src="/img/utils/menu.svg" alt="Abrir menú" class="menu_icon" />
@@ -198,7 +198,7 @@ header {
 
         .navigation__nav {
             width: 60%;
-            padding: 0 20px;
+            padding: 0 30px;
 
             .links__item {
                 a {

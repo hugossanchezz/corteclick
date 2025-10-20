@@ -22,6 +22,7 @@ export default {
         const puedeValorar = ref(false);
         const mostrarFormulario = ref(false);
         const comentario = ref('');
+        const loadingValoraciones = ref(true);
         // Variables para el modal
         const showModal = ref(false);
         const modalTitle = ref('');
@@ -77,6 +78,7 @@ export default {
                 );
 
                 valoraciones.value = valoracionesConNombres;
+                loadingValoraciones.value = false;
             } catch (error) {
                 console.error('❌ Error al cargar valoraciones:', error);
             }
@@ -171,6 +173,7 @@ export default {
             modalTitle,
             modalMessage,
             handleModalConfirm,
+            loadingValoraciones,
         };
     },
 };
@@ -179,11 +182,16 @@ export default {
 <template>
     <div class="valoraciones_local">
         <div class="valoracion_top flex">
-            <p v-if="valoraciones.length === 0">
-                Cargando valoraciones...
-            </p>
+            <!-- Estado: cargando -->
+            <p v-if="loadingValoraciones">Cargando valoraciones...</p>
+
+            <!-- Estado: sin valoraciones -->
+            <p v-else-if="valoraciones.length === 0">No hay valoraciones para este local.</p>
+
+            <!-- Estado: con valoraciones -->
             <p v-else>
-                Hay {{ valoraciones.length }} {{ valoraciones.length === 1 ? 'valoración' : 'valoraciones' }}
+                Hay {{ valoraciones.length }}
+                {{ valoraciones.length === 1 ? 'valoración' : 'valoraciones' }}.
             </p>
 
             <!-- Si puede valorar -->
@@ -266,7 +274,6 @@ export default {
     .valoracion_top {
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
 
         .mensaje_info {
             font-style: italic;
@@ -336,7 +343,7 @@ export default {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 1rem;
-    margin-bottom: 1rem;
+    margin-top: 1rem;
 
     .valoracion_card_top {
         justify-content: space-between;
