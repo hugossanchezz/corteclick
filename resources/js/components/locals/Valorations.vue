@@ -31,7 +31,7 @@ export default {
         const valoracionesMostradas = computed(() => {
             return mostrarTodas.value
                 ? valoraciones.value
-                : valoraciones.value.slice(0, 10);
+                : valoraciones.value.slice(0, 5);
         });
 
         const cargarValoraciones = async () => {
@@ -196,7 +196,7 @@ export default {
 
             <!-- Si puede valorar -->
             <div v-if="puedeValorar" class="enviar_valoracion flex">
-                <button v-if="!mostrarFormulario" class="ver_mas flex" @click="mostrarFormulario = true">
+                <button v-if="!mostrarFormulario" class="btn_valoraciones flex" @click="mostrarFormulario = true">
                     Publicar valoración <img src="/img/utils/send.svg" alt="Publicar valoración">
                 </button>
 
@@ -208,8 +208,7 @@ export default {
                             {{ n }} ★
                         </button>
                     </div>
-                    <p class="mensaje_info">La valoración se asignará automaticamente a la última cita realizada sin
-                        valoración.</p>
+                    <p class="mensaje_info">La valoración se asignará automaticamente a la última cita terminada sin valoración.</p>
                     <div class="valoracion_text flex">
                         <textarea type="text" v-model="comentario"
                             placeholder="Escriba aquí su valoración del local"> </textarea>
@@ -249,7 +248,7 @@ export default {
         </div>
 
         <!-- Botón ver más/menos -->
-        <button class="ver_mas flex" v-if="valoraciones.length > 10" @click="verMasValoraciones">
+        <button class="btn_valoraciones ver_mas flex" v-if="valoraciones.length > 5" @click="verMasValoraciones">
             {{ mostrarTodas ? 'Ver menos valoraciones' : 'Ver más valoraciones' }}
         </button>
 
@@ -373,7 +372,7 @@ export default {
     }
 }
 
-.ver_mas {
+.btn_valoraciones {
     background-color: #333;
     color: white;
     padding: 5px 10px;
@@ -382,6 +381,10 @@ export default {
     cursor: pointer;
     align-items: center;
     gap: 10px;
+}
+
+.ver_mas {
+    margin: 1rem auto;
 }
 
 @media (max-width: 1024px) {
