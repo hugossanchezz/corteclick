@@ -279,13 +279,25 @@ export default {
     const isSlotAvailable = (date, time) => {
       if (!selectedServiceDuration.value) return false;
 
+      const now = toMadridDate(DateTime.now());
+      const slotDate = DateTime.fromISO(date, { zone: "Europe/Madrid" });
+
+      // 🚫 Bloquear días pasados
+      if (slotDate < now.startOf("day")) return false;
+
+      // ⏰ Bloquear horas anteriores a la hora actual + 2h
+      if (slotDate.hasSame(now, "day")) {
+        const slotMinutes = parseTime(time);
+        const nowMinutes = now.hour * 60 + now.minute + 120;
+        if (slotMinutes < nowMinutes) return false;
+      }
+
       const startMinutes = parseTime(time);
       const neededSlots = selectedServiceDuration.value / 30;
       const endMinutes = startMinutes + selectedServiceDuration.value;
 
-      const cierreEnMinutos = 14 * 60 + 30; // 14:30 → 870 min
+      const cierreEnMinutos = 14 * 60 + 30;
 
-      // Si termina después de 14:30, no está permitido
       if (endMinutes > cierreEnMinutos) return false;
 
       for (let i = 0; i < neededSlots; i++) {
@@ -295,6 +307,7 @@ export default {
 
       return true;
     };
+
 
     /**
      * Devuelve las clases CSS que debe tener una celda de horario, en función de si está ocupada, disponible
@@ -470,17 +483,13 @@ export default {
 
         // Solo agregar la imagen principal si existe
         if (peluqueria.value.imagen) {
-          imagenes.push(
-            `data:image/jpeg;base64,${peluqueria.value.imagen}`
-          );
+          imagenes.push(`data:image/jpeg;base64,${peluqueria.value.imagen}`);
         }
 
         // Añadir las secundarias si existen
         if (Array.isArray(responseFotos.data)) {
           imagenes.push(
-            ...responseFotos.data.map(
-              (f) => `data:image/jpeg;base64,${f.imagen}`
-            )
+            ...responseFotos.data.map((f) => `data:image/jpeg;base64,${f.imagen}`)
           );
         }
 
@@ -489,13 +498,14 @@ export default {
           imagenes.push("/img/utils/corteclick.png");
         }
 
+        // 🧩 Log para saber cuántas hay
+        console.log("🖼️ Imágenes del carrusel:", imagenes);
+        console.log("🔢 Número de imágenes:", imagenes.length);
+
         imagenesCarrusel.value = imagenes;
         indiceActual.value = 0;
       } catch (error) {
-        console.error(
-          "❌ Error al cargar imágenes del carrusel:",
-          error
-        );
+        console.error("❌ Error al cargar imágenes del carrusel:", error);
         imagenesCarrusel.value = ["/img/utils/corteclick.png"];
       }
     };
@@ -622,11 +632,12 @@ export default {
           <div class="local__image">
             <img :src="imagenesCarrusel[indiceActual]" alt="Imagen del local" class="main_image" />
 
-            <button class="carrusel-btn izquierda" @click="anteriorImagen" v-if="imagenesCarrusel.length <= 2">
-              <img src="/img/utils/arrow_back_white.svg" alt="" />
+            <button class="carrusel-btn izquierda" @click="anteriorImagen" v-if="imagenesCarrusel.length > 1">
+              <img src="/img/utils/arrow_back_white.svg" alt="Anterior" />
             </button>
-            <button class="carrusel-btn derecha" @click="siguienteImagen" v-if="imagenesCarrusel.length <= 2">
-              <img src="/img/utils/arrow_forward_white.svg" alt="" />
+
+            <button class="carrusel-btn derecha" @click="siguienteImagen" v-if="imagenesCarrusel.length > 1">
+              <img src="/img/utils/arrow_forward_white.svg" alt="Siguiente" />
             </button>
           </div>
 
@@ -709,12 +720,16 @@ export default {
 
             <div class="schedule__info flex">
               <div>
-                <span class="square square--green"></span> Huecos
-                disponibles
+                <span class="square square--green"></span>
+                Huecos disponibles
               </div>
               <div>
-                <span class="square square--red"></span> Huecos
-                ocupados
+                <span class="square square--red"></span>
+                Huecos ocupados
+              </div>
+              <div>
+                <span class="square square--orange"></span>
+                Hueco seleccionado
               </div>
             </div>
           </div>
@@ -994,6 +1009,10 @@ export default {
 
       .square--red {
         background-color: map-get($colores, "rojo");
+      }
+
+      .square--orange {
+        background-color: map-get($colores, "naranja");
       }
     }
 

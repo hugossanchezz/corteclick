@@ -331,11 +331,13 @@ export default {
                 padding: 20px;
                 gap: 10px;
                 transition: transform 0.3s ease, box-shadow 0.3s ease;
+                border: 2px solid transparent;
 
                 &:hover {
                     transform: translateY(-5px);
                     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
                     cursor: pointer;
+                    border-color: map-get($colores, 'naranja');
                 }
 
                 strong {
