@@ -195,7 +195,6 @@ header {
             }
         }
 
-
         .navigation__nav {
             width: 60%;
             padding: 0 30px;
@@ -208,6 +207,7 @@ header {
                     white-space: nowrap;
                 }
 
+                a.router-link-active,
                 &:hover {
                     border-bottom: 1px solid map-get($colores, "naranja");
                 }
