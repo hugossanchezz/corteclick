@@ -1,7 +1,7 @@
 <script>
 import axios from "axios";
 import { useRouter } from "vue-router";
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import PrimaryButton from "@/js/components/actions/PrimaryButton.vue";
 import ModalConfirm from "@/js/components/utils/ModalConfirm.vue";
 
@@ -34,142 +34,95 @@ export default {
     const credencialesInvalidas = ref("");
     const isSubmitting = ref(false);
 
-    // Modal
+    // Modales
     const showModal = ref(false);
     const modalMessage = ref("");
     const modalAction = ref(null);
 
-    // Patterns de validación
+    // Modal de éxito
+    const showSuccessModal = ref(false);
+    const successMessage = ref("");
+
+    // Validaciones
     const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const telefonoPattern = /^\+?[0-9]{9}$/;
 
-
     const tieneErrores = computed(() => Object.keys(errores.value).length > 0);
 
-    /**
-     * Actualiza el objeto de errores con un mensaje de error para el campo especificado.
-     * Si el mensaje es vacío, elimina la propiedad del objeto de errores.
-     *
-     * @param {string} campo - El nombre del campo que se desea actualizar.
-     * @param {string} mensaje - El mensaje de error para el campo.
-     */
     const actualizarError = (campo, mensaje) => {
-      if (mensaje) {
-        errores.value[campo] = mensaje;
-      } else {
-        delete errores.value[campo];
-      }
+      if (mensaje) errores.value[campo] = mensaje;
+      else delete errores.value[campo];
     };
 
-    /**
-     * Obtiene la lista de localidades desde la API y las asigna al estado `localidades`.
-     * Muestra un error en la consola si la operación de obtención falla.
-     */
     const cargarLocalidades = async () => {
       try {
         const response = await fetch('/api/localities');
-        if (!response.ok) {
-          throw new Error(`Error al cargar localidades: ${response.status}`);
-        }
-        const data = await response.json();
-        localidades.value = data;
+        if (!response.ok) throw new Error(`Error al cargar localidades: ${response.status}`);
+        localidades.value = await response.json();
       } catch (error) {
         console.error("Error al obtener las localidades:", error);
       }
     };
 
-    // Manual validation function
     const validarFormulario = () => {
       errores.value = {};
 
-      if (!nombre.value) {
-        actualizarError("nombre", "El nombre del negocio es requerido");
-      } else if (/[^a-zA-Z0-9\s]/.test(nombre.value)) {
+      if (!nombre.value) actualizarError("nombre", "El nombre del negocio es requerido");
+      else if (/[^a-zA-Z0-9\s]/.test(nombre.value))
         actualizarError("nombre", "No se permiten caracteres especiales");
-      }
 
-      if (descripcion.value && descripcion.value.length > 200) {
+      if (descripcion.value && descripcion.value.length > 200)
         actualizarError("descripcion", "La descripción no puede exceder 200 caracteres");
-      }
 
-      if (!direccion.value) {
-        actualizarError("direccion", "La dirección es requerida");
-      }
+      if (!direccion.value) actualizarError("direccion", "La dirección es requerida");
+      if (!localidad.value) actualizarError("localidad", "La localidad es requerida");
 
-      if (!localidad.value) {
-        actualizarError("localidad", "La localidad es requerida");
-      }
+      if (!email.value) actualizarError("email", "El correo es requerido");
+      else if (!emailPattern.test(email.value)) actualizarError("email", "Correo no válido");
 
-      if (!email.value) {
-        actualizarError("email", "El correo es requerido");
-      } else if (!emailPattern.test(email.value)) {
-        actualizarError("email", "Correo no válido");
-      }
-
-      // Quitar espacios en blanco
       telefono.value = telefono.value.replace(/\s+/g, "").trim();
-
-      if (!telefono.value) {
-        actualizarError("telefono", "El teléfono es requerido");
-      } else if (!telefonoPattern.test(telefono.value)) {
+      if (!telefono.value) actualizarError("telefono", "El teléfono es requerido");
+      else if (!telefonoPattern.test(telefono.value))
         actualizarError("telefono", "Teléfono no válido");
-      }
 
-      if (!tipo.value) {
-        actualizarError("tipo", "El tipo de servicio es requerido");
-      }
-
-      if (!user_id.value) {
-        actualizarError("user_id", "Debe estar autenticado para registrar un negocio");
-      }
+      if (!tipo.value) actualizarError("tipo", "El tipo de servicio es requerido");
+      if (!user_id.value) actualizarError("user_id", "Debe estar autenticado");
 
       return Object.keys(errores.value).length === 0;
     };
 
-    /**
-     * Maneja el evento de selección de imágenes.
-     *
-     * @param {Event} event - Evento de selección de archivos.
-     * @return {void}
-     *
-     * Verifica que el usuario haya seleccionado algo y que no haya seleccionado
-     * más de 5 archivos. Si se seleccionaron más de 5, se toman solo las primeras 5.
-     * Luego verifica que cada archivo tenga un tamaño menor o igual a 10MB.
-     * Si alguno de los archivos supera el límite, se muestra un mensaje de error y
-     * se resetean las imágenes.
-     */
     const manejarSeleccionImagenes = (event) => {
       const archivos = Array.from(event.target.files);
       errorImagenes.value = "";
 
-      if (archivos.length === 0) return;
-      if (archivos.length > 4) errorImagenes.value = "Solo se permiten un máximo de 5 imágenes. Se tomarán las primeras 5.";
+      if (!archivos.length) return;
+      if (archivos.length > 5)
+        errorImagenes.value = "Máximo 5 imágenes. Se tomarán las primeras 5.";
 
       imagenes.value = archivos.slice(0, 5);
 
       for (const archivo of imagenes.value) {
         if (archivo.size > 10 * 1024 * 1024) {
-          errorImagenes.value = `La imagen ${archivo.name} supera el límite de 10MB.`;
+          errorImagenes.value = `La imagen ${archivo.name} supera 10MB.`;
           imagenes.value = [];
           return;
         }
       }
     };
 
-    // Enviar formulario
     const submitForm = () => {
       generalErrorMessage.value = "";
       credencialesInvalidas.value = "";
+
       if (validarFormulario()) {
-        modalMessage.value = "¿Estás seguro de enviar esta solicitud de registro?";
+        modalMessage.value = "¿Estás seguro de enviar esta solicitud?";
         modalAction.value = "submit";
         showModal.value = true;
       } else {
-        generalErrorMessage.value = "Por favor, corrige los errores en el formulario.";
+        generalErrorMessage.value = "Corrige los errores del formulario.";
       }
     };
 
-    // Handle modal confirmation
     const confirmarEnvio = async () => {
       isSubmitting.value = true;
       try {
@@ -185,33 +138,23 @@ export default {
 
         if (imagenes.value.length > 0) {
           formData.append("imagen", imagenes.value[0]);
-          for (let i = 1; i < imagenes.value.length; i++) {
-            formData.append("otras_imagenes[]", imagenes.value[i]);
-          }
+          imagenes.value.slice(1).forEach(img => formData.append("otras_imagenes[]", img));
         }
 
-        const response = await axios.post("/api/new-request", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await axios.post("/api/new-request", formData);
 
         if (response.status === 200) {
-          nombre.value = descripcion.value = direccion.value = localidad.value = email.value = telefono.value = tipo.value = "";
-          imagenes.value = [];
-          errores.value = {};
-          errorImagenes.value = "";
-          generalErrorMessage.value = "";
-          imagenes.value = [];
-          if (inputImagenes.value) {
-            inputImagenes.value.value = null;
-          }
+          successMessage.value = " Tu solicitud ha sido enviada correctamente.";
+          showSuccessModal.value = true;
         }
+
       } catch (error) {
-        if (error.response && error.response.status === 422) {
+        if (error.response?.status === 422) {
           const erroresServidor = error.response.data.errors;
           for (const campo in erroresServidor) actualizarError(campo, erroresServidor[campo][0]);
-          generalErrorMessage.value = "Error en el registro. Por favor, revisa los campos.";
+          generalErrorMessage.value = "Revisa los campos.";
         } else {
-          generalErrorMessage.value = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde.";
+          generalErrorMessage.value = "Error inesperado. Inténtalo de nuevo.";
         }
       } finally {
         isSubmitting.value = false;
@@ -219,22 +162,39 @@ export default {
       }
     };
 
-    // Cancel modal
+    const limpiarFormulario = () => {
+      nombre.value = "";
+      descripcion.value = "";
+      direccion.value = "";
+      localidad.value = "";
+      email.value = "";
+      telefono.value = "";
+      tipo.value = "";
+      imagenes.value = [];
+      errores.value = {};
+      errorImagenes.value = "";
+      generalErrorMessage.value = "";
+
+      if (inputImagenes.value) inputImagenes.value.value = null;
+    };
+
+    const confirmarSuccess = () => {
+      showSuccessModal.value = false;
+      limpiarFormulario();
+    };
+
     const cancelarEnvio = () => {
       showModal.value = false;
       modalAction.value = null;
     };
 
-    onMounted(async () => {
+    onMounted(() => {
       cargarLocalidades();
-
       const storedUser = sessionStorage.getItem("user");
       if (storedUser) {
         try {
-          const user = JSON.parse(storedUser);
-          user_id.value = user.id;
-        } catch (error) {
-          console.error("Error al cargar usuario", error);
+          user_id.value = JSON.parse(storedUser).id;
+        } catch {
           sessionStorage.removeItem("user");
           router.push("/");
         }
@@ -246,10 +206,14 @@ export default {
       errores, generalErrorMessage, registroExitoso, credencialesInvalidas,
       tieneErrores, isSubmitting, submitForm, showModal, modalMessage, modalAction,
       confirmarEnvio, cancelarEnvio, manejarSeleccionImagenes, errorImagenes, inputImagenes,
+
+      // Retornamos popup de éxito y limpieza
+      showSuccessModal, successMessage, confirmarSuccess
     };
   }
 };
 </script>
+
 
 <template>
   <form class="flex-column" @submit.prevent="submitForm">
@@ -372,6 +336,8 @@ export default {
     <!-- Modal de confirmación -->
     <ModalConfirm v-model:show="showModal" :message="modalMessage" :show-cancel="true" @confirm="confirmarEnvio"
       @cancel="cancelarEnvio" />
+    <ModalConfirm v-model:show="showSuccessModal" :message="successMessage" :show-cancel="false" confirm-text="Aceptar"
+      @confirm="confirmarSuccess" />
   </form>
 </template>
 
