@@ -16,7 +16,7 @@ const INTERVAL_ACTUAL = INTERVAL_5_MIN;
 async function verificarCitas() {
     try {
         const res = await axios.patch(`${API_BASE}/api/appointments/check-expired`);
-        console.log("✅ " + (res.data?.message || "Citas actualizadas correctamente."));
+        
     } catch (error) {
         if (error.response) {
             console.error("❌ Error al verificar citas:", error.response.data);

@@ -3,11 +3,6 @@ import FormLocal from "@/js/components/utils/FormLocal.vue";
 export default {
     name: "NewLocalView",
     components: { FormLocal },
-    methods: {
-        guardarNegocio(negocio) {
-            console.log(negocio);
-        }
-    }
 };
 </script>
 

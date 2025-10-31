@@ -516,10 +516,6 @@ export default {
           imagenes.push("/img/utils/corteclick.png");
         }
 
-        // 🧩 Log para saber cuántas hay
-        console.log("🖼️ Imágenes del carrusel:", imagenes);
-        console.log("🔢 Número de imágenes:", imagenes.length);
-
         imagenesCarrusel.value = imagenes;
         indiceActual.value = 0;
       } catch (error) {

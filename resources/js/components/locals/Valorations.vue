@@ -54,7 +54,7 @@ export default {
                     dataVal.map(async (v) => {
                         let nombreUsuario = 'Usuario';
                         try {
-                            console.log(`Obteniendo nombre del usuario ${v.id_usuario}`);
+                            
                             const resUser = await fetch(`/api/user/${v.id_usuario}/name`);
                             if (resUser.ok) {
                                 const dataUser = await resUser.text();

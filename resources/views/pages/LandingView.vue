@@ -9,14 +9,6 @@ export default {
         PrimaryButton,
         DangerButton,
     },
-    methods: {
-        clickLogin() {
-            console.log("Ir a login");
-        },
-        clickRegister() {
-            console.log("Ir a register");
-        },
-    },
 };
 </script>
 
