@@ -688,13 +688,15 @@ export default {
             </p>
 
             <table>
-              <tr>
-                <th>Lunes</th>
-                <th>Martes</th>
-                <th>Miércoles</th>
-                <th>Jueves</th>
-                <th>Viernes</th>
-              </tr>
+              <thead>
+                <tr>
+                  <th>Lunes</th>
+                  <th>Martes</th>
+                  <th>Miércoles</th>
+                  <th>Jueves</th>
+                  <th>Viernes</th>
+                </tr>
+              </thead>
               <tr v-for="time in [
                 '09:00',
                 '09:30',
