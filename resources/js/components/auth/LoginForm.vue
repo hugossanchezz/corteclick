@@ -113,7 +113,7 @@ export default {
                 isAuthenticated.value = true;
 
                 // Mostrar un mensaje de inicio de sesión exitoso.
-                mostrarError("Has iniciado sesión correctamente. Bienvenido/a 👋", true);
+                mostrarError("Has iniciado sesión correctamente.<br> Bienvenido/a 👋", true);
 
             } catch (error) {
                 // Captura cualquier error ocurrido durante la petición de inicio de sesión.

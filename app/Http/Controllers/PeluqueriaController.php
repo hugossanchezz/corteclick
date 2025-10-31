@@ -78,29 +78,29 @@ class PeluqueriaController extends Controller
     public function getIdsByCodigoPostalONombre(string $valor): JsonResponse
     {
         try {
+            $idsLocalidades = [];
+            $idsPeluquerias = [];
+
             if (ctype_digit($valor)) {
-                // Búsqueda por código postal
-                $ids = Localidad::where('codigo_postal', 'LIKE', $valor . '%')
+                $idsLocalidades = Localidad::where('codigo_postal', 'LIKE', $valor . '%')
                     ->pluck('id')
                     ->toArray();
             } else {
-                $nombre = strtoupper($valor); // Para búsquedas insensibles a mayúsculas/minúsculas
+                $nombre = strtoupper($valor);
 
-                // IDs por nombre de localidad
                 $idsLocalidades = Localidad::where('nombre', 'LIKE', '%' . $nombre . '%')
                     ->pluck('id')
                     ->toArray();
 
-                // IDs de localidades a través del nombre de peluquerías
-                $idsDesdePeluquerias = Peluqueria::where('nombre', 'LIKE', '%' . $nombre . '%')
-                    ->pluck('localidad')
+                $idsPeluquerias = Peluqueria::where('nombre', 'LIKE', '%' . $nombre . '%')
+                    ->pluck('id') // <-- AHORA devuelve EL ID DEL LOCAL, NO DE LA LOCALIDAD
                     ->toArray();
-
-                // Unificar y eliminar duplicados
-                $ids = array_unique(array_merge($idsLocalidades, $idsDesdePeluquerias));
             }
 
-            return response()->json(array_values($ids));
+            return response()->json([
+                'localidades' => array_values(array_unique($idsLocalidades)),
+                'peluquerias' => array_values(array_unique($idsPeluquerias)),
+            ]);
         } catch (Throwable $e) {
             return response()->json([], 500);
         }

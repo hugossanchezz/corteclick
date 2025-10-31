@@ -49,43 +49,60 @@ export default {
             let resultado = [...peluquerias.value];
             errorBusqueda.value = null;
 
+            // Filtrar primero por tipo
             if (tipoLocalFilter.value) {
                 resultado = resultado.filter((p) => p.tipo === tipoLocalFilter.value);
             }
 
             const valorBusqueda = codigoPostalBusqueda.value.trim().toLowerCase();
 
-            if (valorBusqueda) {
-                try {
-                    const res = await fetch(`/api/locals/search/${encodeURIComponent(valorBusqueda)}`);
-                    if (!res.ok) throw new Error("Localidad no encontrada");
+            // Si NO hay texto, solo aplica tipo/orden
+            if (!valorBusqueda) {
+                ordenarYGuardar(resultado);
+                return;
+            }
 
-                    const idsLocalidad = await res.json();
+            try {
+                // Petición al backend
+                const res = await fetch(`/api/locals/search/${encodeURIComponent(valorBusqueda)}`);
+                const data = res.ok ? await res.json() : { localidades: [], peluquerias: [] };
 
-                    if (!Array.isArray(idsLocalidad)) {
-                        throw new Error("Respuesta de búsqueda inválida");
-                    }
+                const idsLocalidades = data.localidades || [];
+                const idsPeluquerias = data.peluquerias || [];
 
-                    resultado = resultado.filter((p) => {
-                        const coincideLocalidad = idsLocalidad.includes(p.localidad);
-                        const coincideNombre = p.nombre.toLowerCase().includes(valorBusqueda);
-                        return coincideLocalidad || coincideNombre;
-                    });
+                // 1) Coincidencia por localidad
+                let filtradoLocalidad = resultado.filter((p) =>
+                    idsLocalidades.includes(p.localidad)
+                );
 
-                    if (resultado.length === 0) {
-                        errorBusqueda.value = "No se encontraron peluquerías con ese nombre o localidad.";
-                    }
-
-                } catch (error) {
-                    errorBusqueda.value = "Error al buscar la localidad.";
-                    console.error("Error en búsqueda por localidad:", error);
-                    resultado = [];
+                if (filtradoLocalidad.length > 0) {
+                    resultado = filtradoLocalidad;
                 }
+                else if (idsPeluquerias.length > 0) {
+                    // 2) Coincidencia directa por id de peluquería
+                    resultado = resultado.filter((p) =>
+                        idsPeluquerias.includes(p.id)
+                    );
+                }
+                else {
+                    // 3) Búsqueda por nombre local si no hay coincidencias previas
+                    resultado = resultado.filter((p) =>
+                        p.nombre.toLowerCase().includes(valorBusqueda)
+                    );
+                }
+
+                if (resultado.length === 0) {
+                    errorBusqueda.value = "No se encontraron locales.";
+                }
+
+            } catch (error) {
+                errorBusqueda.value = "Error al buscar datos.";
+                console.error("Error en búsqueda:", error);
+                resultado = [];
             }
 
             ordenarYGuardar(resultado);
         };
-
 
         const ordenarYGuardar = (lista) => {
             let listaOrdenada = [...lista];
@@ -100,7 +117,7 @@ export default {
             paginaActual.value = 1;
         };
 
-        const resetFilters = () => {
+        const resetFiltros = () => {
             tipoLocalFilter.value = "";
             ordenValoracion.value = "";
             codigoPostalBusqueda.value = "";
@@ -141,7 +158,7 @@ export default {
             tipoLocalFilter,
             ordenValoracion,
             codigoPostalBusqueda,
-            resetFilters,
+            resetFiltros,
             paginaActual,
             totalPages,
             paginaSiguiente,
@@ -188,7 +205,7 @@ export default {
                     </div>
                 </div>
             </div>
-            <p class="filtro__reset" @click="resetFilters">Restablecer filtros</p>
+            <p class="filtro__reset" @click="resetFiltros">Restablecer filtros</p>
         </aside>
         <main class="flex-column">
             <div class="peluquerias__buscador">
