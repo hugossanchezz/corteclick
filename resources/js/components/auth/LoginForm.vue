@@ -111,7 +111,10 @@ export default {
 
                 // Cambiar varible global de estar logueado a true
                 isAuthenticated.value = true;
-                router.push("/"); // Redirige al usuario a la página principal después del inicio de sesión exitoso.
+
+                // Mostrar un mensaje de inicio de sesión exitoso.
+                mostrarError("Has iniciado sesión correctamente. Bienvenido/a 👋", true);
+
             } catch (error) {
                 // Captura cualquier error ocurrido durante la petición de inicio de sesión.
                 if (error.response && error.response.status === 401) {
@@ -345,11 +348,13 @@ label {
         width: 60%;
     }
 }
+
 @media (max-width: 768px) {
     form {
         width: 80%;
     }
 }
+
 @media (max-width: 500px) {
     form {
         width: 100%;
