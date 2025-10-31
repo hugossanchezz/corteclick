@@ -93,6 +93,24 @@ export default {
       return monday;
     };
 
+    const currentMonthName = computed(() => {
+      if (!currentMonday.value) return "";
+
+      const monday = currentMonday.value.setLocale("es");
+      const friday = currentMonday.value.plus({ days: 4 }).setLocale("es");
+
+      const mondayMonth = monday.toFormat("LLLL");
+      const fridayMonth = friday.toFormat("LLLL");
+
+      // Si son meses distintos → "diciembre / enero"
+      if (mondayMonth !== fridayMonth) {
+        return `${mondayMonth} / ${fridayMonth}`;
+      }
+
+      // Si son iguales, devolver solo uno
+      return mondayMonth;
+    });
+
     /**
      * Actualiza los días lunes y viernes de la semana actual.
      * También actualiza `currentMonday`, `mondayDay`, `fridayDay` y recarga las citas.
@@ -575,6 +593,7 @@ export default {
       goToPreviousWeek,
       goToNextWeek,
       getDateForDay,
+      currentMonthName,
       isPreviousWeekDisabled,
       handleServiceChange,
       selectedServiceId,
@@ -683,7 +702,7 @@ export default {
             <p class="schedule__week flex-center">
               <img src="/img/utils/arrow_back.svg" alt="Ir a semana anterior" @click="goToPreviousWeek"
                 :class="{ disabled: isPreviousWeekDisabled() }" />
-              Lun {{ mondayDay }} - Vie {{ fridayDay }}
+              Lun {{ mondayDay }} - {{ currentMonthName }} - Vie {{ fridayDay }}
               <img src="/img/utils/arrow_forward.svg" alt="Ir a semana siguiente" @click="goToNextWeek" />
             </p>
 
